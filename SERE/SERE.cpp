@@ -2,11 +2,20 @@
 //
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#include <fstream>
+#include <streambuf>
+
 #include "SERE.h"
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx11.h"
+
 #include <d3d11.h>
+#include "RuiNodeEditor.h"
+
+
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;
 static ID3D11DeviceContext*     g_pd3dDeviceContext = nullptr;
@@ -153,13 +162,12 @@ void ShowExampleAppDockSpace(bool* p_open)
 
 
 
-
 // Main code
 int main(int, char**)
 {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr),::LoadIcon(nullptr,MAKEINTRESOURCE(101)) , nullptr, nullptr, nullptr, L"SERE", ::LoadIcon(nullptr,MAKEINTRESOURCE(101))};
+    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr),::LoadIcon(nullptr,MAKEINTRESOURCE(1)) , nullptr, nullptr, nullptr, L"SERE", ::LoadIcon(nullptr,MAKEINTRESOURCE(1))};
     ::RegisterClassExW(&wc);
     HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"SERE", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
@@ -178,10 +186,12 @@ int main(int, char**)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -201,7 +211,9 @@ int main(int, char**)
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     //io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+    ImFontConfig config;
+    config.OversampleH = 2.0f;
+    io.Fonts->AddFontFromFileTTF("imgui/DroidSans.ttf", 16.0f,&config);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
@@ -215,6 +227,19 @@ int main(int, char**)
     bool use_docking_space = 0;
     // Main loop
     bool done = false;
+
+
+
+    //TextEditor textEdit;
+    //setupTextEditor(textEdit);
+
+    loadFonts(g_pd3dDevice);
+    loadImageAtlases(g_pd3dDevice);
+
+    RenderInstance render{g_pd3dDevice,g_pd3dDeviceContext,1920,1080};
+    NodeEditor nodeEdit{render};
+
+
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
@@ -254,11 +279,23 @@ int main(int, char**)
 
      
         ShowExampleAppDockSpace(&use_docking_space);
-        ImGui::ShowDemoWindow(&show_demo_window);
+        //ImGui::ShowDemoWindow(&show_demo_window);
+        //showTextEditor(textEdit);
+
+        render.StartFrame(ImGui::GetCurrentContext()->Time);
+        nodeEdit.draw();
+        render.EndFrame();
+        render.DrawImage();
+        
 
         // Rendering
         ImGui::Render();
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -272,12 +309,13 @@ int main(int, char**)
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
+
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-
+    
     return 0;
 }
 
@@ -303,7 +341,7 @@ bool CreateDeviceD3D(HWND hWnd)
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     UINT createDeviceFlags = 0;
-    //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
     D3D_FEATURE_LEVEL featureLevel;
     const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
     HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
@@ -315,6 +353,7 @@ bool CreateDeviceD3D(HWND hWnd)
     CreateRenderTarget();
     return true;
 }
+
 
 void CleanupDeviceD3D()
 {
