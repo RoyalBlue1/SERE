@@ -76,7 +76,7 @@
 //  2017-10-23: Inputs: Added WM_SYSKEYDOWN / WM_SYSKEYUP handlers so e.g. the VK_MENU key can be read.
 //  2017-10-23: Inputs: Using Win32 ::SetCapture/::GetCapture() to retrieve mouse positions outside the client area when dragging.
 //  2016-11-12: Inputs: Only call Win32 ::SetCursor(nullptr) when io.MouseDrawCursor is set.
-
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_impl_win32.h"
