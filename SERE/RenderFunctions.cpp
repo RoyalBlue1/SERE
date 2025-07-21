@@ -1,6 +1,6 @@
 #include "RenderFunctions.h"
 #include "RenderManager.h"
-
+#include "IntrinUtil.h"
 
 #undef max
 #undef min
@@ -160,9 +160,7 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	{
 		v60 = (__m128)_mm_shuffle_ps(mins, mins, 68);
 		v61 = _mm_max_ps(_mm_set1_ps(1.1754944e-38f), _mm_sub_ps((__m128)_mm_shuffle_ps(maxs, maxs, 68), v60));
-		v62 = _mm_rcp_ps(v61);
-		v63 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v62, v61));
-		v64 = _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v63, v63), v63), v62), v62);
+		v64 = NRReciprocal(v61);
 		v58 = _mm_mul_ps(v10, v64);
 		v59 = _mm_mul_ps(_mm_sub_ps(v13, v60), v64);
 	}
@@ -252,7 +250,7 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 
 	quad.xUvVector = _mm_movelh_ps(v42, v58);
 	quad.yUvVector = _mm_movehl_ps(v58, v42);
-	quad.xUvBase = _mm_movelh_ps(v43, v59);
+	quad.UvBase = _mm_movelh_ps(v43, v59);
 	quad.m128_30 = _mm_setzero_ps();
 	quad.m128_40 = _mm_setzero_ps();
 	quad.m128_50 = _mm_setzero_ps();
@@ -686,12 +684,8 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	v16 = _mm_add_ps((__m128)_mm_shuffle_ps(v15, v15, _MM_SHUFFLE(1, 0, 3, 2)), (__m128)v15);
 	v198 = v16;
 
-	v18 = _mm_rcp_ps((__m128)transform.inputSize);
 
-	v26 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v18, (__m128)transform.inputSize));
-
-
-	v31 = _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v26, v26), v26), v18), v18);
+	v31 = NRReciprocal(transform.inputSize);
 
 
 
@@ -752,20 +746,20 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 				_mm_mul_ps(_mm_set_ps(image.afloat_4[3], image.afloat_4[2], image.afloat_4[3], image.afloat_4[2]), v47),
 				v53);
 			v55 = _mm_add_ps(v49, v53);
-			v56 = _mm_rcp_ps(v54);
+
 			v57 = &imageAtlases[imageAssetMap[assetHash].atlasIndex].offsets[assetIndex];
 			uint16_2 = image.styleId;
-			v59 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v56, v54));
+
 			v60 = v57->m128_0;
 
 			a8 = _mm_add_ps(_mm_mul_ps(_mm_xor_ps(v60, _mm_set_ps(0, 0, -0.0, -0.0)), v54), v55);
-			a11 = _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v59, v59), v59), v56), v56);
+			a11 = NRReciprocal(v54);
 			v62 = _mm_shuffle_ps(v57->m128_10, v57->m128_10, _MM_SHUFFLE(3, 2, 3, 2));//_mm_loaddup_pd((const double *)(v57 + 24));
 			v63 = _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(v16, v55), a11), v62);
 			v64 = _mm_mul_ps(_mm_mul_ps(v14, a11), v62);
 			a10 = _mm_xor_ps(_mm_mul_ps(a11, v55), _mm_set1_ps(-0.0));
 			v65 = _mm_shuffle_ps(v57->m128_10, v57->m128_10, _MM_SHUFFLE(1, 0, 1, 0));//(__m128)_mm_loadl_epi64((const __m128i *)(v57 + 16));
-			quad.xUvBase = _mm_add_ps(v63, v65);
+			quad.UvBase = _mm_add_ps(v63, v65);
 			quad.xUvVector = _mm_shuffle_ps(v64, v64, _MM_SHUFFLE(1, 0, 1, 0));
 			quad.yUvVector = _mm_shuffle_ps(v64, v64, _MM_SHUFFLE(3, 2, 3, 2));
 			quad.m128_30 = _mm_setzero_ps();
@@ -846,8 +840,6 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 		v96 = data.styles[v89].backgroundSize.value;
 		v97 = _mm_unpacklo_ps(v94, v95);
 		v98 = _mm_movelh_ps(v97, v97);
-		v99 = _mm_rcp_ps(v98);
-		v100 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v99, v98));
 		v167 = fmaxf(
 			data.styles[v89].mainColor.value.alpha,
 			fminf(fmaxf(data.styles[v89].scndColor.value.alpha, data.styles[v89].tertColor.value.alpha), v96)) > 0.0;
@@ -883,7 +875,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 		v113 = _mm_setzero_ps();
 		v114 = _mm_setzero_ps();
 		v199 = _mm_mul_ps(
-			_mm_mul_ps(_mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v100, v100), v100), v99), v99), v204),
+			_mm_mul_ps(NRReciprocal(v98), v204),
 			proportionScale);
 		v200 = _mm_mul_ps(v197, v199);
 		v206 = _mm_mul_ps(v198, v199);
@@ -1058,15 +1050,12 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 				v146.m128_f32[0] = v139;
 				v147.m128_f32[0] = v112;
 				v148 = _mm_shuffle_ps(v147, v146, 0);
-				v149 = _mm_shuffle_ps(
-					_mm_set_ps(0, 0, 0, v124->proportions[v137->proportionIndex].scaleBounds),
-					_mm_set_ps(0, 0, 0, v124->proportions[v138->proportionIndex].scaleBounds),
-					0);
+				v149 = _mm_set1_ps(v124->proportions[v137->proportionIndex].scaleBounds);
 				__m128 t1 = _mm_set_ps(v138->posBaseY, v138->posBaseX, v137->posBaseY, v137->posBaseX);//v138(r8) & v137(rdx)
 				__m128 t2 = _mm_unpacklo_ps(
 					_mm_unpacklo_ps(_mm_set_ps(0, 0, 0, v181.float_0), _mm_set_ps(0, 0, 0, v179.float_0)),
 					_mm_unpacklo_ps((__m128)v171, v171));
-				quad.xUvBase = _mm_add_ps(
+				quad.UvBase = _mm_add_ps(
 					_mm_mul_ps(
 						_mm_sub_ps(
 							v206,
@@ -1087,19 +1076,10 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 					_mm_unpacklo_ps(_mm_unpacklo_ps(v113, v141), _mm_unpacklo_ps(v114, v140)),
 					_mm_shuffle_ps(v171, v171, 0));
 				//si128 = _mm_load_si128((const __m128i *)v10);
-				v194[0] = _mm_add_ps(
-					_mm_add_ps(
-						_mm_mul_ps((__m128)_mm_shuffle_ps(transform.directionVector, transform.directionVector, _MM_SHUFFLE(0, 0, 0, 0)), v148),
-						_mm_mul_ps((__m128)_mm_shuffle_ps(transform.directionVector, transform.directionVector, _MM_SHUFFLE(2, 2, 2, 2)), v150)),
-					(__m128)_mm_shuffle_ps(transform.position, transform.position, _MM_SHUFFLE(0, 0, 0, 0)));
-				v194[1] = _mm_add_ps(
-					_mm_add_ps(
-						_mm_mul_ps((__m128)_mm_shuffle_ps(transform.directionVector, transform.directionVector, _MM_SHUFFLE(1, 1, 1, 1)), v148),
-						_mm_mul_ps((__m128)_mm_shuffle_ps(transform.directionVector, transform.directionVector, _MM_SHUFFLE(3, 3, 3, 3)), v150)),
-					(__m128)_mm_shuffle_ps(transform.position, transform.position, _MM_SHUFFLE(1, 1, 1, 1)));
-				proto.sub_FEF30( v209, &a9, v194);
-				v153 = _mm_unpackhi_ps(v194[0], v194[1]);
-				v154 = _mm_unpacklo_ps(v194[0], v194[1]);
+				TriData tri = transform.GenTri(v148, v150);
+				proto.sub_FEF30( v209, &a9, tri);
+				v153 = _mm_unpackhi_ps(tri.a, tri.b);
+				v154 = _mm_unpacklo_ps(tri.a, tri.b);
 				if (a6 == 2)
 				{
 					v154 = _mm_shuffle_ps(v154, v154, _MM_SHUFFLE(1, 0, 3, 2));

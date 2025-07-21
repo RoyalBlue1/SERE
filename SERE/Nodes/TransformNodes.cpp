@@ -1,6 +1,6 @@
 #include "TransformNodes.h"
 #include "imgui/imgui_stdlib.h"
-
+#include "IntrinUtil.h"
 
 __m128 xmmword_12A146C0 = _mm_castsi128_ps(_mm_set_epi32(0xFFFFFFFF,0,0,0xFFFFFFFF));
 
@@ -476,15 +476,13 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			p2parent.position);
 		__m128 v24 = _mm_mul_ps(v22, v22);
 		__m128 v25 = _mm_max_ps(_mm_set1_ps(1.1754944e-38f), _mm_add_ps(_mm_shuffle_ps(v24, v24, 27), (__m128)v24));
-		__m128 v26 = _mm_rcp_ps(v25);
-		__m128 v27 = _mm_sub_ps(_mm_set1_ps(1.0f), _mm_mul_ps(v26, v25));
 		__m128 v28 = _mm_mul_ps(
 			_mm_mul_ps(
 				_mm_mul_ps(
 					_mm_sub_ps(pin2, pin1),
 					v5),
 				v22),
-			_mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v27, v27), v27), v26), v26));
+			NRReciprocal(v25));
 		__m128 v29 = _mm_mul_ps(
 			_mm_add_ps(_mm_xor_ps((__m128)_mm_shuffle_ps(v28,v28, 27), _mm_set_ps(0,-0.0,-0.0,0)), (__m128)v28),
 			_mm_mul_ps(size.size, v8));
@@ -566,8 +564,6 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			_mm_add_ps(_mm_shuffle_ps(v18,v18, 78), v18),
 			p1parent.position);
 		__m128 v24 = _mm_max_ps(_mm_set1_ps(1.1754944e-38f), _mm_add_ps(_mm_shuffle_ps(v22, v22, 27), (__m128)v22));
-		__m128 v25 = _mm_rcp_ps(v24);
-		__m128 v26 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v25, v24));
 		__m128 v27 = _mm_mul_ps(
 			_mm_sub_ps(
 				_mm_add_ps(
@@ -577,7 +573,7 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			v5);
 		__m128 v28 = _mm_mul_ps(v19, v27);
 		__m128 v29 = _mm_mul_ps(v27, v27);
-		__m128 v30 = _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v26, v26), v26), v25), v25);
+		__m128 v30 = NRReciprocal(v24);
 		__m128 v31 = _mm_max_ps(_mm_set1_ps(1.1754944e-38f), _mm_mul_ps(_mm_add_ps(_mm_shuffle_ps(v29, v29, _MM_SHUFFLE(0,1,2,3)), (__m128)v29), v30));
 		__m128 v32 = _mm_rsqrt_ps(v31);
 		__m128 v33 = _mm_mul_ps(

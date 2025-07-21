@@ -79,6 +79,11 @@ struct IndexSegment_t {
     size_t indexStart;
 };
 
+struct TriData {
+    __m128 a;
+    __m128 b;
+};
+
 struct TransformResult {
     int index;
     __m128 directionVector;
@@ -97,14 +102,27 @@ struct TransformResult {
         position(pos),
         inputSize(size)
     { }
-
+    TriData GenTri(__m128 x,__m128 y) const {
+        TriData res;
+        res.a =_mm_add_ps(
+            _mm_add_ps(
+                _mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(2, 2, 2, 2)), x),
+                _mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(0, 0, 0, 0)), y)),
+            _mm_shuffle_ps(position, position, _MM_SHUFFLE(0, 0, 0, 0)));
+        res.b = _mm_add_ps(
+            _mm_add_ps(
+                _mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 3, 3)), x),
+                _mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(1, 1, 1, 1)), y)),
+            _mm_shuffle_ps(position, position, _MM_SHUFFLE(1, 1, 1, 1)));
+        return res;
+    }
 };
 
 struct RenderQuad
 {
     __m128 xUvVector;
     __m128 yUvVector;
-    __m128 xUvBase;
+    __m128 UvBase;
     __m128 m128_30;
     __m128 m128_40;
     __m128 m128_50;
@@ -251,7 +269,7 @@ public:
     }
 
     void AddQuad(RenderQuad& quad);
-    void sub_FEF30(__m128 *a3, __m128 *a4, __m128 *a5);
+    void sub_FEF30(__m128 *a3, __m128 *a4, TriData& a5);
     void generateDrawTriangle(RenderQuad* v180,bool v24,__m128 a8,__m128* a3a, int a6,const TransformResult& a5, __m128* triangleType );
     void sub_F9B80_rev(
         __m128 ruiSize,

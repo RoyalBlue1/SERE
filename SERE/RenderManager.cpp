@@ -23,14 +23,12 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 		ruiVertex.float_C[2] = 0;
 		__m128 a = _mm_add_ps(
 			_mm_add_ps(_mm_mul_ps(quad.xUvVector, v18), _mm_mul_ps(v19, quad.yUvVector)),
-			quad.xUvBase);
+			quad.UvBase);
 		ruiVertex.float_18[0] = a.m128_f32[0];
 		ruiVertex.float_18[1] = a.m128_f32[1];
 		ruiVertex.float_18[2] = a.m128_f32[2];
 		ruiVertex.float_18[3] = a.m128_f32[3];
-		__m128 b = _mm_add_ps(
-			_mm_add_ps(_mm_mul_ps(quad.m128_40, v19), _mm_mul_ps(quad.m128_30, v18)),
-			quad.m128_50);
+		__m128 b = quad.m128_50;
 		ruiVertex.float_28[0] = b.m128_f32[0];
 		ruiVertex.float_28[1] = b.m128_f32[1];
 		ruiVertex.assetIndex = quad.assetIndex;
@@ -43,7 +41,7 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 }
 
 
-void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, __m128 *a5)
+void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
 {
 
 
@@ -93,18 +91,18 @@ void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, __m128 *a5)
 	v16 = _mm_add_ps(
 		_mm_add_ps(
 			_mm_set1_ps(drawInfo.float_10),
-			_mm_mul_ps(unk3ScreenWidth, *a5)),
-		_mm_mul_ps(unk3Float_10, a5[1]));
+			_mm_mul_ps(unk3ScreenWidth, a5.a)),
+		_mm_mul_ps(unk3Float_10, a5.b));
 	v17 = _mm_add_ps(
 		_mm_add_ps(
 			_mm_set1_ps(drawInfo.float_14),
-			_mm_mul_ps(unk3Float_4, *a5)),
-		_mm_mul_ps(unk3screenHeight, a5[1]));
+			_mm_mul_ps(unk3Float_4, a5.a)),
+		_mm_mul_ps(unk3screenHeight, a5.b));
 	v72 = _mm_add_ps(
 		_mm_add_ps(
 			_mm_set1_ps(drawInfo.float_18),
-			_mm_mul_ps(unk3Float_8, *a5)),
-		_mm_mul_ps(unk3Float_18, a5[1]));
+			_mm_mul_ps(unk3Float_8, a5.a)),
+		_mm_mul_ps(unk3Float_18, a5.b));
 
 	v19 = (__m128)_mm_shuffle_ps(*a4,*a4, _MM_SHUFFLE(1,1,0,0));
 	v20 = (__m128)_mm_shuffle_ps(*a4,*a4, _MM_SHUFFLE(2,3,3,2));
@@ -129,15 +127,8 @@ void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, __m128 *a5)
 	v33.m128_f32[0] = 1 * 2.0;
 
 
-
-
-	v59 = _mm_set1_ps(1.1754944e-38f);
-
-	v62 = _mm_rcp_ps(v59);
-	v63 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v62, v59));
-
-	v65 = a5[1];
-	v66 = *a5;
+	v65 = a5.b;
+	v66 = a5.a;
 	v67 = _mm_shuffle_ps(v65,v65, _MM_SHUFFLE(0,3,2,1));
 	v68 = _mm_sub_ps(v67, (__m128)v65);
 	v69 = _mm_shuffle_ps(v66,v66, _MM_SHUFFLE(0,3,2,1));
@@ -149,8 +140,8 @@ void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, __m128 *a5)
 				_mm_mul_ps((__m128)_mm_shuffle_ps(v70,v70, _MM_SHUFFLE(2,1,0,3)), (__m128)v68)),
 			_mm_sub_ps(_mm_mul_ps(a3[3], a3[0]), _mm_mul_ps(a3[1], a3[2]))),
 		_mm_setzero_ps());
-	*a5 = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v66), _mm_and_ps(v71, v69));
-	a5[1] = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v65), _mm_and_ps(v71, v67));
+	a5.a = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v66), _mm_and_ps(v71, v69));
+	a5.b = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v65), _mm_and_ps(v71, v67));
 }
 
 void RenderInstance::sub_FFAE0(__m128 a1,__m128 a2, __m128* a3)
@@ -178,28 +169,19 @@ void RenderInstance::sub_FFAE0(__m128 a1,__m128 a2, __m128* a3)
 }
 
 void RenderInstance::generateDrawTriangle(RenderQuad* v180,bool v24,__m128 a8,__m128* a3a, int a6,const TransformResult& a5, __m128* triangleType ) {
-	__m128 v184[2];
+	
 	__m128 v27 = _mm_shuffle_ps(a8,a8, _MM_SHUFFLE(1,3,3,1));
 	__m128 v28 = _mm_shuffle_ps(a8,a8, _MM_SHUFFLE(2,2,0,0));
-	v184[0] = _mm_add_ps(
-		_mm_add_ps(
-			_mm_mul_ps(_mm_shuffle_ps(a5.directionVector,a5.directionVector, _MM_SHUFFLE(2,2,2,2)), v27),
-			_mm_mul_ps(_mm_shuffle_ps(a5.directionVector,a5.directionVector,   _MM_SHUFFLE(0,0,0,0)), v28)),
-		_mm_shuffle_ps(a5.position,a5.position, 0));
-
-	v184[1] = _mm_add_ps(
-		_mm_add_ps(
-			_mm_mul_ps(_mm_shuffle_ps(a5.directionVector,a5.directionVector, _MM_SHUFFLE(3,3,3,3)), v27),
-			_mm_mul_ps(_mm_shuffle_ps(a5.directionVector,a5.directionVector,  _MM_SHUFFLE(1,1,1,1)), v28)),
-		_mm_shuffle_ps(a5.position,a5.position, _MM_SHUFFLE(1,1,1,1)));
+	
+	TriData v184= a5.GenTri(v27,v28);
 
 	if ( v24 )
 	{
 		sub_FEF30(  a3a, triangleType, v184);
 	}
 
-	__m128 v32 = _mm_unpackhi_ps(v184[0], v184[1]);
-	__m128 v33 = _mm_unpacklo_ps(v184[0], v184[1]);
+	__m128 v32 = _mm_unpackhi_ps(v184.a, v184.b);
+	__m128 v33 = _mm_unpacklo_ps(v184.a, v184.b);
 	if ( a6 == 2 )
 	{
 		v33 = _mm_shuffle_ps(v33,v33, _MM_SHUFFLE(1,0,3,2));
@@ -466,13 +448,11 @@ void RenderInstance::sub_F9B80_rev(
 			_mm_shuffle_ps(v35->m128_10,v35->m128_10,_MM_SHUFFLE(1,0,1,0))),
 		_mm_shuffle_ps(v35->m128_10,v35->m128_10,_MM_SHUFFLE(3,2,3,2)));
 	v47 = _mm_sub_ps(v46, v41);
-	v48 = _mm_rcp_ps(v47);
-	v49 = _mm_sub_ps(_mm_set1_ps(1), _mm_mul_ps(v48, v47));
 	v50 = _mm_movelh_ps(v46, _mm_set1_ps(1));
-	v51 = _mm_mul_ps(v50, a4.xUvBase);
+	v51 = _mm_mul_ps(v50, a4.UvBase);
 	v52 = _mm_mul_ps(v50, a4.yUvVector);
 	v184[0] = _mm_add_ps(_mm_sub_ps(_mm_set1_ps(1), v50), v51);
-	v53 = _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v49, v49), v49), v48), v48);
+	v53 = NRReciprocal(v47);
 	v54 = _mm_movelh_ps(_mm_mul_ps(_mm_mul_ps(v42, v46), v53), _mm_set1_ps(1));
 	v55 = _mm_mul_ps(v54, a4.xUvVector);
 	v56 = _mm_mul_ps(
@@ -485,7 +465,7 @@ void RenderInstance::sub_F9B80_rev(
 	v61 = _mm_shuffle_ps(a8,a8, _MM_SHUFFLE(3,1,2,0));
 	v62 = _mm_unpackhi_ps(v61, v60);
 	v63 = _mm_unpacklo_ps(v61, v60);
-	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.xUvBase));
+	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.UvBase));
 	v65 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps((__m128)v56, _mm_set_ps(-0.0,-0.0,0,0))));
 
 	v187 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps((__m128)_mm_shuffle_ps(v56,v56, 78),_mm_set_ps(-0.0,-0.0,0,0))));
@@ -495,28 +475,15 @@ void RenderInstance::sub_F9B80_rev(
 		v67 = (__m128)_mm_shuffle_ps(v62,v62, 20);
 		v68 = (__m128)_mm_shuffle_ps(v63,v63, 80);
 		v69 = &stru_5F4740a[v24 & 5];
-		v70 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 170), v67),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 0), v68)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 0));
-		v178[0] = v70;
-		v71 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 255), v67),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 85), v68)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 85));
+		TriData v178 = a5.GenTri(v67,v68);
 		v72 = _mm_cmpneq_ps(*v69, _mm_setzero_ps());
-		v178[1] = v71;
 		if ( _mm_movemask_ps(v72) )
 		{
 			sub_FEF30(  a3a, v69, v178);
-			v71 = v178[1];
-			v70 = v178[0];
+
 		}
-		v73 = v70;
-		v74 = _mm_unpackhi_ps(v70, v71);
-		v75 = _mm_unpacklo_ps(v73, v71);
+		v74 = _mm_unpackhi_ps(v178.a, v178.b);
+		v75 = _mm_unpacklo_ps(v178.a, v178.b);
 		if ( a6 == 2 )
 		{
 			v75 = _mm_shuffle_ps(v75,v75, 78);
@@ -524,7 +491,7 @@ void RenderInstance::sub_F9B80_rev(
 		}
 		//v76 = *(_QWORD *)&a4->assetIndex;
 
-		quad.xUvBase = v51;
+		quad.UvBase = v51;
 		quad.xUvVector = v57;
 		quad.yUvVector = v52;
 		quad.m128_30 = _mm_setzero_ps();
@@ -547,34 +514,21 @@ void RenderInstance::sub_F9B80_rev(
 		v79 = (__m128)_mm_shuffle_ps(v62, v62, 20);
 		v80 = (__m128)_mm_shuffle_ps(v63, v63, 245);
 		v81 = &stru_5F4740a[v24 & 4];
-		v82 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 170), v79),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 0), v80)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 0));
-		v178[0] = v82;
-		v83 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 255), v79),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 85), v80)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 85));
+		TriData v178 = a5.GenTri(v79,v80);
 		v84 = _mm_cmpneq_ps(_mm_setzero_ps(), *v81);
-		v178[1] = v83;
+
 		if (_mm_movemask_ps(v84))
 		{
 			sub_FEF30(a3a, v81, v178);
-			v83 = v178[1];
-			v82 = v178[0];
 		}
-		v85 = v82;
-		v86 = _mm_unpackhi_ps(v82, v83);
-		v87 = _mm_unpacklo_ps(v85, v83);
+		v86 = _mm_unpackhi_ps(v178.a, v178.b);
+		v87 = _mm_unpacklo_ps(v178.a, v178.b);
 		if (a6 == 2)
 		{
 			v87 = _mm_shuffle_ps(v87, v87, 78);
 			v86 = _mm_shuffle_ps(v86, v86, 78);
 		}
-		quad.xUvBase = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146D0a, v51), _mm_and_ps(v64, (__m128)xmmword_12A146D0a));
+		quad.UvBase = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146D0a, v51), _mm_and_ps(v64, (__m128)xmmword_12A146D0a));
 		quad.xUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146D0a, v57), _mm_and_ps(v55, (__m128)xmmword_12A146D0a));
 		quad.yUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146D0a, v52), _mm_and_ps(v58, (__m128)xmmword_12A146D0a));
 		quad.m128_30 = _mm_setzero_ps();
@@ -595,28 +549,15 @@ void RenderInstance::sub_F9B80_rev(
 		v92 = (__m128)_mm_shuffle_ps(v62,v62, 20);
 		v93 = (__m128)_mm_shuffle_ps(v63,v63, 175);
 		v94 = &stru_5F4740a[v24 & 6];
-		v95 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector,  170), v92),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector,  0), v93)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 0));
-		v178[0] = v95;
-		v96 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector,  255), v92),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector,  85), v93)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 85));
+		TriData v178 = a5.GenTri(v92,v93);
 		v97 = _mm_cmpneq_ps(*v94, _mm_setzero_ps());
-		v178[1] = v96;
 		if ( _mm_movemask_ps(v97) )
 		{
 			sub_FEF30(  a3a, v94, v178);
-			v96 = v178[1];
-			v95 = v178[0];
+
 		}
-		v98 = v95;
-		v99 = _mm_unpackhi_ps(v95, v96);
-		v100 = _mm_unpacklo_ps(v98, v96);
+		v99 = _mm_unpackhi_ps(v178.a, v178.b);
+		v100 = _mm_unpacklo_ps(v178.a, v178.b);
 		if ( a6 == 2 )
 		{
 			v100 = _mm_shuffle_ps(v100,v100, 78);
@@ -627,7 +568,7 @@ void RenderInstance::sub_F9B80_rev(
 
 		quad.xUvVector = v57;
 		quad.yUvVector = v52;
-		quad.xUvBase = _mm_or_ps(
+		quad.UvBase = _mm_or_ps(
 			_mm_andnot_ps((__m128)xmmword_12A146D0a, v51),
 			_mm_and_ps(v184[0], (__m128)xmmword_12A146D0a));
 		quad.m128_30 = _mm_setzero_ps();
@@ -651,28 +592,17 @@ void RenderInstance::sub_F9B80_rev(
 		v107 = (__m128)_mm_shuffle_ps(v62, v62, _MM_SHUFFLE(1, 3, 3, 1));
 		v108 = (__m128)_mm_shuffle_ps(v63, v63, _MM_SHUFFLE(1, 1, 0, 0));
 		v109 = &stru_5F4740a[v24 & 1];
-		v110 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(2, 2, 2, 2)), v107),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(0, 0, 0, 0)), v108)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, _MM_SHUFFLE(0, 0, 0, 0)));
-		v178[0] = v110;
-		v111 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(3, 3, 3, 3)), v107),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(1, 1, 1, 1)), v108)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, _MM_SHUFFLE(1, 1, 1, 1)));
+		TriData tri = a5.GenTri(v107,v108);
 		v112 = _mm_cmpneq_ps(*v109, _mm_setzero_ps());
-		v178[1] = v111;
+
 		if (_mm_movemask_ps(v112))
 		{
-			sub_FEF30(a3a, v109, v178);
-			v111 = v178[1];
-			v110 = v178[0];
+			sub_FEF30(a3a, v109, tri);
+
 		}
 		v113 = v110;
-		v114 = _mm_unpackhi_ps(v110, v111);
-		v115 = _mm_unpacklo_ps(v113, v111);
+		v114 = _mm_unpackhi_ps(tri.a, tri.b);
+		v115 = _mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
 			v115 = _mm_shuffle_ps(v115, v115, _MM_SHUFFLE(1, 0, 3, 2));
@@ -688,7 +618,7 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		quad.xUvBase = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v51), _mm_and_ps(v64, (__m128)xmmword_12A146A0a));
+		quad.UvBase = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v51), _mm_and_ps(v64, (__m128)xmmword_12A146A0a));
 		quad.xUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v57), _mm_and_ps(v55, (__m128)xmmword_12A146A0a));
 		quad.yUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v52), _mm_and_ps(v58, (__m128)xmmword_12A146A0a));
 		*(__m128*)& quad.vert[0][0] = v115;
@@ -700,18 +630,9 @@ void RenderInstance::sub_F9B80_rev(
 	{
 		v119 = (__m128)_mm_shuffle_ps(v62, v62, _MM_SHUFFLE(1, 3, 3, 1));
 		v120 = (__m128)_mm_shuffle_ps(v63, v63, _MM_SHUFFLE(3, 3, 1, 1));
-		v121 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(2, 2, 2, 2)), v119),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(0, 0, 0, 0)), v120)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, _MM_SHUFFLE(0, 0, 0, 0)));
-		v122 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(3, 3, 3, 3)), v119),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, _MM_SHUFFLE(1, 1, 1, 1)), v120)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, _MM_SHUFFLE(1, 1, 1, 1)));
-		v123 = _mm_unpacklo_ps(v121, v122);
-		v124 = _mm_unpackhi_ps(v121, v122);
+		TriData tri = a5.GenTri(v119,v120);
+		v123 = _mm_unpacklo_ps(tri.a, tri.b);
+		v124 = _mm_unpackhi_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
 			v123 = _mm_shuffle_ps(v123, v123, 78);
@@ -720,7 +641,7 @@ void RenderInstance::sub_F9B80_rev(
 
 
 
-		quad.xUvBase = v64;
+		quad.UvBase = v64;
 		quad.yUvVector = v58;
 		quad.xUvVector = v55;
 		quad.m128_30 = _mm_setzero_ps();
@@ -739,35 +660,21 @@ void RenderInstance::sub_F9B80_rev(
 		v128 = (__m128)_mm_shuffle_ps(v62, v62, 125);
 		v129 = (__m128)_mm_shuffle_ps(v63, v63, 175);
 		v130 = &stru_5F4740a[v24 & 2];
-		v131 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 170), v128),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 0), v129)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 0));
-		v178[0] = v131;
-		v132 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 255), v128),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 85), v129)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 85));
+		TriData tri = a5.GenTri(v128,v129);
 		v133 = _mm_cmpneq_ps(_mm_setzero_ps(), *v130);
-		v178[1] = v132;
 		if (_mm_movemask_ps(v133))
 		{
-			sub_FEF30(a3a, v130, v178);
-			v132 = v178[1];
-			v131 = v178[0];
+			sub_FEF30(a3a, v130, tri);
 		}
-		v134 = v131;
-		v135 = (__m128)_mm_unpackhi_ps(v131, v132);
-		v136 = (__m128)_mm_unpacklo_ps(v134, v132);
+		v135 = (__m128)_mm_unpackhi_ps(tri.a, tri.b);
+		v136 = (__m128)_mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
 			v136 = _mm_shuffle_ps(v136, v136, 78);
 			v135 = _mm_shuffle_ps(v135, v135, 78);
 		}
 
-		quad.xUvBase = _mm_or_ps(
+		quad.UvBase = _mm_or_ps(
 			_mm_andnot_ps((__m128)xmmword_12A146A0a, v184[0]),
 			_mm_and_ps(v64, (__m128)xmmword_12A146A0a));
 		quad.xUvVector = _mm_or_ps(
@@ -801,28 +708,16 @@ void RenderInstance::sub_F9B80_rev(
 		v141 = (__m128)_mm_shuffle_ps(v62,v62, 235);
 		v142 = (__m128)_mm_shuffle_ps(v63,v63, 80);
 		v143 = &stru_5F4740a[v24 & 9];
-		v144 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 170), v141),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 0), v142)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 0));
-		v178[0] = v144;
-		v145 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 255), v141),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 85), v142)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 85));
+		TriData tri = a5.GenTri(v141,v142);
 		v146 = _mm_cmpneq_ps(*v143, _mm_setzero_ps());
-		v178[1] = v145;
+
 		if ( _mm_movemask_ps(v146) )
 		{
-			sub_FEF30(a3a, v143, v178);
-			v145 = v178[1];
-			v144 = v178[0];
+			sub_FEF30(a3a, v143, tri);
 		}
-		v147 = v144;
-		v148 = _mm_unpackhi_ps(v144, v145);
-		v149 = _mm_unpacklo_ps(v147, v145);
+
+		v148 = _mm_unpackhi_ps(tri.a, tri.b);
+		v149 = _mm_unpacklo_ps(tri.a, tri.b);
 		if ( a6 == 2 )
 		{
 			v149 = _mm_shuffle_ps(v149,v149, 78);
@@ -836,7 +731,7 @@ void RenderInstance::sub_F9B80_rev(
 		quad.xUvVector = v57;
 		quad.yUvVector = v52;
 
-		quad.xUvBase = _mm_or_ps(v152, _mm_and_ps(v184[0], (__m128)xmmword_12A146A0a));
+		quad.UvBase = _mm_or_ps(v152, _mm_and_ps(v184[0], (__m128)xmmword_12A146A0a));
 		quad.m128_30 = _mm_setzero_ps();
 		quad.m128_40 = _mm_setzero_ps();
 		quad.m128_50 = _mm_setzero_ps();
@@ -854,35 +749,23 @@ void RenderInstance::sub_F9B80_rev(
 		v155 = (__m128)_mm_shuffle_ps(v62, v62, 235);
 		v156 = (__m128)_mm_shuffle_ps(v63, v63, 245);
 		v157 = &stru_5F4740a[v24 & 8];
-		v158 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 170), v155),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 0), v156)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 0));
-		v178[0] = v158;
-		v159 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 255), v155),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector, a5.directionVector, 85), v156)),
-			(__m128)_mm_shuffle_ps(a5.position, a5.position, 85));
+		TriData tri = a5.GenTri(v155,v156);
 		v160 = _mm_cmpneq_ps(*v157, _mm_setzero_ps());
-		v178[1] = v159;
+
 		if (_mm_movemask_ps(v160))
 		{
-			sub_FEF30(a3a, v157, v178);
-			v159 = v178[1];
-			v158 = v178[0];
+			sub_FEF30(a3a, v157, tri);
 		}
 		v161 = v158;
-		v162 = _mm_unpackhi_ps(v158, v159);
-		v163 = _mm_unpacklo_ps(v161, v159);
+		v162 = _mm_unpackhi_ps(tri.a, tri.b);
+		v163 = _mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
 			v163 = _mm_shuffle_ps(v163, v163, 78);
 			v162 = _mm_shuffle_ps(v162, v162, 78);
 		}
 
-		quad.xUvBase = _mm_or_ps(
+		quad.UvBase = _mm_or_ps(
 			_mm_andnot_ps((__m128)xmmword_12A146D0a, v153),
 			_mm_and_ps(v64, (__m128)xmmword_12A146D0a));
 		quad.xUvVector = _mm_or_ps(
@@ -911,35 +794,25 @@ void RenderInstance::sub_F9B80_rev(
 		v167 = (__m128)_mm_shuffle_ps(v62,v62, 235);
 		v168 = (__m128)_mm_shuffle_ps(v63,v63, 175);
 		v169 = &stru_5F4740a[v24 & 0xA];
-		v170 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 170), v167),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 0), v168)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 0));
-		v178[0] = v170;
-		v171 = _mm_add_ps(
-			_mm_add_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector,255), v167),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(a5.directionVector,a5.directionVector, 85), v168)),
-			(__m128)_mm_shuffle_ps(a5.position,a5.position, 85));
+		TriData tri = a5.GenTri(v167,v168);
 		v172 = _mm_cmpneq_ps(_mm_setzero_ps(), *v169);
-		v178[1] = v171;
+
 		if ( _mm_movemask_ps(v172) )
 		{
-			sub_FEF30(a3a, v169, v178);
+			sub_FEF30(a3a, v169, tri);
 			v171 = v178[1];
 			v170 = v178[0];
 		}
 		v173 = v170;
-		v174 = _mm_unpackhi_ps(v170, v171);
-		v175 = _mm_unpacklo_ps(v173, v171);
+		v174 = _mm_unpackhi_ps(tri.a, tri.b);
+		v175 = _mm_unpacklo_ps(tri.a, tri.b);
 		if ( a6 == 2 )
 		{
 			v175 = _mm_shuffle_ps(v175,v175, 78);
 			v174 = _mm_shuffle_ps(v174,v174, 78);
 		}
 
-		quad.xUvBase = v153;
+		quad.UvBase = v153;
 		quad.xUvVector = v57;
 		quad.yUvVector = v52;
 		quad.m128_30 = _mm_setzero_ps();
