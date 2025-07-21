@@ -298,11 +298,29 @@ namespace ImFlow {
 
         // Links drag-out
         if (!m_draggingNode && m_hovering && !m_dragOut && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            m_dragOut = m_hovering;
+        {
+            if (m_hovering->isConnected() && m_hovering->getType() == PinType_Input) {
+                std::shared_ptr<ImFlow::Link> link = m_hovering->getLink().lock();
+                ImFlow::Pin* other = link->left();
+                if(other==m_dragOut)
+                    other = link->right();
+                m_hovering->deleteLink();
+                m_dragOut = other;
+            }
+            else {
+                m_dragOut = m_hovering;
+            }
+            
+        }
         if (m_dragOut) {
             if (m_dragOut->getType() == PinType_Output)
+            {
+                
                 smart_bezier(m_dragOut->pinPoint(), ImGui::GetMousePos(), m_dragOut->getStyle()->color,
-                             m_dragOut->getStyle()->extra.link_dragged_thickness);
+                    m_dragOut->getStyle()->extra.link_dragged_thickness);
+                
+                
+            }
             else
                 smart_bezier(ImGui::GetMousePos(), m_dragOut->pinPoint(), m_dragOut->getStyle()->color,
                              m_dragOut->getStyle()->extra.link_dragged_thickness);
@@ -314,7 +332,7 @@ namespace ImFlow {
         // Right-click PopUp
         if (m_rightClickPopUp && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
             m_hoveredNodeAux = m_hoveredNode;
-            lastRightClickPos = ImGui::GetMousePos();
+            m_lastRightClickPos = ImGui::GetMousePos();
             ImGui::OpenPopup("RightClickPopUp");
             
         }

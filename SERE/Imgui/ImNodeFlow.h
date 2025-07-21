@@ -532,7 +532,7 @@ namespace ImFlow
 
         InfStyler m_style;
 
-        ImVec2 lastRightClickPos;
+        ImVec2 m_lastRightClickPos;
     };
 
     // -----------------------------------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ namespace ImFlow
     template<typename T, typename... Params>
     std::shared_ptr<T> ImNodeFlow::placeNode(Params&&... args)
     {
-        return placeNodeAt<T>(lastRightClickPos, std::forward<Params>(args)...);
+        return placeNodeAt<T>(m_lastRightClickPos, std::forward<Params>(args)...);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
