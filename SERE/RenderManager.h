@@ -13,6 +13,26 @@
 #pragma comment(lib,"d3dcompiler.lib")
 #include "imgui/imgui.h"
 
+struct Vector2 {
+    float x;
+    float y;
+    Vector2(float ix,float iy):x(ix),y(iy){}
+};
+
+struct Vector3 {
+    float x;
+    float y;
+    float z;
+    Vector3(float ix,float iy,float iz):x(ix),y(iy),z(iz){}
+};
+
+struct Color {
+    float red;
+    float green;
+    float blue;
+    float alpha;
+    Color(float r,float g,float b,float a):red(r),green(g),blue(b),alpha(a){}
+};
 
 struct DrawInfoUnknown3
 {
@@ -64,6 +84,20 @@ struct TransformResult {
     __m128 directionVector;
     __m128 position;
     __m128 inputSize;
+    TransformResult():
+        index(0),
+        directionVector(_mm_setzero_ps()),
+        position(_mm_setzero_ps()),
+        inputSize(_mm_setzero_ps())
+    { }
+
+    TransformResult(int id,__m128 dir,__m128 pos,__m128 size):
+        index(id),
+        directionVector(dir),
+        position(pos),
+        inputSize(size)
+    { }
+
 };
 
 struct RenderQuad
@@ -83,28 +117,20 @@ struct RenderQuad
 
 struct StyleDescriptorShader_t
 {
-    float color0_red;
-    float color0_green;
-    float color0_blue;
-    float color0_alpha;
-    float color1_red;
-    float color1_green;
-    float color1_blue;
-    float color1_alpha;
-    float color2_red;
-    float color2_green;
-    float color2_blue;
-    float color2_alpha;
-    float float_30;
-    float float_34;
-    float float_38;
-    float float_3C;
-    float float_40;
-    float float_44;
-    float float_48;
-    float float_4C;
-    float float_50;
+    Color color0 = Color(1.f,1.f,1.f,1.f);
+    Color color1 = Color(0.f,0.f,0.f,0.f);
+    Color color2 = Color(0.f,0.f,0.f,0.f);
+    float float_30 = 1.f;
+    float float_34 = 0.f;
+    float float_38 = 0.f;
+    float float_3C = 0.f;
+    float float_40 = 0.f;
+    float float_44 = 0.f;
+    float float_48 = 0.f;
+    float float_4C = 0.f;
+    float float_50 = 0.f;
     BYTE gap_54[12];
+    
 };
 
 struct ArgVal {
@@ -226,17 +252,17 @@ public:
 
     void AddQuad(RenderQuad& quad);
     void sub_FEF30(__m128 *a3, __m128 *a4, __m128 *a5);
-    void generateDrawTriangle(RenderQuad* v180,bool v24,__m128 a8,__m128* a3a, int a6,TransformResult* a5, __m128* triangleType );
+    void generateDrawTriangle(RenderQuad* v180,bool v24,__m128 a8,__m128* a3a, int a6,const TransformResult& a5, __m128* triangleType );
     void sub_F9B80_rev(
         __m128 ruiSize,
         RenderQuad& a4,
-        TransformResult *a5,
+        const TransformResult& a5,
         int a6,
         Asset_t &a7,
-        __m128 *a8,
-        __m128 *a9,
-        __m128 *a10,
-        __m128 *a11);
+        const __m128& a8,
+        const __m128& a9,
+        const __m128& texMin,
+        const __m128& texSize);
     void sub_FFAE0(__m128 a1,__m128 a2, __m128* a3);
 
 

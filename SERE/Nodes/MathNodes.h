@@ -11,11 +11,11 @@ public:
 	void draw() override;
 };
 
-class AddNode : public ImFlow::BaseNode
+class AdditionNode : public ImFlow::BaseNode
 {
 	RenderInstance& proto;
 public:
-	explicit AddNode(RenderInstance& prot,NodeStyles& styles);
+	explicit AdditionNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 };
 

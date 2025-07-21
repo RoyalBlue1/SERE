@@ -76,7 +76,8 @@ public:
 class AssetVarNode : public ImFlow::BaseNode
 {
 	RenderInstance& proto;
-	std::string value;
+	uint32_t hash;
+	bool showSelectionUi;
 public:
 	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;

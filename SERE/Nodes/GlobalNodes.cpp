@@ -6,11 +6,7 @@ TimeNode::TimeNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle("Current Time");
 	setStyle(styles.globalNode);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
-		FloatVariable var;
-		var.isGlobal = true;
-		var.value = proto.globals.currentTime;
-		return var;
-
+		return FloatVariable(proto.globals.currentTime,false,1);
 	});
 
 }

@@ -9,11 +9,7 @@ IntVarNode::IntVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	maxVal = 32;
 	value = 0;
 	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.intVariable)->behaviour([this]() {
-		IntVariable var;
-		var.isConstant = true;
-		var.value = value;
-		return var;
-
+		return IntVariable(value);
 	});
 }
 
@@ -28,11 +24,8 @@ BoolVarNode::BoolVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle("Bool Var");
 	setStyle(styles.constantNode);
 	value = false;
-	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.boolVariable)->behaviour([this]() {
-		IntVariable var;
-		var.isConstant = true;
-		var.value = value;
-		return var;
+	ImFlow::BaseNode::addOUT<BoolVariable>("Value",styles.boolVariable)->behaviour([this]() {
+		return BoolVariable(value);
 
 	});
 }
@@ -51,21 +44,17 @@ FloatVarNode::FloatVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	maxVal = 1;
 	value = 0;
 	ImFlow::BaseNode::addOUT<FloatVariable>("Value",styles.floatVariable)->behaviour([this]() {
-		FloatVariable var;
-		var.isConstant = true;
-		var.value = value;
-		return var;
-
+		return FloatVariable(value);
 	});
 }
 
 void FloatVarNode::draw() {
-	ImGui::PushItemWidth(90);
+	ImGui::PushItemWidth(80);
 	ImGui::InputFloat("Min",&minVal);
 	ImGui::SameLine();
 	ImGui::InputFloat("Max",&maxVal);
 	ImGui::PopItemWidth();
-	ImGui::PushItemWidth(150);
+	ImGui::PushItemWidth(100);
 	ImGui::SliderFloat("Value",&value,minVal,maxVal);
 	ImGui::PopItemWidth();
 }
@@ -80,11 +69,7 @@ Float2VarNode::Float2VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	value[0] = 0;
 	value[1] = 0;
 	ImFlow::BaseNode::addOUT<Float2Variable>("Value",styles.float2Variable)->behaviour([this]() {
-		Float2Variable var;
-		var.isConstant = true;
-		var.value[0] = value[0];
-		var.value[1] = value[1];
-		return var;
+		return Float2Variable(value[0],value[1]);
 
 	});
 }
@@ -110,12 +95,7 @@ Float3VarNode::Float3VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	value[1] = 0;
 	value[2] = 0;
 	ImFlow::BaseNode::addOUT<Float3Variable>("Value",styles.float3Variable)->behaviour([this]() {
-		Float3Variable var;
-		var.isConstant = true;
-		var.value[0] = value[0];
-		var.value[1] = value[1];
-		var.value[2] = value[2];
-		return var;
+		return Float3Variable(value[0],value[1],value[2]);
 
 	});
 }
@@ -140,13 +120,7 @@ ColorVarNode::ColorVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	value[2] = 1.f;
 	value[3] = 1.f;
 	ImFlow::BaseNode::addOUT<ColorVariable>("Value",styles.colorVariable)->behaviour([this]() {
-		ColorVariable var;
-		var.isConstant = true;
-		var.value[0] = value[0];
-		var.value[1] = value[1];
-		var.value[2] = value[2];
-		var.value[3] = value[3];
-		return var;
+		return ColorVariable(value[0],value[1],value[2],value[3]);
 
 	});
 }
@@ -162,17 +136,13 @@ StringVarNode::StringVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle("String Var");
 	setStyle(styles.constantNode);
 	ImFlow::BaseNode::addOUT<StringVariable>("Value",styles.stringVariable)->behaviour([this]() {
-		StringVariable var;
-		var.isConstant = true;
-		var.value = value;
-		return var;
-
+		return StringVariable(value);
 	});
 }
 
 void StringVarNode::draw() {
 	ImGui::PushItemWidth(90);
-	ImGui::InputText("Value",&value);
+	ImGui::InputTextMultiline("Value",&value);
 	ImGui::PopItemWidth();
 }
 
@@ -180,19 +150,28 @@ AssetVarNode::AssetVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 	setTitle("Asset Var");
 	setStyle(styles.constantNode);
+	hash = loadAsset("white");
+	showSelectionUi = true;
 	ImFlow::BaseNode::addOUT<AssetVariable>("Value",styles.assetVariable)->behaviour([this]() {
-		AssetVariable var;
-		var.isConstant = true;
-		var.value = value;
-		return var;
-
+		return AssetVariable(hash);
 	});
 }
 
 void AssetVarNode::draw() {
 	ImGui::PushItemWidth(90);
-	ImGui::InputText("Value",&value);
+	if(ImGui::Button("Select Asset")) {
+		showSelectionUi = true;
+	}
 	ImGui::PopItemWidth();
+	ImGui::Begin("test");
+	const Asset_t& asset = imageAssetMap[hash];
+	const ImageAtlas& atlas = imageAtlases[asset.atlasIndex];
+	auto& dim = atlas.dimentions[asset.imageIndex];
+
+	ImGui::Image(atlas.imageResourceView,
+		ImVec2(200.f,200.f/dim.width*dim.height));
+		
+	ImGui::End();
 }
 
 SizeVarNode::SizeVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {

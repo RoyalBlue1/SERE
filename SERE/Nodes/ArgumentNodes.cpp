@@ -6,10 +6,7 @@ IntArgNode::IntArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle("Int Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.intVariable)->behaviour([this]() {
-		IntVariable var;
-		var.isConstant = false;
-		var.value = proto.arguments[name].defaultVal.intVal;
-		return var;
+		return IntVariable(proto.arguments[name].defaultVal.intVal,false);
 
 	});
 }
@@ -26,11 +23,7 @@ BoolArgNode::BoolArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle("Bool Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.boolVariable)->behaviour([this]() {
-		IntVariable var;
-		var.isConstant = false;
-		var.value = proto.arguments[name].defaultVal.intVal;
-		return var;
-
+		return IntVariable(proto.arguments[name].defaultVal.intVal,false);
 	});
 }
 
@@ -46,11 +39,7 @@ FloatArgNode::FloatArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle("Float Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Value",styles.floatVariable)->behaviour([this]() {
-		FloatVariable var;
-		var.isConstant = false;
-		var.value = proto.arguments[name].defaultVal.floatVal[0];
-		return var;
-
+		return FloatVariable(proto.arguments[name].defaultVal.floatVal[0],false);
 	});
 }
 
@@ -67,11 +56,10 @@ Float2ArgNode::Float2ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle("Vector2 Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<Float2Variable>("Value",styles.float2Variable)->behaviour([this]() {
-		Float2Variable var;
-		var.isConstant = false;
-		var.value[0] = proto.arguments[name].defaultVal.floatVal[0];
-		var.value[1] = proto.arguments[name].defaultVal.floatVal[1];
-		return var;
+		return Float2Variable(
+			proto.arguments[name].defaultVal.floatVal[0],
+			proto.arguments[name].defaultVal.floatVal[1],
+			false);
 
 	});
 }
@@ -88,12 +76,12 @@ Float3ArgNode::Float3ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle("Vector3 Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<Float3Variable>("Value",styles.float2Variable)->behaviour([this]() {
-		Float3Variable var;
-		var.isConstant = false;
-		var.value[0] = proto.arguments[name].defaultVal.floatVal[0];
-		var.value[1] = proto.arguments[name].defaultVal.floatVal[1];
-		var.value[2] = proto.arguments[name].defaultVal.floatVal[2];
-		return var;
+		return Float3Variable(
+			proto.arguments[name].defaultVal.floatVal[0],
+			proto.arguments[name].defaultVal.floatVal[1],
+			proto.arguments[name].defaultVal.floatVal[2],
+			false);
+
 
 	});
 }
@@ -110,13 +98,13 @@ ColorArgNode::ColorArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle("Color Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<ColorVariable>("Value",styles.colorVariable)->behaviour([this]() {
-		ColorVariable var;
-		var.isConstant = false;
-		var.value[0] = proto.arguments[name].defaultVal.floatVal[0];
-		var.value[1] = proto.arguments[name].defaultVal.floatVal[1];
-		var.value[2] = proto.arguments[name].defaultVal.floatVal[2];
-		var.value[3] = proto.arguments[name].defaultVal.floatVal[3];
-		return var;
+		return ColorVariable(
+			proto.arguments[name].defaultVal.floatVal[0],
+			proto.arguments[name].defaultVal.floatVal[1],
+			proto.arguments[name].defaultVal.floatVal[2],
+			proto.arguments[name].defaultVal.floatVal[3],
+			false);
+
 
 	});
 }
@@ -133,10 +121,7 @@ StringArgNode::StringArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle("String Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<StringVariable>("Value",styles.stringVariable)->behaviour([this]() {
-		StringVariable var;
-		var.isConstant = false;
-		var.value = proto.arguments[name].defaultVal.stringVal;
-		return var;
+		return StringVariable(proto.arguments[name].defaultVal.stringVal,false);
 
 	});
 }
@@ -153,11 +138,7 @@ AssetArgNode::AssetArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle("Asset Argument");
 	setStyle(styles.argumentNode);
 	ImFlow::BaseNode::addOUT<AssetVariable>("Value",styles.assetVariable)->behaviour([this]() {
-		AssetVariable var;
-		var.isConstant = false;
-		var.value = proto.arguments[name].defaultVal.stringVal;
-		return var;
-
+		return AssetVariable(proto.arguments[name].defaultVal.stringVal,false);
 	});
 }
 

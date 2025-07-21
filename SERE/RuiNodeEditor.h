@@ -22,6 +22,8 @@ struct NodeStyles {
 	std::shared_ptr<ImFlow::PinStyle> colorVariable;
 	std::shared_ptr<ImFlow::PinStyle> stringVariable;
 	std::shared_ptr<ImFlow::PinStyle> assetVariable;
+	std::shared_ptr<ImFlow::PinStyle> textData;
+	
 
 	std::shared_ptr<ImFlow::NodeStyle> mathNode;
 	std::shared_ptr<ImFlow::NodeStyle> renderNode;
@@ -80,38 +82,86 @@ struct NodeEditor{
 
 struct Variable {
 	bool isConstant = true;
-	bool isGlobal = false;
+	int globalId;
+	Variable(bool isConst,int globId):isConstant(isConst),globalId(globId){}
 };
 
 struct IntVariable :Variable {
 	int value;
+	IntVariable(int val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+		
+	}
+	IntVariable():Variable(true,-1),value(0){};
 };
 
 struct BoolVariable :Variable {
 	int value;
+	BoolVariable(bool val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	BoolVariable():Variable(true,-1),value(false){};
 };
 
 struct FloatVariable :Variable {
 	float value;
+	FloatVariable(float val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	FloatVariable():Variable(true,-1),value(1.f){};
 };
 
 struct Float2Variable :Variable {
-	float value[2];
+	Vector2 value;
+	Float2Variable(Vector2 val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	Float2Variable(float x, float y, bool isConst = true, int globId = -1):Variable(isConst,globId), value(x,y) {
+
+	}
+	Float2Variable():Variable(true,-1),value(1.f,1.f){};
 };
 
 struct Float3Variable :Variable {
-	float value[3];
+	Vector3 value;
+	Float3Variable(Vector3 val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	Float3Variable(float x, float y, float z, bool isConst = true, int globId = -1):Variable(isConst,globId), value(x,y,z) {
+
+	}
+	Float3Variable():Variable(true,-1),value(1.f,1.f,1.f){};
 };
 
 struct ColorVariable :Variable {
-	float value[4];
+	Color value;
+	ColorVariable(Color val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	ColorVariable(float r, float g, float b,float a, bool isConst = true, int globId = -1):Variable(isConst,globId), value(r,g,b,a) {
+
+	}
+	ColorVariable():Variable(true,-1),value(1.f,1.f,1.f,1.f){};
 };
 
 struct StringVariable :Variable {
 	std::string value;
+	StringVariable(std::string val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	StringVariable(const char* val, bool isConst = true, int globId = -1):Variable(isConst,globId), value(val) {
+
+	}
+	StringVariable():Variable(true,-1),value(""){}
 };
 
 struct AssetVariable :Variable {
-	std::string value;
+	uint32_t hash;
+	AssetVariable(std::string val, bool isConst = true, int globId = -1):Variable(isConst,globId) {
+		hash = loadAsset(val.c_str());
+	}
+	AssetVariable(uint32_t val, bool isConst = true, int globId = -1):Variable(isConst,globId),hash(val) {
+
+	}
+	AssetVariable() :Variable(true, -1), hash(INVALID_ASSET) {}
 };
 

@@ -52,9 +52,10 @@ void loadImageAtlases(ID3D11Device* d11Device) {
 			yyjson_arr_foreach(hashes, idx, size, entry) {
 				uint32_t hash = yyjson_get_uint(yyjson_obj_get(entry,"hash"));
 				uint16_t flags = yyjson_get_uint(yyjson_obj_get(entry,"flags"));
-				imageAssetMap.insert({ hash, {imageAtlases.size(),atlas.hashes.size(),flags} });
+				std::string name = yyjson_get_str(yyjson_obj_get(entry,"name"));
+				imageAssetMap.insert({ hash, {name,imageAtlases.size(),atlas.hashes.size(),flags} });
 				atlas.hashes.push_back(hash);
-				atlas.names.push_back(yyjson_get_str(yyjson_obj_get(entry,"name")));
+				atlas.names.push_back(name);
 
 			}
 			yyjson_val* renderOffsets = yyjson_obj_get(yyjson_doc_get_root(doc),"renderOffsets");
@@ -175,34 +176,21 @@ uint32_t calculateUimgHash(const char* a1) {
 	return (uint32_t)hash ^ (hash >> 32);
 }
 
-__int64 loadAsset(const char* a2)
+uint32_t loadAsset(const char* a2)
 {
 
-	uint32_t nameHash; // rax
-	uint32_t newHash;
-
+	uint32_t nameHash;
 
 	if (!a2 || !*a2)
-		return -1LL;
+		return INVALID_ASSET;
 
 	nameHash = calculateUimgHash(a2);
-	newHash = nameHash;
-	if (imageAssetMap.contains(nameHash))
-		return nameHash;
-	nameHash = calculateUimgHash("missing");
-	if (imageAssetMap.contains(nameHash))
-		return nameHash;
-	return -1LL;
-	/*
-	AssetInternal = assetIndexList.getIndex(&newHash, nameHash);
-	if (!AssetInternal) {
-	nameHash = calculateUimgHash("missing");
-	newHash = nameHash;
-	AssetInternal = assetIndexList.getIndex(&newHash, nameHash);
-	if (!AssetInternal)
-	return -1LL;
-	}
 
-	return AssetInternal - g_AssetIndexData;
-	*/
+	if (imageAssetMap.contains(nameHash))
+		return nameHash;
+	nameHash = calculateUimgHash("missing");
+	if (imageAssetMap.contains(nameHash))
+		return nameHash;
+	return INVALID_ASSET;
+
 }

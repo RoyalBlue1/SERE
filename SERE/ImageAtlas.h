@@ -6,7 +6,8 @@
 #include <string>
 #include <d3d11_1.h>
 
-void bindResource(unsigned int slot, ID3D11ShaderResourceView* resource);
+#define INVALID_ASSET 0xFFFFFFFF
+
 struct textureOffset_
 {
 	__m128 m128_0;
@@ -33,6 +34,7 @@ struct ShaderData_t {
 };
 
 struct Asset_t {
+	std::string name;
 	size_t atlasIndex;
 	size_t imageIndex;
 	uint16_t flags;
@@ -54,7 +56,7 @@ struct ImageAtlas {
 };
 
 
-__int64 loadAsset(const char* a2);
+uint32_t loadAsset(const char* a2);
 void loadImageAtlases(ID3D11Device* d11Device);
 
 extern std::map<uint32_t,Asset_t> imageAssetMap;

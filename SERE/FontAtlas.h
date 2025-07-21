@@ -79,9 +79,6 @@ struct FontAtlas_t {
 
     FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,ID3D11Device* d11Device);
     void loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device);
-
-    void bind();
-
 };
 
 extern std::vector<FontAtlas_t> fonts;

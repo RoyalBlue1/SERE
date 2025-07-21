@@ -57,8 +57,8 @@ Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 	setTitle("Transform 2");
 	setStyle(styles.transformNode);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",{true,false,{1.0f,1.0f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out", styles.transformResult)->behaviour([this]() {
@@ -73,11 +73,11 @@ Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		__m128 elementSizeRatio_unpacked = _mm_unpacklo_ps(elementSizeRatio, elementSizeRatio);
 		__m128 v13 = _mm_and_ps(_mm_mul_ps(size.size, elementSizeRatio_unpacked), (__m128)xmmword_12A146C0);
 		__m128 v14 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,val_0.value[0]),
-			_mm_set_ps(0,0,0,val_0.value[1]),
+			_mm_set_ps(0,0,0,val_0.value.x),
+			_mm_set_ps(0,0,0,val_0.value.y),
 			0);
-		__m128 v15 = _mm_set_ps(0,0,0,val_3.value[0]);
-		__m128 v16 = _mm_set_ps(0,0,0,val_0.value[1]);
+		__m128 v15 = _mm_set_ps(0,0,0,val_3.value.x);
+		__m128 v16 = _mm_set_ps(0,0,0,val_0.value.y);
 		res.directionVector = v13;
 		__m128 v18 = _mm_mul_ps(v14, parent.directionVector);
 		__m128 v19 = _mm_mul_ps(_mm_shuffle_ps(v15, v16, 0), v13);
@@ -103,8 +103,8 @@ Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 	setTitle("Transform 3");
 	setStyle(styles.transformNode);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",{true,false,{1.0f,1.0f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
@@ -113,8 +113,8 @@ Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const Float2Variable& val_3 = getInVal<Float2Variable>("Val_3");
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 		__m128 v9 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,val_0.value[0]),
-			_mm_set_ps(0,0,0,val_0.value[1]),
+			_mm_set_ps(0,0,0,val_0.value.x),
+			_mm_set_ps(0,0,0,val_0.value.y),
 			0);
 
 		__m128 v11 = _mm_mul_ps(parent.directionVector, parent.directionVector);
@@ -123,8 +123,8 @@ Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			xmmword_12A146C0);
 		__m128 v13 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,val_3.value[0]),
-				_mm_set_ps(0,0,0,val_3.value[1]),
+				_mm_set_ps(0,0,0,val_3.value.x),
+				_mm_set_ps(0,0,0,val_3.value.y),
 				0),
 			v12);
 		res.directionVector = v12;
@@ -150,8 +150,8 @@ Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 	setTitle("Transform 4");
 	setStyle(styles.transformNode);
-	ImFlow::BaseNode::addIN<Float2Variable>("Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",{true,false,{1.0f,1.0f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
@@ -162,8 +162,8 @@ Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 
 		__m128 v11 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,val_0.value[0]),
-			_mm_set_ps(0,0,0,val_0.value[1]),
+			_mm_set_ps(0,0,0,val_0.value.x),
+			_mm_set_ps(0,0,0,val_0.value.y),
 			0);
 
 
@@ -172,8 +172,8 @@ Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			_mm_cmpneq_ps(_mm_setzero_ps(), size.size));
 		__m128 v15 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,val_3.value[0]),
-				_mm_set_ps(0,0,0,val_3.value[1]),
+				_mm_set_ps(0,0,0,val_3.value.x),
+				_mm_set_ps(0,0,0,val_3.value.y),
 				0),
 			v14);
 		res.directionVector = v14;
@@ -213,8 +213,8 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 	setTitle("Transform 5");
 	setStyle(styles.transformNode);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",{true,false,{1.0f,1.0f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
@@ -222,7 +222,6 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const Float2Variable& val_0 = getInVal<Float2Variable>("Val_0");
 		const Float2Variable& val_3 = getInVal<Float2Variable>("Val_3");
 		const TransformSize& size = getInVal<TransformSize>("Size");
-		const TransformSize& parentSize = getInVal<TransformSize>("ParentSize");
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 
 
@@ -234,8 +233,8 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		
 		__m128 v17 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,val_0.value[0]), 
-				_mm_set_ps(0,0,0,val_0.value[1]), 
+				_mm_set_ps(0,0,0,val_0.value.x), 
+				_mm_set_ps(0,0,0,val_0.value.y), 
 				0),
 			parent.directionVector);
 		
@@ -243,12 +242,12 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 			_mm_add_ps((__m128)_mm_shuffle_ps(v17,v17, 78), (__m128)v17),
 			parent.position);
 
-		__m128 v16 = _mm_set_ps(0,0,0,val_3.value[0]);
-		__m128 v18 = _mm_set_ps(0,0,0,val_3.value[1]);
+		__m128 v16 = _mm_set_ps(0,0,0,val_3.value.x);
+		__m128 v18 = _mm_set_ps(0,0,0,val_3.value.y);
 
 
 		__m128 v22 = _mm_xor_ps(
-			_mm_mul_ps((__m128)_mm_shuffle_ps(parentSize.size,parentSize.size, 0), v6),
+			_mm_mul_ps((__m128)_mm_shuffle_ps(parent.inputSize,parent.inputSize, 0), v6),
 			_mm_set_ps(0,-0.0,0,0));
 		__m128 a = _mm_mul_ps(parent.directionVector, v6);
 		__m128 v23 = _mm_and_ps(
@@ -279,8 +278,8 @@ Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 	setTitle("Transform 6");
 	setStyle(styles.transformNode);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",{true,false,{1.0f,1.0f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
@@ -297,15 +296,15 @@ Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 		__m128 v6 = _mm_unpacklo_ps(v25, v26);
 
-		__m128 v13 = _mm_set_ps(0,0,0,val_0.value[1]);
+		__m128 v13 = _mm_set_ps(0,0,0,val_0.value.y);
 
 
 
-		__m128 v16 = _mm_set_ps(0,0,0,val_3.value[0]);
+		__m128 v16 = _mm_set_ps(0,0,0,val_3.value.x);
 		__m128 v17 = _mm_mul_ps(
-			_mm_shuffle_ps(_mm_set_ps(0,0,0,val_0.value[0]), v13, 0),
+			_mm_shuffle_ps(_mm_set_ps(0,0,0,val_0.value.x), v13, 0),
 			parent.directionVector);
-		__m128 v18 = _mm_set_ps(0,0,0,val_3.value[1]);
+		__m128 v18 = _mm_set_ps(0,0,0,val_3.value.y);
 		__m128 v19 = _mm_add_ps(
 			_mm_add_ps((__m128)_mm_shuffle_ps(v17,v17, 78), v17),
 			parent.position);
@@ -342,14 +341,14 @@ Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setStyle(styles.transformNode);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 2 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Translate",{true,false,{0.f,0.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Translate",Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",{true,false,{1.f,1.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
 		TransformResult res;
@@ -363,22 +362,22 @@ Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 
 		__m128 v6 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,p1Pos.value[0]),
-			_mm_set_ps(0,0,0,p1Pos.value[1]),
+			_mm_set_ps(0,0,0,p1Pos.value.x),
+			_mm_set_ps(0,0,0,p1Pos.value.y),
 			0);
 		__m128 v7 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,translate.value[0]),
-			_mm_set_ps(0,0,0,translate.value[1]),
+			_mm_set_ps(0,0,0,translate.value.x),
+			_mm_set_ps(0,0,0,translate.value.y),
 			0);
 		__m128 v8 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,p2Pos.value[0]),
-			_mm_set_ps(0,0,0,p2Pos.value[1]),
+			_mm_set_ps(0,0,0,p2Pos.value.x),
+			_mm_set_ps(0,0,0,p2Pos.value.y),
 			0);
 
 
 		__m128 v10 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,point.value[0]),
-			_mm_set_ps(0,0,0,point.value[1]),
+			_mm_set_ps(0,0,0,point.value.x),
+			_mm_set_ps(0,0,0,point.value.y),
 			20);
 
 
@@ -419,14 +418,14 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setStyle(styles.transformNode);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 2 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Translate",{true,false,{0.f,0.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Translate",Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",{true,false,{1.f,1.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
 		TransformResult res;
@@ -444,17 +443,17 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 
 		__m128 v14 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,p2Pos.value[0]),
-			_mm_set_ps(0,0,0,p2Pos.value[1]),
+			_mm_set_ps(0,0,0,p2Pos.value.x),
+			_mm_set_ps(0,0,0,p2Pos.value.y),
 			0);
 
 		__m128 v16 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,translate.value[0]),
-			_mm_set_ps(0,0,0,translate.value[1]),
+			_mm_set_ps(0,0,0,translate.value.x),
+			_mm_set_ps(0,0,0,translate.value.y),
 			0);
 		__m128 v17 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,p1Pos.value[0]),
-			_mm_set_ps(0,0,0,p1Pos.value[1]),
+			_mm_set_ps(0,0,0,p1Pos.value.x),
+			_mm_set_ps(0,0,0,p1Pos.value.y),
 			0);
 
 
@@ -465,8 +464,8 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		__m128 v21 = _mm_mul_ps(v14, p2parent.directionVector);
 		__m128 v22 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,point.value[0]),
-				_mm_set_ps(0,0,0,point.value[1]),
+				_mm_set_ps(0,0,0,point.value.x),
+				_mm_set_ps(0,0,0,point.value.y),
 				0),
 			size.size);
 		__m128 pin1 = _mm_add_ps(
@@ -513,14 +512,14 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setStyle(styles.transformNode);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 2 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Translate",{true,false,{0.f,0.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Translate",Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",{true,false,{1.f,1.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(), styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
 		TransformResult res;
@@ -538,26 +537,26 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 
 		__m128 v15 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,translate.value[0]),
-			_mm_set_ps(0,0,0,translate.value[1]),
+			_mm_set_ps(0,0,0,translate.value.x),
+			_mm_set_ps(0,0,0,translate.value.y),
 			0);
 		__m128 v16 = _mm_shuffle_ps(
-			_mm_set_ps(0,0,0,p2Pos.value[0]),
-			_mm_set_ps(0,0,0,p2Pos.value[1]),
+			_mm_set_ps(0,0,0,p2Pos.value.x),
+			_mm_set_ps(0,0,0,p2Pos.value.y),
 			0);
 
 
 
 		__m128 v18 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,p1Pos.value[0]),
-				_mm_set_ps(0,0,0,p1Pos.value[1]), 
+				_mm_set_ps(0,0,0,p1Pos.value.x),
+				_mm_set_ps(0,0,0,p1Pos.value.y), 
 				0),
 			p1parent.directionVector);
 		__m128 v19 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0,0,0,point.value[0]),
-				_mm_set_ps(0,0,0,point.value[1]),
+				_mm_set_ps(0,0,0,point.value.x),
+				_mm_set_ps(0,0,0,point.value.y),
 				0),
 			size.size);
 
@@ -616,19 +615,19 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setStyle(styles.transformNode);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 2 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 2 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 3 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
-	ImFlow::BaseNode::addIN<Float2Variable>("Pin 3 Position",{true,false,{0.5f,0.5f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Pin 3 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Translate",{true,false,{0.f,0.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Translate",Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",{true,false,{0.f,1.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Point 1",Float2Variable(0.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
-	ImFlow::BaseNode::addIN<Float2Variable>("Point 2",{true,false,{1.f,1.f}}, ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Point 2",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out",styles.transformResult)->behaviour([this]() {
@@ -643,22 +642,22 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 		const Float2Variable& translate = getInVal<Float2Variable>("Translate");
 		const Float2Variable& point1 = getInVal<Float2Variable>("Point 1");
 		const Float2Variable& point2 = getInVal<Float2Variable>("Point 2");
-		__m128 v5 = _mm_set_ps(0, 0, 0, translate.value[0]);
-		__m128 v6 = _mm_set_ps(0, 0, 0, translate.value[1]);
+		__m128 v5 = _mm_set_ps(0, 0, 0, translate.value.x);
+		__m128 v6 = _mm_set_ps(0, 0, 0, translate.value.y);
 
 
 
 
 		__m128 v9 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0, 0, 0, p1Pos.value[0]),
-				_mm_set_ps(0, 0, 0, p1Pos.value[1]),
+				_mm_set_ps(0, 0, 0, p1Pos.value.x),
+				_mm_set_ps(0, 0, 0, p1Pos.value.y),
 				0),
 			p1parent.directionVector);
 		__m128 v10 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0, 0, 0, p2Pos.value[0]),
-				_mm_set_ps(0, 0, 0, p2Pos.value[1]),
+				_mm_set_ps(0, 0, 0, p2Pos.value.x),
+				_mm_set_ps(0, 0, 0, p2Pos.value.y),
 				0),
 			p2parent.directionVector);
 		__m128 v11 = _mm_add_ps(
@@ -668,8 +667,8 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 
 		__m128 v14 = _mm_mul_ps(
 			_mm_shuffle_ps(
-				_mm_set_ps(0, 0, 0, p3Pos.value[0]),
-				_mm_set_ps(0, 0, 0, p3Pos.value[1]),
+				_mm_set_ps(0, 0, 0, p3Pos.value.x),
+				_mm_set_ps(0, 0, 0, p3Pos.value.y),
 				0),
 			p3parent.directionVector);
 		__m128 v15 = _mm_add_ps(
@@ -680,8 +679,8 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 						p3parent.position),
 					v11),
 				_mm_shuffle_ps(
-					_mm_set_ps(0, 0, 0, point1.value[1]),
-					_mm_set_ps(0, 0, 0, point1.value[0]),
+					_mm_set_ps(0, 0, 0, point1.value.y),
+					_mm_set_ps(0, 0, 0, point1.value.x),
 					0)),
 			_mm_mul_ps(
 				_mm_sub_ps(
@@ -690,8 +689,8 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 						p2parent.position),
 					v11),
 				_mm_shuffle_ps(
-					_mm_set_ps(0, 0, 0, point2.value[1]),
-					_mm_set_ps(0, 0, 0, point2.value[0]),
+					_mm_set_ps(0, 0, 0, point2.value.y),
+					_mm_set_ps(0, 0, 0, point2.value.x),
 					0)));
 		__m128 v16 = _mm_mul_ps(_mm_shuffle_ps(v5, v6, 0), v15);
 		res.directionVector = v15;
