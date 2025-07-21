@@ -81,15 +81,24 @@ void NodeEditorPopup(ImFlow::ImNodeFlow& mINF,RenderInstance& proto,NodeStyles& 
 				}
 				ImGui::EndMenu();
 			}
-			if (ImGui::BeginMenu("Render Jobs")) {
-				if (ImGui::MenuItem("Text Render Job")) {
-
-				}
-				if (ImGui::MenuItem("Asset Render Job")) {
+			if (ImGui::BeginMenu("Image Nodes")) {
+				if (ImGui::MenuItem("Image Render")) {
 					mINF.placeNode<AssetRenderNode>(proto,styles);
 				}
-				if (ImGui::MenuItem("Small Asset Render Job")) {
+				if (ImGui::MenuItem("Other Image Render")) {
 
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Text Nodes")) {
+				if (ImGui::MenuItem("Text Style")) {
+					mINF.placeNode<TextStyleNode>(proto,styles);
+				}
+				if (ImGui::MenuItem("Text Size")) {
+					mINF.placeNode<TextSizeNode>(proto,styles);
+				}
+				if (ImGui::MenuItem("Text Render")) {
+					mINF.placeNode<TextRenderNode>(proto,styles);
 				}
 				ImGui::EndMenu();
 			}
@@ -170,7 +179,7 @@ void NodeEditorPopup(ImFlow::ImNodeFlow& mINF,RenderInstance& proto,NodeStyles& 
 			}
 			if (ImGui::BeginMenu("Math")) {
 				if (ImGui::MenuItem("Add")) {
-					mINF.placeNode<AddNode>(proto,styles);
+					mINF.placeNode<AdditionNode>(proto,styles);
 				}
 				if (ImGui::MenuItem("Subtract")) {
 					mINF.placeNode<SubtractNode>(proto,styles);
