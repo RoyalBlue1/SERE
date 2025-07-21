@@ -1050,7 +1050,10 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 				v146.m128_f32[0] = v139;
 				v147.m128_f32[0] = v112;
 				v148 = _mm_shuffle_ps(v147, v146, 0);
-				v149 = _mm_set1_ps(v124->proportions[v137->proportionIndex].scaleBounds);
+				v149 = _mm_shuffle_ps(
+					_mm_set_ps(0, 0, 0, v124->proportions[v137->proportionIndex].scaleBounds),
+					_mm_set_ps(0, 0, 0, v124->proportions[v138->proportionIndex].scaleBounds),
+					0);
 				__m128 t1 = _mm_set_ps(v138->posBaseY, v138->posBaseX, v137->posBaseY, v137->posBaseX);//v138(r8) & v137(rdx)
 				__m128 t2 = _mm_unpacklo_ps(
 					_mm_unpacklo_ps(_mm_set_ps(0, 0, 0, v181.float_0), _mm_set_ps(0, 0, 0, v179.float_0)),
@@ -1076,7 +1079,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 					_mm_unpacklo_ps(_mm_unpacklo_ps(v113, v141), _mm_unpacklo_ps(v114, v140)),
 					_mm_shuffle_ps(v171, v171, 0));
 				//si128 = _mm_load_si128((const __m128i *)v10);
-				TriData tri = transform.GenTri(v148, v150);
+				TriData tri = transform.GenTri(v150, v148);
 				proto.sub_FEF30( v209, &a9, tri);
 				v153 = _mm_unpackhi_ps(tri.a, tri.b);
 				v154 = _mm_unpacklo_ps(tri.a, tri.b);
