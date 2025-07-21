@@ -33,7 +33,7 @@ add_executable (SERE
 	"FontAtlas.cpp"
 	"Nodes/ConstantVarNodes.cpp"
 	"Nodes/SplitMergeNodes.cpp"
-	"Nodes/MathNodes.cpp" "Nodes/GlobalNodes.h" "Nodes/GlobalNodes.cpp" "RenderFunctions.cpp" "RenderFunctions.h" "IntrinUtil.h")
+	"Nodes/MathNodes.cpp" "Nodes/GlobalNodes.h" "Nodes/GlobalNodes.cpp" "RenderFunctions.cpp" "RenderFunctions.h" "IntrinUtil.h" "CustomImGuiWidgets.cpp" "CustomImGuiWidgets.h")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )#${PROJECT_SOURCE_DIR}/include)
 #target_link_libraries(SERE PUBLIC Zep::Zep)

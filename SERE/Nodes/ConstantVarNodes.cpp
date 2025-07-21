@@ -1,4 +1,5 @@
 #include "ConstantVarNodes.h"
+#include "CustomImGuiWidgets.h"
 #include "imgui/imgui_stdlib.h"
 
 IntVarNode::IntVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
@@ -151,27 +152,18 @@ AssetVarNode::AssetVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle("Asset Var");
 	setStyle(styles.constantNode);
 	hash = loadAsset("white");
-	showSelectionUi = true;
+	showSelectionUi = false;
 	ImFlow::BaseNode::addOUT<AssetVariable>("Value",styles.assetVariable)->behaviour([this]() {
 		return AssetVariable(hash);
 	});
 }
 
 void AssetVarNode::draw() {
-	ImGui::PushItemWidth(90);
-	if(ImGui::Button("Select Asset")) {
-		showSelectionUi = true;
+	if (AtlasImageButton("Open Selection", hash, ImVec2(200.f, 400.f))) {
+		ImGui::OpenPopup("Asset Selection");
 	}
-	ImGui::PopItemWidth();
-	ImGui::Begin("test");
-	const Asset_t& asset = imageAssetMap[hash];
-	const ImageAtlas& atlas = imageAtlases[asset.atlasIndex];
-	auto& dim = atlas.dimentions[asset.imageIndex];
-
-	ImGui::Image(atlas.imageResourceView,
-		ImVec2(200.f,200.f/dim.width*dim.height));
-		
-	ImGui::End();
+	AssetSelectionPopup("Asset Selection",&hash);
+	
 }
 
 SizeVarNode::SizeVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {

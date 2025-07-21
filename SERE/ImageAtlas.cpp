@@ -72,33 +72,33 @@ void loadImageAtlases(ID3D11Device* d11Device) {
 				atlas.renderOffsets.push_back(offset);
 			}
 			yyjson_val* jsonShaderData = yyjson_obj_get(yyjson_doc_get_root(doc),"shaderData");
-			std::vector<ShaderData_t> shaderData;
+			
 			yyjson_arr_foreach(jsonShaderData, idx, size, entry) {
 				ShaderData_t shdDat;
 				shdDat.minX = yyjson_get_num(yyjson_obj_get(entry, "minX"));
 				shdDat.minY = yyjson_get_num(yyjson_obj_get(entry, "minY"));
-				shdDat.maxX = yyjson_get_num(yyjson_obj_get(entry, "maxX"));
-				shdDat.maxY = yyjson_get_num(yyjson_obj_get(entry, "maxY"));
-				shaderData.push_back(shdDat);
+				shdDat.sizeX = yyjson_get_num(yyjson_obj_get(entry, "maxX"));
+				shdDat.sizeY = yyjson_get_num(yyjson_obj_get(entry, "maxY"));
+				atlas.shaderData.push_back(shdDat);
 			}
 			yyjson_doc_free(doc);
 			fs::path ddsName = jsonName.replace_extension("dds");
 
 			DirectX::CreateDDSTextureFromFile(d11Device,ddsName.wstring().c_str(), &atlas.imageResource, &atlas.imageResourceView);
 
-			if (shaderData.size()) {
+			if (atlas.shaderData.size()) {
 				D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
 				D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
 				D3D11_BUFFER_DESC boundsBufferDesc;
 
-				boundsBufferDesc.ByteWidth = 16 * shaderData.size();
+				boundsBufferDesc.ByteWidth = 16 * atlas.shaderData.size();
 				boundsBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 				boundsBufferDesc.MiscFlags = 64;
 				boundsBufferDesc.StructureByteStride = 16;
 				boundsBufferDesc.BindFlags =  8;
 				boundsBufferDesc.CPUAccessFlags = 0;
 
-				boundSubresoureDesc.pSysMem = shaderData.data();
+				boundSubresoureDesc.pSysMem = atlas.shaderData.data();
 				boundSubresoureDesc.SysMemPitch = 0;
 				boundSubresoureDesc.SysMemSlicePitch = 0;
 
@@ -108,7 +108,7 @@ void loadImageAtlases(ID3D11Device* d11Device) {
 				boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
 				boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
 				boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
-				boundsShaderResourceViewDesc.Buffer.NumElements = shaderData.size();
+				boundsShaderResourceViewDesc.Buffer.NumElements = atlas.shaderData.size();
 				if (HRESULT res = d11Device->CreateShaderResourceView(atlas.boundsBuffer, &boundsShaderResourceViewDesc, &atlas.boundsResourceView); res) {
 					printf("D3D11Decive::CreateShaderResourceView returned 0x%x\n",(uint32_t)res);
 				}

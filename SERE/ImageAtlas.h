@@ -29,8 +29,8 @@ struct uiImageAtlasUnk_
 struct ShaderData_t {
 	float minX;
 	float minY;
-	float maxX;
-	float maxY;
+	float sizeX;
+	float sizeY;
 };
 
 struct Asset_t {
@@ -52,6 +52,7 @@ struct ImageAtlas {
 	ID3D11ShaderResourceView* imageResourceView;
 	ID3D11Buffer *boundsBuffer;
 	ID3D11ShaderResourceView *boundsResourceView;
+	std::vector<ShaderData_t> shaderData;
 
 };
 
