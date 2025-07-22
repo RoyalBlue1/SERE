@@ -286,7 +286,7 @@ namespace ImFlow {
         // Links drop-off
         if (m_dragOut && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             if (!m_hovering) {
-                if (on_free_space() && m_droppedLinkPopUp) {
+                if (on_free_space() && m_droppedLinkPopUp && (!m_draggingExistingLink)) {
                     if (m_droppedLinkPupUpComboKey == ImGuiKey_None || ImGui::IsKeyDown(m_droppedLinkPupUpComboKey)) {
                         m_droppedLinkLeft = m_dragOut;
                         ImGui::OpenPopup("DroppedLinkPopUp");
@@ -294,6 +294,7 @@ namespace ImFlow {
                 }
             } else
                 m_dragOut->createLink(m_hovering);
+            m_draggingExistingLink = false;
         }
 
         // Links drag-out
@@ -306,6 +307,7 @@ namespace ImFlow {
                     other = link->right();
                 m_hovering->deleteLink();
                 m_dragOut = other;
+                m_draggingExistingLink = true;
             }
             else {
                 m_dragOut = m_hovering;

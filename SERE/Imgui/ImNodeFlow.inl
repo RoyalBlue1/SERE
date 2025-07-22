@@ -67,13 +67,13 @@ namespace ImFlow
     // BASE NODE
 
     template<typename T>
-    std::shared_ptr<InPin<T>> BaseNode::addIN(const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style)
+    std::shared_ptr<InPin<T>> BaseNode::addIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style)
     {
         return addIN_uid(name, name, defReturn, std::move(filter), std::move(style));
     }
 
     template<typename T, typename U>
-    std::shared_ptr<InPin<T>> BaseNode::addIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style)
+    std::shared_ptr<InPin<T>> BaseNode::addIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style)
     {
         PinUID h = std::hash<U>{}(uid);
         auto p = std::make_shared<InPin<T>>(h, name, defReturn, std::move(filter), std::move(style), this, &m_inf);
@@ -101,13 +101,13 @@ namespace ImFlow
     }
 
     template<typename T>
-    const T& BaseNode::showIN(const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style)
+    const T& BaseNode::showIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style)
     {
         return showIN_uid(name, name, defReturn, std::move(filter), std::move(style));
     }
 
     template<typename T, typename U>
-    const T& BaseNode::showIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style)
+    const T& BaseNode::showIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style)
     {
         PinUID h = std::hash<U>{}(uid);
         for (std::pair<int, std::shared_ptr<Pin>>& p : m_dynamicIns)
@@ -313,7 +313,7 @@ namespace ImFlow
             return;
         }
 
-        if (!m_filter(other, this)) // Check Filter
+        if (!m_filter(other->getDataType(), this->getDataType())) // Check Filter
             return;
 
         m_link = std::make_shared<Link>(other, this, (*m_inf));

@@ -526,7 +526,7 @@ namespace ImFlow
         BaseNode* m_hoveredNodeAux = nullptr;
 
         BaseNode* m_hoveredNode = nullptr;
-        bool m_draggingNode = false, m_draggingNodeNext = false;
+        bool m_draggingNode = false, m_draggingNodeNext = false,m_draggingExistingLink = false;
         Pin* m_hovering = nullptr;
         Pin* m_dragOut = nullptr;
 
@@ -574,7 +574,7 @@ namespace ImFlow
          * @return Shared pointer to the newly added pin
          */
         template<typename T>
-        std::shared_ptr<InPin<T>> addIN(const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<InPin<T>> addIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Input to the node
@@ -590,7 +590,7 @@ namespace ImFlow
          * @return Shared pointer to the newly added pin
          */
         template<typename T, typename U>
-        std::shared_ptr<InPin<T>> addIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<InPin<T>> addIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Remove input pin
@@ -620,7 +620,7 @@ namespace ImFlow
          * @return Const reference to the value of the connected link for the current frame of defReturn
          */
         template<typename T>
-        const T& showIN(const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        const T& showIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Show a temporary input pin
@@ -637,7 +637,7 @@ namespace ImFlow
          * @return Const reference to the value of the connected link for the current frame of defReturn
          */
         template<typename T, typename U>
-        const T& showIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        const T& showIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Output to the node
@@ -1076,9 +1076,19 @@ namespace ImFlow
     class ConnectionFilter
     {
     public:
-        static std::function<bool(Pin*, Pin*)> None() { return [](Pin* out, Pin* in){ return true; }; }
-        static std::function<bool(Pin*, Pin*)> SameType() { return [](Pin* out, Pin* in) { return out->getDataType() == in->getDataType(); }; }
-        static std::function<bool(Pin*, Pin*)> Numbers() { return [](Pin* out, Pin* in){ return out->getDataType() == typeid(double) || out->getDataType() == typeid(float) || out->getDataType() == typeid(int); }; }
+        static std::function<bool(const std::type_info&, const std::type_info&)> None() {
+            return [](const std::type_info& out, const std::type_info& in) { return true; }; 
+        }
+        static std::function<bool(const std::type_info&, const std::type_info&)> SameType() { 
+            return [](const std::type_info& out, const std::type_info& in) { return out == in; }; 
+        }
+        static std::function<bool(const std::type_info&, const std::type_info&)> Numbers() {
+            return [](const std::type_info& out, const std::type_info& in){ 
+                return out == typeid(double) ||
+                    out == typeid(float) ||
+                    out == typeid(int); 
+            }; 
+        }
     };
 
     /**
@@ -1098,7 +1108,7 @@ namespace ImFlow
          * @param inf Pointer to the Grid Handler the pin is in (same as parent)
          * @param style Style of the pin
          */
-        explicit InPin(PinUID uid, const std::string& name, T defReturn, std::function<bool(Pin*, Pin*)> filter, std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
+        explicit InPin(PinUID uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
             : Pin(uid, name, style, PinType_Input, parent, inf), m_emptyVal(defReturn), m_filter(std::move(filter)) {}
 
         /**
@@ -1156,7 +1166,7 @@ namespace ImFlow
     private:
         std::shared_ptr<Link> m_link;
         T m_emptyVal;
-        std::function<bool(Pin*, Pin*)> m_filter;
+        std::function<bool(const std::type_info&, const std::type_info&)> m_filter;
         bool m_allowSelfConnection = false;
     };
 
