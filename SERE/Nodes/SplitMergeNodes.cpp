@@ -2,8 +2,8 @@
 
 SplitFloat2Node::SplitFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Split Vector2");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("In",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("X",styles.floatVariable)->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
@@ -24,10 +24,14 @@ void SplitFloat2Node::draw() {
 
 }
 
+std::vector<PinInfo> SplitFloat2Node::GetPinInfo() {
+	return {};
+}
+
 MergeFloat2Node::MergeFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Merge Vector2");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("X",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Y",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 
@@ -49,10 +53,14 @@ void MergeFloat2Node::draw() {
 	ImGui::Text("%f",inY.value);
 }
 
+std::vector<PinInfo> MergeFloat2Node::GetPinInfo() {
+	return {};
+}
+
 SplitFloat3Node::SplitFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Split Vector3");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float3Variable>("In",Float3Variable(0.f,0.f,0.f), ImFlow::ConnectionFilter::SameType(), styles.float3Variable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("X",styles.floatVariable)->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
@@ -79,10 +87,14 @@ void SplitFloat3Node::draw() {
 
 }
 
+std::vector<PinInfo> SplitFloat3Node::GetPinInfo() {
+	return {};
+}
+
 MergeFloat3Node::MergeFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Merge Vector2");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("X",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Y",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Z",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
@@ -108,12 +120,14 @@ void MergeFloat3Node::draw() {
 	ImGui::Text("%f",inZ.value);
 }
 
-
+std::vector<PinInfo> MergeFloat3Node::GetPinInfo() {
+	return {};
+}
 
 SplitColorNode::SplitColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Split Color");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<ColorVariable>("In",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.colorVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Red",styles.floatVariable)->behaviour([this]() {
 
@@ -146,10 +160,14 @@ void SplitColorNode::draw() {
 	ImGui::Text("%f",col.value.alpha);
 }
 
+std::vector<PinInfo> SplitColorNode::GetPinInfo() {
+	return {};
+}
+
 RGBToColorNode::RGBToColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("RGB Color");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("Red",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Green",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Blue",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
@@ -177,10 +195,14 @@ void RGBToColorNode::draw() {
 	ImGui::Text("%f",inAlpha.value);
 }
 
+std::vector<PinInfo> RGBToColorNode::GetPinInfo() {
+	return {};
+}
+
 HSVToColorNode::HSVToColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("HSV Color");
-	setStyle(styles.splitMergeNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("Hue",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Saturation",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("Vibrance",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
@@ -275,4 +297,18 @@ void HSVToColorNode::draw() {
 	ImGui::Text("%f",inGreen.value);
 	ImGui::Text("%f",inBlue.value);
 	ImGui::Text("%f",inAlpha.value);
+}
+
+std::vector<PinInfo> HSVToColorNode::GetPinInfo() {
+	return {};
+}
+
+void AddSplitMergeNodes(NodeEditor& editor) {
+	editor.AddNodeType<SplitFloat2Node>();
+	editor.AddNodeType<MergeFloat2Node>();
+	editor.AddNodeType<SplitFloat3Node>();
+	editor.AddNodeType<MergeFloat3Node>();
+	editor.AddNodeType<SplitColorNode>();
+	editor.AddNodeType<RGBToColorNode>();
+	editor.AddNodeType<HSVToColorNode>();
 }

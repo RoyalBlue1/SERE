@@ -15,6 +15,13 @@
 #include <d3d11.h>
 #include "RuiNodeEditor.h"
 
+#include "Nodes/ArgumentNodes.h"
+#include "Nodes/ConstantVarNodes.h"
+#include "Nodes/GlobalNodes.h"
+#include "Nodes/MathNodes.h"
+#include "Nodes/RenderJobNodes.h"
+#include "Nodes/SplitMergeNodes.h"
+#include "Nodes/TransformNodes.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;
@@ -238,7 +245,13 @@ int main(int, char**)
 
     RenderInstance render{g_pd3dDevice,g_pd3dDeviceContext,1920,1080};
     NodeEditor nodeEdit{render};
-
+    AddArgumentNodes(nodeEdit);
+    AddConstantVarNodes(nodeEdit);
+    AddMathNodes(nodeEdit);
+    AddGlobalNodes(nodeEdit);
+    AddRenderNodes(nodeEdit);
+    AddSplitMergeNodes(nodeEdit);
+    AddTransformNodes(nodeEdit);
 
     while (!done)
     {

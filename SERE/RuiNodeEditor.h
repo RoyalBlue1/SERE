@@ -24,59 +24,129 @@ struct NodeStyles {
 	std::shared_ptr<ImFlow::PinStyle> assetVariable;
 	std::shared_ptr<ImFlow::PinStyle> textData;
 	
-
-	std::shared_ptr<ImFlow::NodeStyle> mathNode;
-	std::shared_ptr<ImFlow::NodeStyle> renderNode;
-	std::shared_ptr<ImFlow::NodeStyle> argumentNode;
-	std::shared_ptr<ImFlow::NodeStyle> constantNode;
-	std::shared_ptr<ImFlow::NodeStyle> splitMergeNode;
-	std::shared_ptr<ImFlow::NodeStyle> transformNode;
-	std::shared_ptr<ImFlow::NodeStyle> globalNode;
+	
+	
+	std::map<std::string,std::shared_ptr<ImFlow::NodeStyle>> nodeStyles;
+	std::shared_ptr<ImFlow::NodeStyle> defaultNode;
 	std::shared_ptr<ImFlow::NodeStyle> errorNode;
+	NodeStyles() {
+		transformResult = std::make_shared<ImFlow::PinStyle>(IM_COL32(191,90,90,255),1,4.f,4.67f,3.7f,1.f);
+		transformSize = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,191,93,255),1,4.f,4.67f,3.7f,1.f);
+
+		intVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(87,155,185,255),0,4.f,4.67f,3.7f,1.f);
+		boolVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,117,191,255),0,4.f,4.67f,3.7f,1.f);
+		floatVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
+		float2Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
+		float3Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
+		colorVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
+		stringVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
+		assetVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
 
 
+		
+
+		nodeStyles.emplace(
+			"Math",
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(17, 61, 173, 255), ImColor(233, 241, 244, 255), 6.5f));
+		nodeStyles.emplace(
+			"Transform", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(27, 173, 17, 255), ImColor(233, 241, 244, 255), 6.5f));
+		nodeStyles.emplace(
+			"Render", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f));
+		nodeStyles.emplace(
+			"Constant", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,17,170,255),ImColor(233,241,244,255),6.5f));
+		nodeStyles.emplace(
+			"Argument", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(113,17,173,255),ImColor(233,241,244,255),6.5f));
+		nodeStyles.emplace(
+			"Split Merge", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(17,149,173,255),ImColor(233,241,244,255),6.5f));
+		nodeStyles.emplace(
+			"Global", 
+			std::make_shared<ImFlow::NodeStyle>(IM_COL32(57,17,132,255),ImColor(233,241,244,255),6.5f));
+
+		defaultNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f);
+		errorNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
+		errorNode->bg = IM_COL32(132,23,17,255);
+	}
+
+	std::shared_ptr<ImFlow::NodeStyle> GetNodeStyle(std::string name) {
+		if(nodeStyles.contains(name))
+			return nodeStyles[name];
+		return defaultNode;
+	}
+};
+
+struct PinInfo {
 
 };
 
+struct NodeType {
+	void (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::vector<PinInfo> (*GetPinInfo)();
+};
 
-void NodeEditorPopup(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles, ImFlow::BaseNode* node);
 
+typedef std::map<std::string,NodeType> NodeCategory;
+
+
+
+template<class T> void AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
+	mINF.placeNode<T>(proto,styles);
+}
+
+template<class T> std::vector<PinInfo> GetPinInfo() {
+	return T::GetPinInfo();
+}
+
+
+template<class T> NodeType CreateNodeType() {
+	NodeType type;
+	type.AddNode = AddNode<T>;
+	type.GetPinInfo = GetPinInfo<T>;
+	return type;
+}
 
 struct NodeEditor{
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& proto;
 	NodeStyles styles;
+
+	std::map<std::string,NodeCategory> nodeTypes;
+
 	NodeEditor(RenderInstance& prot):proto(prot) {
 		mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
-			NodeEditorPopup(mINF,proto,styles, node);
+			RightClickPopup(node);
 		});
 
 
-		styles.transformResult = std::make_shared<ImFlow::PinStyle>(IM_COL32(191,90,90,255),1,4.f,4.67f,3.7f,1.f);
-		styles.transformSize = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,191,93,255),1,4.f,4.67f,3.7f,1.f);
 		
-		styles.intVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(87,155,185,255),0,4.f,4.67f,3.7f,1.f);
-		styles.boolVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,117,191,255),0,4.f,4.67f,3.7f,1.f);
-		styles.floatVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		styles.float2Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		styles.float3Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		styles.colorVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		styles.stringVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		styles.assetVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-	
-		styles.mathNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(17,61,173,255),ImColor(233,241,244,255),6.5f);
-		styles.transformNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(27,173,17,255),ImColor(233,241,244,255),6.5f);
-		styles.renderNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f);
-		styles.constantNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,17,170,255),ImColor(233,241,244,255),6.5f);
-		styles.argumentNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(113,17,173,255),ImColor(233,241,244,255),6.5f);
-		styles.splitMergeNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(17,149,173,255),ImColor(233,241,244,255),6.5f);
-		styles.globalNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(57,17,132,255),ImColor(233,241,244,255),6.5f);
-		styles.errorNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
-		styles.errorNode->bg = IM_COL32(132,23,17,255);
 		
 		
 	}
+
+	void RightClickPopup(ImFlow::BaseNode* node);
+
 	void draw();
+
+
+	template<class T> void AddNodeType() {
+		
+		
+		const std::string& category = T::category;
+		const std::string& name = T::name;
+		NodeType type = CreateNodeType<T>();
+		if (nodeTypes.contains(category)) {
+			nodeTypes[category].emplace(name,type);
+			return;
+		}
+		std::map<std::string,NodeType> newCategory;
+		newCategory.emplace(name,type);
+		nodeTypes.emplace(category,newCategory);
+		
+	}
 };
 
 

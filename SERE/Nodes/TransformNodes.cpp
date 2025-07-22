@@ -6,8 +6,8 @@ __m128 xmmword_12A146C0 = _mm_castsi128_ps(_mm_set_epi32(0xFFFFFFFF,0,0,0xFFFFFF
 
 Transform0Node::Transform0Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Null Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(), styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out", styles.transformResult)->behaviour([this]() {
 		TransformResult res; 
@@ -25,11 +25,14 @@ void Transform0Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform0Node::GetPinInfo() {
+	return {};
+}
 
 Transform1Node::Transform1Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Copy Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<TransformResult>("Source",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(), styles.transformSize);
 	ImFlow::BaseNode::addOUT<TransformResult>("Out", styles.transformResult)->behaviour([this]() {
@@ -52,11 +55,14 @@ void Transform1Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform1Node::GetPinInfo() {
+	return {};
+}
 
 Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Transform 2");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
@@ -99,10 +105,14 @@ void Transform2Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform2Node::GetPinInfo() {
+	return {};
+}
+
 Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Transform 3");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
@@ -146,10 +156,14 @@ void Transform3Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform3Node::GetPinInfo() {
+	return {};
+}
+
 Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Transform 4");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
@@ -196,6 +210,10 @@ void Transform4Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform4Node::GetPinInfo() {
+	return {};
+}
+
 void sub_100520(RenderInstance& proto,__m128* a2,__m128* a3) {
 	__m128 m128_10 = *(__m128 *)&proto.drawInfo.ruiUnk3[0].screenWidth;
 	__m128 m128_20 = *(__m128 *)&proto.drawInfo.ruiUnk3[0].float_10;
@@ -211,8 +229,8 @@ void sub_100520(RenderInstance& proto,__m128* a2,__m128* a3) {
 
 Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Transform 5");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
@@ -274,10 +292,14 @@ void Transform5Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform5Node::GetPinInfo() {
+	return {};
+}
+
 Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Transform 6");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_0",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<Float2Variable>("Val_3",Float2Variable(1.f,1.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
 	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
@@ -335,10 +357,14 @@ void Transform6Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform6Node::GetPinInfo() {
+	return {};
+}
+
 Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Two Pin Scale Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
@@ -412,10 +438,14 @@ void Transform7Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform7Node::GetPinInfo() {
+	return {};
+}
+
 Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Two Pin Pinch Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
@@ -504,10 +534,14 @@ void Transform8Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform8Node::GetPinInfo() {
+	return {};
+}
+
 Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Two Pin Stretch Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
@@ -605,10 +639,14 @@ void Transform9Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Transform9Node::GetPinInfo() {
+	return {};
+}
+
 Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Two Pin Stretch Transform");
-	setStyle(styles.transformNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 
 	ImFlow::BaseNode::addIN<TransformResult>("Pin 1 Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
 	ImFlow::BaseNode::addIN<Float2Variable>("Pin 1 Position",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
@@ -703,4 +741,25 @@ void Transform10Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+std::vector<PinInfo> Transform10Node::GetPinInfo() {
+	return {};
+}
+
+void AddTransformNodes(NodeEditor& editor) {
+	editor.AddNodeType<Transform0Node>();
+	editor.AddNodeType<Transform1Node>();
+	editor.AddNodeType<Transform2Node>();
+	editor.AddNodeType<Transform3Node>();
+	editor.AddNodeType<Transform4Node>();
+	editor.AddNodeType<Transform5Node>();
+	editor.AddNodeType<Transform6Node>();
+	editor.AddNodeType<Transform7Node>();
+	editor.AddNodeType<Transform8Node>();
+	editor.AddNodeType<Transform9Node>();
+	editor.AddNodeType<Transform10Node>();
+	//editor.AddNodeType<Transform11Node>();
+	//editor.AddNodeType<Transform12Node>();
+	//editor.AddNodeType<Transform13Node>();
 }

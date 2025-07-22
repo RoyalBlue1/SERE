@@ -4,8 +4,8 @@
 
 IntVarNode::IntVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Int Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	minVal = 0;
 	maxVal = 32;
 	value = 0;
@@ -20,10 +20,14 @@ void IntVarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> IntVarNode::GetPinInfo() {
+	return {};
+}
+
 BoolVarNode::BoolVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Bool Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	value = false;
 	ImFlow::BaseNode::addOUT<BoolVariable>("Value",styles.boolVariable)->behaviour([this]() {
 		return BoolVariable(value);
@@ -37,10 +41,14 @@ void BoolVarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> BoolVarNode::GetPinInfo() {
+	return {};
+}
+
 FloatVarNode::FloatVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Float Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	minVal = 0;
 	maxVal = 1;
 	value = 0;
@@ -60,11 +68,14 @@ void FloatVarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> FloatVarNode::GetPinInfo() {
+	return {};
+}
 
 Float2VarNode::Float2VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Vector2 Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	minVal = 0;
 	maxVal = 1;
 	value[0] = 0;
@@ -86,10 +97,14 @@ void Float2VarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Float2VarNode::GetPinInfo() {
+	return {};
+}
+
 Float3VarNode::Float3VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Vector3 Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	minVal = 0;
 	maxVal = 1;
 	value[0] = 0;
@@ -112,10 +127,14 @@ void Float3VarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> Float3VarNode::GetPinInfo() {
+	return {};
+}
+
 ColorVarNode::ColorVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Color Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	value[0] = 1.f;
 	value[1] = 1.f;
 	value[2] = 1.f;
@@ -132,10 +151,14 @@ void ColorVarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> ColorVarNode::GetPinInfo() {
+	return {};
+}
+
 StringVarNode::StringVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("String Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addOUT<StringVariable>("Value",styles.stringVariable)->behaviour([this]() {
 		return StringVariable(value);
 	});
@@ -147,15 +170,23 @@ void StringVarNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> StringVarNode::GetPinInfo() {
+	return {};
+}
+
 AssetVarNode::AssetVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Asset Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	hash = loadAsset("white");
 	showSelectionUi = false;
 	ImFlow::BaseNode::addOUT<AssetVariable>("Value",styles.assetVariable)->behaviour([this]() {
 		return AssetVariable(hash);
 	});
+}
+
+std::vector<PinInfo> AssetVarNode::GetPinInfo() {
+	return {};
 }
 
 void AssetVarNode::draw() {
@@ -168,8 +199,8 @@ void AssetVarNode::draw() {
 
 SizeVarNode::SizeVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Color Var");
-	setStyle(styles.constantNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	minVal = 0;
 	maxVal = 128;
 	value[0] = 1.f;
@@ -194,4 +225,20 @@ void SizeVarNode::draw() {
 	ImGui::PushItemWidth(240);
 	ImGui::SliderFloat4("Value",value,minVal,maxVal);
 	ImGui::PopItemWidth();
+}
+
+std::vector<PinInfo> SizeVarNode::GetPinInfo() {
+	return {};
+}
+
+void AddConstantVarNodes(NodeEditor& editor) {
+	editor.AddNodeType<IntVarNode>();
+	editor.AddNodeType<BoolVarNode>();
+	editor.AddNodeType<FloatVarNode>();
+	editor.AddNodeType<Float2VarNode>();
+	editor.AddNodeType<Float3VarNode>();
+	editor.AddNodeType<ColorVarNode>();
+	editor.AddNodeType<StringVarNode>();
+	editor.AddNodeType<AssetVarNode>();
+	editor.AddNodeType<SizeVarNode>();
 }

@@ -3,8 +3,8 @@
 
 MultiplyNode::MultiplyNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Multiply");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -27,10 +27,14 @@ void MultiplyNode::draw() {
 
 }
 
+std::vector<PinInfo> MultiplyNode::GetPinInfo() {
+	return {};
+}
+
 AdditionNode::AdditionNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Add");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -53,11 +57,15 @@ void AdditionNode::draw() {
 
 }
 
+std::vector<PinInfo> AdditionNode::GetPinInfo() {
+	return {};
+}
+
 
 SubtractNode::SubtractNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Subtract");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -80,10 +88,16 @@ void SubtractNode::draw() {
 
 }
 
-DivideNode::DivideNode(RenderInstance& prot,NodeStyles& style):proto(prot),styles(style) {
+std::vector<PinInfo> SubtractNode::GetPinInfo() {
+	return {};
+}
 
-	setTitle("Divide");
-	setStyle(styles.mathNode);
+DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+
+	setTitle(name);
+	style = styles.GetNodeStyle(category);
+	errorStyle = styles.errorNode;
+	setStyle(style);
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(2.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -103,21 +117,27 @@ void DivideNode::draw() {
 	ImGui::Text("B %f",b.value);
 	if(b.value!=0.f)
 	{
-		setStyle(styles.mathNode);
+		setStyle(style);
 		ImGui::Text("Res %f", a.value / b.value);
 	}
 	else
 	{
-		setStyle(styles.errorNode);
+		setStyle(errorStyle);
 		ImGui::Text("Divide by 0");
 	}
 
 }
 
-ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& style):proto(prot),styles(style) {
+std::vector<PinInfo> DivideNode::GetPinInfo() {
+	return {};
+}
 
-	setTitle("Modulo");
-	setStyle(styles.mathNode);
+ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+
+	setTitle(name);
+	style = styles.GetNodeStyle(category);
+	errorStyle = styles.errorNode;
+	setStyle(style);
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -139,22 +159,26 @@ void ModuloNode::draw() {
 	ImGui::Text("B %f",b.value);
 	if(b.value!=0.f)
 	{
-		setStyle(styles.mathNode);
+		setStyle(style);
 		ImGui::Text("Res %f", std::fmodf(a.value,b.value));
 	}
 	else
 	{
-		setStyle(styles.errorNode);
+		setStyle(errorStyle);
 		ImGui::Text("Divide by 0");
 	}
 
 }
 
+std::vector<PinInfo> ModuloNode::GetPinInfo() {
+	return {};
+}
+
 
 AbsoluteNode::AbsoluteNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Absolute");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -172,10 +196,15 @@ void AbsoluteNode::draw() {
 
 }
 
+
+std::vector<PinInfo> AbsoluteNode::GetPinInfo() {
+	return {};
+}
+
 SineNode::SineNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Sine");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -195,10 +224,14 @@ void SineNode::draw() {
 
 }
 
+std::vector<PinInfo> SineNode::GetPinInfo() {
+	return {};
+}
+
 ExponentNode::ExponentNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
-	setTitle("Exponent");
-	setStyle(styles.mathNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
 	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
@@ -219,4 +252,21 @@ void ExponentNode::draw() {
 	ImGui::Text("B %f",b.value);
 	ImGui::Text("Res %f",std::pow(a.value, b.value));
 
+}
+
+
+std::vector<PinInfo> ExponentNode::GetPinInfo() {
+	return {};
+}
+
+void AddMathNodes(NodeEditor& editor) {
+
+	editor.AddNodeType<MultiplyNode>();
+	editor.AddNodeType<AdditionNode>();
+	editor.AddNodeType<SubtractNode>();
+	editor.AddNodeType<DivideNode>();
+	editor.AddNodeType<ModuloNode>();
+	editor.AddNodeType<AbsoluteNode>();
+	editor.AddNodeType<SineNode>();
+	editor.AddNodeType<ExponentNode>();
 }

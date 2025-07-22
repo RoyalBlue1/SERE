@@ -8,8 +8,8 @@
 
 
 AssetRenderNode::AssetRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
-	setTitle("Render Asset");
-	setStyle(styles.renderNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<ColorVariable>("Main Color", ColorVariable(1.f,1.f,1.f,1.f), ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
 	ImFlow::BaseNode::addIN<ColorVariable>("Mask Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
 	ImFlow::BaseNode::addIN<ColorVariable>("Tertiary Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
@@ -51,11 +51,15 @@ void AssetRenderNode::draw() {
 	Render_Asset(proto,input);
 }
 
+std::vector<PinInfo> AssetRenderNode::GetPinInfo() {
+	return {};
+}
+
 
 
 TextStyleNode::TextStyleNode(RenderInstance& prot, NodeStyles& styles) :proto(prot) {
-	setTitle("Text Style");
-	setStyle(styles.renderNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	currentFont = &fonts[0].fonts.begin()->second;
 	ImFlow::BaseNode::addIN<ColorVariable>("mainColor",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
 	ImFlow::BaseNode::addIN<ColorVariable>("scndColor",ColorVariable(0.f,0.f,0.f,0.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
@@ -111,9 +115,13 @@ void TextStyleNode::draw() {
 	ImGui::PopItemWidth();
 }
 
+std::vector<PinInfo> TextStyleNode::GetPinInfo() {
+	return {};
+}
+
 TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
-	setTitle("Text Size");
-	setStyle(styles.renderNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 
 	ImFlow::BaseNode::addIN<StringVariable>("text",StringVariable("Default Text"), ImFlow::ConnectionFilter::SameType(), styles.stringVariable);
 
@@ -164,10 +172,14 @@ void TextSizeNode::draw() {
 
 }
 
+std::vector<PinInfo> TextSizeNode::GetPinInfo() {
+	return {};
+}
+
 
 TextRenderNode::TextRenderNode(RenderInstance& prot, NodeStyles& styles) :proto(prot) {
-	setTitle("Text Render");
-	setStyle(styles.renderNode);
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
 	ImFlow::BaseNode::addIN<TextInputData>("Data",TextInputData(), ImFlow::ConnectionFilter::SameType(), styles.textData);
 	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(), styles.transformResult);
 
@@ -177,4 +189,18 @@ void TextRenderNode::draw() {
 	const TextInputData& data = getInVal<TextInputData>("Data");
 	const TransformResult& parent = getInVal<TransformResult>("Parent");
 	Text_Render(proto,data,parent);
+}
+
+std::vector<PinInfo> TextRenderNode::GetPinInfo() {
+	return {};
+}
+
+
+
+void AddRenderNodes(NodeEditor& editor) {
+	editor.AddNodeType<AssetRenderNode>();
+	editor.AddNodeType<TextStyleNode>();
+	editor.AddNodeType<TextSizeNode>();
+	editor.AddNodeType<TextRenderNode>();
+
 }
