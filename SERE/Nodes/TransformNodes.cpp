@@ -747,6 +747,113 @@ std::vector<PinInfo> Transform10Node::GetPinInfo() {
 	return {};
 }
 
+Transform11Node::Transform11Node(RenderInstance& prot,NodeStyles & styles):proto(prot) {
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
+
+	ImFlow::BaseNode::addIN<FloatVariable>("Rotation",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Rotation Origin",Float2Variable(.5f,.5f), ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(),styles.transformResult);
+	ImFlow::BaseNode::addIN<TransformSize>("Size", { _mm_set1_ps(64) }, ImFlow::ConnectionFilter::SameType(),styles.transformSize);
+	ImFlow::BaseNode::addOUT<TransformResult>("Out", styles.transformResult)->behaviour([this]() {
+		TransformResult res;
+		const TransformSize& size = getInVal<TransformSize>("Size");
+		const TransformResult& parent = getInVal<TransformResult>("Parent");
+		const Float2Variable& center = getInVal<Float2Variable>("Rotation Origin");
+		const FloatVariable& rot = getInVal<FloatVariable>("Rotation");
+
+		__m128 v2 = _mm_set_ps(0,0,0, 2147483600.0);
+		__m128 v3 = _mm_xor_ps(
+			_mm_mul_ps(
+				(__m128)_mm_set_ps(proto.elementWidth,proto.elementHeight,proto.elementWidth,proto.elementHeight),
+				(__m128)_mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeightRatio,proto.elementWidthRatio)),
+			_mm_set_ps(0,-0.0f,0,-0.0f));
+
+
+
+		res = parent;
+		res.inputSize = size.size;
+
+		__m128 v7 = _mm_set_ps(0,0,0,rot.value);
+
+		__m128 v9 = _mm_set_ps(0,0,0,center.value.y);
+
+
+		
+		__m128 a = _mm_and_ps(
+			_mm_sub_ps(v7, _mm_cvtepi32_ps(_mm_cvttps_epi32(v7))),
+			_mm_cmple_ss(_mm_cvtpd_ps(_mm_and_pd(_mm_cvtps_pd(v7), _mm_castsi128_pd(_mm_set1_epi64x(0x7FFFFFFFFFFFFFFF)))), v2));
+		__m128 v12 = _mm_mul_ps(
+			_mm_add_ps(
+				_mm_shuffle_ps(
+					a,a,
+					80),
+				_mm_set_ps(0,0.25,0,-0.75)),
+			_mm_set1_ps(4));
+		__m128i v13 = _mm_cvtps_epi32(v12);
+		__m128 v14 = _mm_sub_ps(v12, _mm_cvtepi32_ps(v13));
+		__m128 v15 = _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_and_si128(_mm_set1_epi32(1), v13), _mm_setzero_si128()));
+		__m128 v16 = _mm_mul_ps(v14, v14);
+		__m128 v17 = _mm_xor_ps(
+			_mm_or_ps(
+				_mm_andnot_ps(
+					v15,
+					_mm_sub_ps(
+						_mm_set1_ps(1),
+						_mm_sub_ps(
+							v16,
+							_mm_mul_ps(
+								_mm_add_ps(
+									_mm_mul_ps(
+										_mm_add_ps(
+											_mm_mul_ps(
+												_mm_add_ps(_mm_mul_ps(_mm_set1_ps(0.00091595226f), v16), _mm_set1_ps(-0.020863468f)),
+												v16),
+											_mm_set1_ps(0.25366944f)),
+										v16),
+									_mm_set1_ps(-0.23370054f)),
+								v16)))),
+				_mm_and_ps(
+					_mm_add_ps(
+						_mm_mul_ps(
+							_mm_add_ps(
+								_mm_mul_ps(
+									_mm_add_ps(
+										_mm_mul_ps(
+											_mm_add_ps(_mm_mul_ps(_mm_set1_ps(-0.004600245f), v16), _mm_set1_ps(0.079678982f)),
+											v16),
+										_mm_set1_ps(-0.64596325f)),
+									v16),
+								_mm_set1_ps(0.57079631f)),
+							v14),
+						v14),
+					v15)),
+			_mm_castsi128_ps(_mm_slli_epi32(_mm_and_si128(_mm_set1_epi32(2), v13), 30u)));
+		__m128 v18 = _mm_add_ps(
+			_mm_mul_ps(
+				_mm_mul_ps(_mm_shuffle_ps(v17,v17, 85), _mm_shuffle_ps(res.directionVector,res.directionVector, 177)),
+				v3),
+			_mm_mul_ps(_mm_shuffle_ps(v17,v17, 0), res.directionVector));
+		__m128 v19 = _mm_mul_ps(
+			_mm_shuffle_ps(_mm_set_ps(0,0,0,center.value.x), v9, 0),
+			_mm_sub_ps(res.directionVector, v18));
+		res.position = _mm_add_ps(_mm_add_ps(_mm_shuffle_ps(v19,v19, 78), v19), res.position);
+		res.directionVector = v18;
+
+		return res;
+	});
+}
+
+void Transform11Node::draw() {
+	ImGui::PushItemWidth(90);
+
+	ImGui::PopItemWidth();
+}
+
+std::vector<PinInfo> Transform11Node::GetPinInfo() {
+	return {};
+}
+
 void AddTransformNodes(NodeEditor& editor) {
 	editor.AddNodeType<Transform0Node>();
 	editor.AddNodeType<Transform1Node>();
@@ -759,7 +866,7 @@ void AddTransformNodes(NodeEditor& editor) {
 	editor.AddNodeType<Transform8Node>();
 	editor.AddNodeType<Transform9Node>();
 	editor.AddNodeType<Transform10Node>();
-	//editor.AddNodeType<Transform11Node>();
+	editor.AddNodeType<Transform11Node>();
 	//editor.AddNodeType<Transform12Node>();
 	//editor.AddNodeType<Transform13Node>();
 }
