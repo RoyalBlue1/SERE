@@ -334,10 +334,11 @@ namespace ImFlow {
         // Right-click PopUp
         if (m_rightClickPopUp && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
             m_hoveredNodeAux = m_hoveredNode;
-            m_lastRightClickPos = ImGui::GetMousePos();
+            m_lastRightClickPos = screen2grid( ImGui::GetMousePos());
             ImGui::OpenPopup("RightClickPopUp");
             
         }
+        ImGui::SetNextWindowPos(grid2screen(m_lastRightClickPos));
         if (ImGui::BeginPopup("RightClickPopUp")) {
             m_rightClickPopUp(m_hoveredNodeAux);
             ImGui::EndPopup();

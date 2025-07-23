@@ -60,7 +60,7 @@ namespace ImFlow
     template<typename T, typename... Params>
     std::shared_ptr<T> ImNodeFlow::placeNode(Params&&... args)
     {
-        return placeNodeAt<T>(m_lastRightClickPos, std::forward<Params>(args)...);
+        return addNode<T>(m_lastRightClickPos, std::forward<Params>(args)...);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -274,14 +274,14 @@ namespace ImFlow
                 (*m_inf)->hovering(this);
             return;
         }
-
+        ImGui::BeginGroup();
         ImGui::SetCursorPos(m_pos);
         ImGui::Text("%s", m_name.c_str());
         m_size = ImGui::GetItemRectSize();
 
         drawDecoration();
         drawSocket();
-
+        ImGui::EndGroup();
         if (ImGui::IsItemHovered())
             (*m_inf)->hovering(this);
     }
