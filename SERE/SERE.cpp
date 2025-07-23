@@ -11,6 +11,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "Imgui/implot.h"
 
 #include <d3d11.h>
 #include "RuiNodeEditor.h"
@@ -193,6 +194,7 @@ int main(int, char**)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -300,7 +302,7 @@ int main(int, char**)
         render.EndFrame();
         render.DrawImage();
         
-
+        //ImPlot::ShowDemoWindow();
         // Rendering
         ImGui::Render();
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
@@ -323,6 +325,7 @@ int main(int, char**)
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
 
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();

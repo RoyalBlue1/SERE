@@ -12,6 +12,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable (SERE
 	"SERE.cpp"
+	"SERE.rc"
 	"imgui/imgui.cpp"
 	"imgui/imgui_demo.cpp"
 	"imgui/imgui_draw.cpp"
@@ -19,8 +20,10 @@ add_executable (SERE
 	"imgui/imgui_widgets.cpp"
 	"imgui/imgui_impl_dx11.cpp"
 	"imgui/imgui_impl_win32.cpp"
-	"SERE.rc"
 	"imgui/ImNodeFlow.cpp"
+	"imgui/implot.cpp"
+	"imgui/implot_demo.cpp"
+	"imgui/implot_items.cpp"
 	"RuiNodeEditor.cpp"
 	"imgui/imgui_stdlib.cpp"
 	"Nodes/ArgumentNodes.cpp"
@@ -33,7 +36,11 @@ add_executable (SERE
 	"FontAtlas.cpp"
 	"Nodes/ConstantVarNodes.cpp"
 	"Nodes/SplitMergeNodes.cpp"
-	"Nodes/MathNodes.cpp" "Nodes/GlobalNodes.h" "Nodes/GlobalNodes.cpp" "RenderFunctions.cpp" "RenderFunctions.h" "IntrinUtil.h" "CustomImGuiWidgets.cpp" "CustomImGuiWidgets.h")
+	"Nodes/MathNodes.cpp"
+	"Nodes/GlobalNodes.cpp"
+	"RenderFunctions.cpp"
+	"CustomImGuiWidgets.cpp"
+	)
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )#${PROJECT_SOURCE_DIR}/include)
 #target_link_libraries(SERE PUBLIC Zep::Zep)
