@@ -1,7 +1,7 @@
 #include "CustomImGuiWidgets.h"
 #include "Imgui/imgui_stdlib.h"
 
-
+#include "Imgui/implot.h"
 
 
 bool AtlasImageButton(const char* id, uint32_t hash,ImVec2 maxSize) {
@@ -49,6 +49,46 @@ void AssetSelectionPopup(const char* id, uint32_t* hash) {
 			ImGui::PopTextWrapPos();
 		}
 		ImGui::EndTable();
+		ImGui::EndPopup();
+	}
+}
+
+bool Slider2D(const char* id,float* xVal,float* yVal) {
+	bool clicked = false,hovered = false,held = false;
+
+	if (ImPlot::BeginPlot(id, ImVec2(150, 150), ImPlotFlags_CanvasOnly)) {
+		const uint32_t axisFlags = ImPlotAxisFlags_NoTickMarks;
+		ImPlot::SetupAxes(nullptr, nullptr, axisFlags, axisFlags);
+		ImPlot::SetupAxesLimits(-1,1,-1,1);
+		double x = *xVal;
+		double y = *yVal;
+		ImPlot::DragPoint(0, &x, &y, ImVec4(0, 0.9f, 0, 1), 7, 0, &clicked, &hovered, &held);
+		*xVal = static_cast<float>(x);
+		*yVal = static_cast<float>(y);
+		ImPlot::EndPlot();
+		if (ImGui::IsItemHovered()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+struct Mapping_t {
+	bool cubicSpline;
+	std::vector<float> xValues;
+	std::vector<float> yValues;
+	std::vector<float> yDirections;
+};
+
+
+void MappingCreationPopup(const char* id, Mapping_t& map) {
+	if(ImGui::BeginPopup(id)) {
+		ImGui::Selectable("isCubic",&map.cubicSpline);
+
+		
+
+
 		ImGui::EndPopup();
 	}
 }

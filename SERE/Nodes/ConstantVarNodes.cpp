@@ -88,12 +88,12 @@ Float2VarNode::Float2VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 
 void Float2VarNode::draw() {
 	ImGui::PushItemWidth(90);
-	ImGui::InputFloat("Min",&minVal);
-	ImGui::SameLine();
-	ImGui::InputFloat("Max",&maxVal);
-	ImGui::PopItemWidth();
-	ImGui::PushItemWidth(210);
-	ImGui::SliderFloat2("Value",value,minVal,maxVal);
+	if (Slider2D("Slider", &value[0], &value[1])) {
+		ImFlow::ImNodeFlow* handler = getHandler();
+		if(handler)
+			handler->getGrid().config().zoom_enabled = false;
+	}
+	ImGui::Text("%f %f",value[0],value[1]);
 	ImGui::PopItemWidth();
 }
 

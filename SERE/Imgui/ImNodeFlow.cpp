@@ -266,6 +266,8 @@ namespace ImFlow {
                 draw_list->AddLine(ImVec2(0.0f, y), ImVec2(gridSize.x, y), m_style.colors.subGrid);
         }
 
+        //set zoom to true so nodes might disable it if they need zoom priority
+        m_context.config().zoom_enabled = true;
         // Update and draw nodes
         // TODO: I don't like this
         draw_list->ChannelsSplit(2);
