@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RuiNodeEditor.h"
+#include "CustomImGuiWidgets.h"
 
 void AddMathNodes(NodeEditor& editor);
 
@@ -117,6 +118,21 @@ private:
 
 public:
 	explicit ExponentNode(RenderInstance& prot,NodeStyles& style);
+	void draw() override;
+
+	static std::vector<PinInfo> GetPinInfo();
+};
+
+class MappingNode : public ImFlow::BaseNode
+{
+public:
+	static inline std::string name = "Mapping";
+	static inline std::string category = "Math";
+private:
+	RenderInstance& proto;
+	Mapping map;
+public:
+	explicit MappingNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
 	static std::vector<PinInfo> GetPinInfo();

@@ -259,6 +259,35 @@ std::vector<PinInfo> ExponentNode::GetPinInfo() {
 	return {};
 }
 
+MappingNode::MappingNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
+	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		return FloatVariable(map.MapVar(a.value), true);
+	});
+
+}
+
+void MappingNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+	ImGui::Text("A %f",a.value);
+	ImGui::Text("Res %f",0.f);
+	if(ImGui::Button("Edit Mapping")) {
+		ImGui::OpenPopup("Mapping Editor");
+	}
+	MappingCreationPopup("Mapping Editor",map);
+
+}
+
+
+std::vector<PinInfo> MappingNode::GetPinInfo() {
+	return {};
+}
+
+
 void AddMathNodes(NodeEditor& editor) {
 
 	editor.AddNodeType<MultiplyNode>();
@@ -269,4 +298,5 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<AbsoluteNode>();
 	editor.AddNodeType<SineNode>();
 	editor.AddNodeType<ExponentNode>();
+	editor.AddNodeType<MappingNode>();
 }
