@@ -81,50 +81,9 @@ bool Slider2D(const char* id,float* xVal,float* yVal) {
 
 
 
-void MappingCreationPopup(const char* id, Mapping& map) {
+void MappingCreationPopup(const char* id, float currentX, Mapping& map) {
 	if(ImGui::BeginPopup(id)) {
-		ImGui::Checkbox("isCubic",&map.cubicSpline);
-		ImGui::SameLine();
-		if(ImGui::Button("Add Value")) {
-			map.AddValue();
-		}
-		ImGui::SameLine();
-		if(ImGui::Button("Remove Value")) {
-			map.RemoveValue();
-		}
-		if(ImPlot::BeginPlot("test",ImVec2(600,400))) {
-			ImPlotRect range =  ImPlot::GetPlotLimits();
-			
-			for (size_t i = 0;i<map.values.size();i++) {
-				double x = map.values[i].x;
-				double y = map.values[i].y;
-				ImPlot::DragPoint(map.values[i].id,&x, &y, ImVec4(0.2f, 0.8f, 0.f, 1.f));
-				map.values[i].x = static_cast<float>(x);
-				map.values[i].y = static_cast<float>(y);
-				if (map.cubicSpline) {
-					x = map.values[i].x + range.Size().x * 0.02;
-					y = map.values[i].y + map.values[i].dir*.2f;
-					ImPlot::DragPoint(map.values[i].id+1, &x, &y, ImVec4(0.7f, 0.2f, 0.f, 1.f), 4.f,ImPlotDragToolFlags_Delayed);
-					float dir = y - map.values[i].y;
-					map.values[i].dir = dir*5.f;
-				}
-				
-
-			}
-			map.sort();
-			
-			
-			std::vector<ImVec2> points;
-			for (float x = range.Min().x; x < range.Max().x; x += (range.Size().x / 200.f)) {
-				points.push_back({x,map.MapVar(x)});
-			}
-
-			ImPlot::PlotLine("line",&points[0].x,&points[0].y,points.size(),0,0,sizeof(ImVec2));
-
-			ImPlot::EndPlot();
-		}
-
-
+		map.ShowEditUi(currentX);
 		ImGui::EndPopup();
 	}
 }

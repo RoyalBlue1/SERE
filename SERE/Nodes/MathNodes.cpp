@@ -274,11 +274,11 @@ MappingNode::MappingNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 void MappingNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	ImGui::Text("A %f",a.value);
-	ImGui::Text("Res %f",0.f);
+	ImGui::Text("Res %f",map.MapVar(a.value));
 	if(ImGui::Button("Edit Mapping")) {
 		ImGui::OpenPopup("Mapping Editor");
 	}
-	MappingCreationPopup("Mapping Editor",map);
+	MappingCreationPopup("Mapping Editor",a.value,map);
 
 }
 
