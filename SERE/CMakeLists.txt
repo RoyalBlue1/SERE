@@ -40,6 +40,7 @@ add_executable (SERE
 	"Nodes/GlobalNodes.cpp"
 	"RenderFunctions.cpp"
 	"CustomImGuiWidgets.cpp"
+	"Mapping.cpp"
 	)
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )#${PROJECT_SOURCE_DIR}/include)

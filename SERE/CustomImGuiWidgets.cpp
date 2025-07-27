@@ -2,6 +2,8 @@
 #include "Imgui/imgui_stdlib.h"
 
 #include "Imgui/implot.h"
+#undef min;
+#undef max;
 
 
 bool AtlasImageButton(const char* id, uint32_t hash,ImVec2 maxSize) {
@@ -74,21 +76,14 @@ bool Slider2D(const char* id,float* xVal,float* yVal) {
 }
 
 
-struct Mapping_t {
-	bool cubicSpline;
-	std::vector<float> xValues;
-	std::vector<float> yValues;
-	std::vector<float> yDirections;
-};
 
 
-void MappingCreationPopup(const char* id, Mapping_t& map) {
+
+
+
+void MappingCreationPopup(const char* id, float currentX, Mapping& map) {
 	if(ImGui::BeginPopup(id)) {
-		ImGui::Selectable("isCubic",&map.cubicSpline);
-
-		
-
-
+		map.ShowEditUi(currentX);
 		ImGui::EndPopup();
 	}
 }
