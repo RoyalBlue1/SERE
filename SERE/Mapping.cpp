@@ -12,17 +12,17 @@ float Mapping::MapVar(float xVal) {
 	float float_14;
 	uint32_t v5 = 0;
 
-	if (values[0].x < xVal)
+	if (controlPoints[0].x < xVal)
 	{
-		if ( xVal < values[values.size()-1].x)
+		if ( xVal < controlPoints[controlPoints.size()-1].x)
 		{
-			float lowerDataX = values[0].x;
-			float highterDataX = values[1].x;
+			float lowerDataX = controlPoints[0].x;
+			float highterDataX = controlPoints[1].x;
 
 			while ( xVal > highterDataX)
 			{
 				lowerDataX = highterDataX;
-				highterDataX = values[2 + v5++].x;
+				highterDataX = controlPoints[2 + v5++].x;
 			}
 
 
@@ -31,7 +31,7 @@ float Mapping::MapVar(float xVal) {
 		}
 		else
 		{
-			v5 = values.size() - 2;
+			v5 = controlPoints.size() - 2;
 			percentageXDiff = 1.0;
 			dataXDifference = 1.0;
 		}
@@ -69,14 +69,14 @@ float Mapping::MapVar(float xVal) {
 
 
 	if ( cubicSpline )
-		return (float)((float)((float)(float_10 * values[v5].dir) + inversePercentageXDiff * values[v5].y) + (float)(percentageXDiff * values[v5+1].y))
-		+ (float)(float_14 * values[v5 +1].dir);
+		return (float)((float)((float)(float_10 * controlPoints[v5].dir) + inversePercentageXDiff * controlPoints[v5].y) + (float)(percentageXDiff * controlPoints[v5+1].y))
+		+ (float)(float_14 * controlPoints[v5 +1].dir);
 	else
-		return (float)(percentageXDiff * values[v5 +1].y) + inversePercentageXDiff * values[v5].y;
+		return (float)(percentageXDiff * controlPoints[v5 +1].y) + inversePercentageXDiff * controlPoints[v5].y;
 
 }
 void Mapping::Sort() {
-	std::sort(values.begin(), values.end(), [](const MappingValue_t& a, const MappingValue_t& b) {
+	std::sort(controlPoints.begin(), controlPoints.end(), [](const MappingValue_t& a, const MappingValue_t& b) {
 		return a.x < b.x;
 	});
 }
@@ -84,28 +84,28 @@ void Mapping::Sort() {
 void Mapping::ShowEditUi(float currentX) {
 	ImGui::Checkbox("Use Cubic Spline",&cubicSpline);
 	ImGui::SameLine();
-	if(ImGui::Button("Add Value")) {
-		AddValue();
+	if(ImGui::Button("Add Control Point")) {
+		AddControlPoint();
 	}
 	ImGui::SameLine();
-	if(ImGui::Button("Remove Value")) {
-		RemoveValue();
+	if(ImGui::Button("Remove Control Point")) {
+		RemoveControlPoint();
 	}
-	if(ImPlot::BeginPlot("test",ImVec2(600,400),ImPlotFlags_NoTitle)) {
+	if(ImPlot::BeginPlot("Mapping Plot",ImVec2(600,400),ImPlotFlags_NoTitle)) {
 		ImPlotRect range =  ImPlot::GetPlotLimits();
 
-		for (auto& value:values) {
-			value.ShowPoint(cubicSpline);
+		for (auto& point:controlPoints) {
+			point.ShowPoint(cubicSpline);
 		}
 		Sort();
 
 
-		std::vector<ImVec2> points;
+		std::vector<ImVec2> resultLine;
 		for (float x = range.Min().x; x < range.Max().x; x += (range.Size().x / 200.f)) {
-			points.push_back({x,MapVar(x)});
+			resultLine.push_back({x,MapVar(x)});
 		}
 
-		ImPlot::PlotLine("Mapping",&points[0].x,&points[0].y,points.size(),0,0,sizeof(ImVec2));
+		ImPlot::PlotLine("Mapping",&resultLine[0].x,&resultLine[0].y,resultLine.size(),0,0,sizeof(ImVec2));
 
 		ImPlot::PushStyleColor(ImPlotCol_Line,ImVec4(.0f,0.2f,0.8f,1.f));
 		ImPlot::PlotInfLines("Input X",&currentX,1);

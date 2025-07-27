@@ -28,24 +28,24 @@ class Mapping {
 		int id_;
 	};
 public:
-	void AddValue() {
-		values.emplace_back(values[values.size()-1].x + 1,values[values.size()-1].y,0.f,id);
+	void AddControlPoint() {
+		controlPoints.emplace_back(controlPoints[controlPoints.size()-1].x + 1,controlPoints[controlPoints.size()-1].y,0.f,id);
 		id +=2;
 	}
-	void AddValue(float x, float y, float dir = 0.f) {
-		values.emplace_back(x,y,dir,id);
+	void AddControlPoint(float x, float y, float dir = 0.f) {
+		controlPoints.emplace_back(x,y,dir,id);
 		id +=2;
 	}
-	void RemoveValue() {
+	void RemoveControlPoint() {
 		//cant be less than 3 values
-		if(values.size()<=3)
+		if(controlPoints.size()<=3)
 			return;
-		values.pop_back();
+		controlPoints.pop_back();
 	}
 	Mapping():cubicSpline(false),id(0) {
-		AddValue(0.f,0.f);
-		AddValue(1.f,1.f);
-		AddValue(2.f,2.f);
+		AddControlPoint(0.f,0.f);
+		AddControlPoint(1.f,1.f);
+		AddControlPoint(2.f,2.f);
 	}
 
 	float MapVar(float xVal);
@@ -53,7 +53,7 @@ public:
 	void ShowEditUi(float currentX);
 
 	bool cubicSpline;
-	std::vector<MappingValue_t> values;
+	std::vector<MappingValue_t> controlPoints;
 private:
 	int id;
 };
