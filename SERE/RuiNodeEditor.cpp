@@ -39,5 +39,53 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 
 			ImGui::EndMenu();
 		}
+
 	}
+#ifdef DEBUG
+	if (ImGui::BeginMenu("Debug")) {
+		if (ImGui::MenuItem("Spawn All Node Types")) {
+			for (auto& [catName, category] : nodeTypes) {
+				for (auto& [name, node] : category) {
+					node.AddNode(mINF,proto,styles);
+				}
+			}
+
+		}
+		ImGui::EndMenu();
+	}
+#endif
+}
+
+
+void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
+	if(!pin)return;
+	ImFlow::PinType neededPinType = pin->getType()==ImFlow::PinType_Input?
+		ImFlow::PinType_Output:ImFlow::PinType_Input;
+	std::string searchString;
+	ImGui::InputText("Search",&searchString,ImGuiInputTextFlags_AutoSelectAll);
+	for (auto& [catName, category] : nodeTypes) {
+		bool searchHit = catName.find(searchString) != std::string::npos;
+		for (auto& [nodeName, nodeType] : category) {
+			searchHit |= nodeName.find(searchString) != std::string::npos;
+			for (auto& pinInfo : nodeType.GetPinInfo()) {
+				searchHit |= pinInfo->name.find(searchString) != std::string::npos;
+				if(pin->getType()==pinInfo->GetPinType())continue;
+				if(!pinInfo->CanCreateLink(pin->getProto()))continue;
+
+				if(searchString.size()&&(!searchHit))continue;
+				std::string menuName = std::format("{} > {}",nodeName,pinInfo->name);
+				if (ImGui::MenuItem(menuName.c_str())) {
+					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF,proto,styles);
+					if (pinInfo->GetPinType() == ImFlow::PinType_Input) {
+						node->inPin(pinInfo->name.c_str())->createLink(pin);
+					}
+					else {
+						node->outPin(pinInfo->name.c_str())->createLink(pin);
+					}
+				}
+			}
+		}
+	}
+
+
 }

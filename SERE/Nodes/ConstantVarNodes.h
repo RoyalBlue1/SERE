@@ -18,7 +18,7 @@ public:
 	explicit IntVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class BoolVarNode : public ImFlow::BaseNode
@@ -33,7 +33,7 @@ public:
 	explicit BoolVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class FloatVarNode : public ImFlow::BaseNode
@@ -50,7 +50,7 @@ public:
 	explicit FloatVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Float2VarNode : public ImFlow::BaseNode
@@ -67,7 +67,7 @@ public:
 	explicit Float2VarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Float3VarNode : public ImFlow::BaseNode
@@ -84,7 +84,7 @@ public:
 	explicit Float3VarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class ColorVarNode : public ImFlow::BaseNode
@@ -99,7 +99,7 @@ public:
 	explicit ColorVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class StringVarNode : public ImFlow::BaseNode
@@ -114,7 +114,7 @@ public:
 	explicit StringVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class AssetVarNode : public ImFlow::BaseNode
@@ -130,7 +130,7 @@ public:
 	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class SizeVarNode : public ImFlow::BaseNode
@@ -147,6 +147,6 @@ public:
 	explicit SizeVarNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 

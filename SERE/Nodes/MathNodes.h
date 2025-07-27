@@ -15,7 +15,7 @@ public:
 	explicit MultiplyNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class AdditionNode : public ImFlow::BaseNode
@@ -29,7 +29,7 @@ public:
 	explicit AdditionNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 
 };
 
@@ -45,7 +45,7 @@ public:
 	explicit SubtractNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class DivideNode : public ImFlow::BaseNode
@@ -60,7 +60,7 @@ public:
 	explicit DivideNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class ModuloNode : public ImFlow::BaseNode
@@ -76,7 +76,7 @@ public:
 	explicit ModuloNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class AbsoluteNode : public ImFlow::BaseNode
@@ -91,7 +91,7 @@ public:
 	explicit AbsoluteNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class SineNode : public ImFlow::BaseNode
@@ -105,7 +105,7 @@ public:
 	explicit SineNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class ExponentNode : public ImFlow::BaseNode
@@ -120,7 +120,7 @@ public:
 	explicit ExponentNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class MappingNode : public ImFlow::BaseNode
@@ -135,5 +135,5 @@ public:
 	explicit MappingNode(RenderInstance& prot,NodeStyles& style);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };

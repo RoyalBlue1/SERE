@@ -15,7 +15,7 @@ public:
 	explicit Transform0Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform1Node : public ImFlow::BaseNode
@@ -29,7 +29,7 @@ public:
 	explicit Transform1Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 
@@ -44,7 +44,7 @@ public:
 	explicit Transform2Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform3Node : public ImFlow::BaseNode
@@ -58,7 +58,7 @@ public:
 	explicit Transform3Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform4Node : public ImFlow::BaseNode
@@ -72,7 +72,7 @@ public:
 	explicit Transform4Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform5Node : public ImFlow::BaseNode
@@ -86,7 +86,7 @@ public:
 	explicit Transform5Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform6Node : public ImFlow::BaseNode
@@ -100,7 +100,7 @@ public:
 	explicit Transform6Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform7Node : public ImFlow::BaseNode
@@ -114,7 +114,7 @@ public:
 	explicit Transform7Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform8Node : public ImFlow::BaseNode
@@ -128,7 +128,7 @@ public:
 	explicit Transform8Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform9Node : public ImFlow::BaseNode
@@ -142,7 +142,7 @@ public:
 	explicit Transform9Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform10Node : public ImFlow::BaseNode
@@ -156,7 +156,7 @@ public:
 	explicit Transform10Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform11Node : public ImFlow::BaseNode
@@ -170,7 +170,7 @@ public:
 	explicit Transform11Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform12Node : public ImFlow::BaseNode
@@ -184,7 +184,7 @@ public:
 	explicit Transform12Node(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class Transform13Node : public ImFlow::BaseNode
@@ -198,7 +198,7 @@ public:
 	explicit Transform13Node(RenderInstance& prot);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 

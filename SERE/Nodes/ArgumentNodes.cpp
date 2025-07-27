@@ -1,6 +1,6 @@
 #include "ArgumentNodes.h"
 #include "imgui/imgui_stdlib.h"
-
+#include "Imgui/ImNodeFlow.h"
 
 
 
@@ -8,7 +8,10 @@ IntArgNode::IntArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.intVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<IntVariable>("Value")->behaviour([this]() {
 		return IntVariable(proto.arguments[argName].defaultVal.intVal,false);
 
 	});
@@ -21,16 +24,21 @@ void IntArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> IntArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> IntArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<IntVariable>>("Value"));
+	return info;
 }
 
 BoolArgNode::BoolArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<IntVariable>("Value",styles.boolVariable)->behaviour([this]() {
-		return IntVariable(proto.arguments[argName].defaultVal.intVal,false);
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<BoolVariable>("Value")->behaviour([this]() {
+		return BoolVariable(proto.arguments[argName].defaultVal.intVal,false);
 	});
 }
 
@@ -42,15 +50,20 @@ void BoolArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> BoolArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> BoolArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Value"));
+	return info;
 }
 
 FloatArgNode::FloatArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<FloatVariable>("Value",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Value")->behaviour([this]() {
 		return FloatVariable(proto.arguments[argName].defaultVal.floatVal[0],false);
 	});
 }
@@ -62,15 +75,20 @@ void FloatArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> FloatArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> FloatArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Value"));
+	return info;
 }
 
 Float2ArgNode::Float2ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<Float2Variable>("Value",styles.float2Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<Float2Variable>("Value")->behaviour([this]() {
 		return Float2Variable(
 			proto.arguments[argName].defaultVal.floatVal[0],
 			proto.arguments[argName].defaultVal.floatVal[1],
@@ -86,15 +104,20 @@ void Float2ArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> Float2ArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> Float2ArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Value"));
+	return info;
 }
 
 Float3ArgNode::Float3ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<Float3Variable>("Value",styles.float2Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<Float3Variable>("Value")->behaviour([this]() {
 		return Float3Variable(
 			proto.arguments[argName].defaultVal.floatVal[0],
 			proto.arguments[argName].defaultVal.floatVal[1],
@@ -112,15 +135,20 @@ void Float3ArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> Float3ArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> Float3ArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Value"));
+	return info;
 }
 
 ColorArgNode::ColorArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<ColorVariable>("Value",styles.colorVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<ColorVariable>("Value")->behaviour([this]() {
 		return ColorVariable(
 			proto.arguments[argName].defaultVal.floatVal[0],
 			proto.arguments[argName].defaultVal.floatVal[1],
@@ -139,15 +167,20 @@ void ColorArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> ColorArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> ColorArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Value"));
+	return info;
 }
 
 StringArgNode::StringArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<StringVariable>("Value",styles.stringVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<StringVariable>("Value")->behaviour([this]() {
 		return StringVariable(proto.arguments[argName].defaultVal.stringVal,false);
 
 	});
@@ -160,15 +193,20 @@ void StringArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> StringArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> StringArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<StringVariable>>("Value"));
+	return info;
 }
 
 AssetArgNode::AssetArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addOUT<AssetVariable>("Value",styles.assetVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<AssetVariable>("Value")->behaviour([this]() {
 		return AssetVariable(proto.arguments[argName].defaultVal.stringVal,false);
 	});
 }
@@ -180,8 +218,10 @@ void AssetArgNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> AssetArgNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> AssetArgNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<AssetVariable>>("Value"));
+	return info;
 }
 
 void AddArgumentNodes(NodeEditor& editor) {

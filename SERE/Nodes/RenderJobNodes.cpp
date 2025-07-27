@@ -10,22 +10,10 @@
 AssetRenderNode::AssetRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<ColorVariable>("Main Color", ColorVariable(1.f,1.f,1.f,1.f), ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<ColorVariable>("Mask Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<ColorVariable>("Tertiary Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<AssetVariable>("Main Asset",AssetVariable("white"), ImFlow::ConnectionFilter::SameType(), styles.assetVariable);
-	ImFlow::BaseNode::addIN<AssetVariable>("Mask Asset",AssetVariable(INVALID_ASSET),ImFlow::ConnectionFilter::SameType(),styles.assetVariable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Mins",Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(), styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Maxs",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Texture Mins",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Texture Maxs",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Blend",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Premul",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Mask Center",Float2Variable(.5f,.5f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Mask Translate",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Mask Size",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Mask Rotation",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<TransformResult>("Transform", proto.transformResults[2],ImFlow::ConnectionFilter::SameType(),styles.transformResult);
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
 }
 
 
@@ -51,8 +39,26 @@ void AssetRenderNode::draw() {
 	Render_Asset(proto,input);
 }
 
-std::vector<PinInfo> AssetRenderNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	if(info.size())return info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Main Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Mask Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Tertiary Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Main Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("white")));
+	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Mask Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("")));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Maxs",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Texture Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Texture Maxs",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Blend",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Premul",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mask Center",ImFlow::ConnectionFilter::SameType(),Float2Variable(.5f,.5f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mask Translate",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mask Size",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Mask Rotation",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Transform",ImFlow::ConnectionFilter::SameType(),TransformResult()));
+	return info;
 }
 
 
@@ -61,21 +67,10 @@ TextStyleNode::TextStyleNode(RenderInstance& prot, NodeStyles& styles) :proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	currentFont = &fonts[0].fonts.begin()->second;
-	ImFlow::BaseNode::addIN<ColorVariable>("mainColor",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<ColorVariable>("scndColor",ColorVariable(0.f,0.f,0.f,0.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<ColorVariable>("tertColor",ColorVariable(0.f,0.f,0.f,0.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Blend",FloatVariable(1.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Premul",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Dropshadow Hardness",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<Float2Variable>("Dropshadow Offset", Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(), styles.float2Variable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Dropshadow Blur",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Size",FloatVariable(50.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("stretchX",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("backgroundSize",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Boltness",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Blur",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("style_32",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<TextStyleData>("Style")->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<TextStyleData>("Style")->behaviour([this]() {
 		TextStyleData res;
 		res.mainColor = getInVal<ColorVariable>("mainColor");
 		res.scndColor = getInVal<ColorVariable>("scndColor");
@@ -115,23 +110,34 @@ void TextStyleNode::draw() {
 	ImGui::PopItemWidth();
 }
 
-std::vector<PinInfo> TextStyleNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> TextStyleNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("mainColor",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("scndColor",ImFlow::ConnectionFilter::SameType(),ColorVariable(0.f,0.f,0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("tertColor",ImFlow::ConnectionFilter::SameType(),ColorVariable(0.f,0.f,0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Blend",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Premul",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Dropshadow Hardness",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Dropshadow Offset",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Dropshadow Blur",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Size",ImFlow::ConnectionFilter::SameType(),FloatVariable(10.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("stretchX",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("backgroundSize",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Boltness",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Blur",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("style_32",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TextStyleData>>("Style"));
+	return info;
 }
 
 TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 
-	ImFlow::BaseNode::addIN<StringVariable>("text",StringVariable("Default Text"), ImFlow::ConnectionFilter::SameType(), styles.stringVariable);
-
-	ImFlow::BaseNode::addIN<Float2Variable>("minSize", Float2Variable(0.f,0.f), ImFlow::ConnectionFilter::SameType(), styles.float2Variable);
-	ImFlow::BaseNode::addIN<Float2Variable>("maxSize", Float2Variable(1000000000.f,1000000000.f), ImFlow::ConnectionFilter::SameType(), styles.float2Variable);
-	ImFlow::BaseNode::addIN<TextStyleData>("Style_0",TextStyleData(),ImFlow::ConnectionFilter::SameType());
-	ImFlow::BaseNode::addIN<TextStyleData>("Style_1",TextStyleData(),ImFlow::ConnectionFilter::SameType());
-	ImFlow::BaseNode::addIN<TextStyleData>("Style_2",TextStyleData(),ImFlow::ConnectionFilter::SameType());
-	ImFlow::BaseNode::addIN<TextStyleData>("Style_3",TextStyleData(),ImFlow::ConnectionFilter::SameType());
-	ImFlow::BaseNode::addOUT<TextInputData>("Text Data", styles.textData)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<TextInputData>("Text Data")->behaviour([this]() {
 		
 		TextInputData data;
 
@@ -145,7 +151,7 @@ TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot)
 		GetTextSize(data);
 		return data;
 	});
-	ImFlow::BaseNode::addOUT<TransformSize>("Size", styles.transformSize)->behaviour([this]() {
+	getOut<TransformSize>("Size")->behaviour([this]() {
 		
 		TextInputData data;
 
@@ -172,17 +178,29 @@ void TextSizeNode::draw() {
 
 }
 
-std::vector<PinInfo> TextSizeNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<StringVariable>>("text",ImFlow::ConnectionFilter::SameType(),StringVariable("Default Text")));
+
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("minSize",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("maxSize",ImFlow::ConnectionFilter::SameType(),Float2Variable(1000000000.f,1000000000.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TextStyleData>>("Style_0",ImFlow::ConnectionFilter::SameType(),TextStyleData()));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TextStyleData>>("Style_1",ImFlow::ConnectionFilter::SameType(),TextStyleData()));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TextStyleData>>("Style_2",ImFlow::ConnectionFilter::SameType(),TextStyleData()));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TextStyleData>>("Style_3",ImFlow::ConnectionFilter::SameType(),TextStyleData()));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TextInputData>>("Text Data"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size"));
+	return info;
 }
 
 
 TextRenderNode::TextRenderNode(RenderInstance& prot, NodeStyles& styles) :proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<TextInputData>("Data",TextInputData(), ImFlow::ConnectionFilter::SameType(), styles.textData);
-	ImFlow::BaseNode::addIN<TransformResult>("Parent",proto.transformResults[2], ImFlow::ConnectionFilter::SameType(), styles.transformResult);
-
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 }
 
 void TextRenderNode::draw() {
@@ -191,8 +209,11 @@ void TextRenderNode::draw() {
 	Text_Render(proto,data,parent);
 }
 
-std::vector<PinInfo> TextRenderNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> TextRenderNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<TextInputData>>("Data",ImFlow::ConnectionFilter::SameType(),TextInputData()));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Parent",ImFlow::ConnectionFilter::SameType(),TransformResult()));
+	return info;
 }
 
 

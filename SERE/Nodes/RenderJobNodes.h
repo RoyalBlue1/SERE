@@ -15,7 +15,7 @@ public:
 	explicit AssetRenderNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 
@@ -30,7 +30,7 @@ public:
 	explicit TextStyleNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class TextSizeNode : public ImFlow::BaseNode {
@@ -43,7 +43,7 @@ public:
 	explicit TextSizeNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 class TextRenderNode : public ImFlow::BaseNode {
@@ -56,6 +56,6 @@ public:
 	explicit TextRenderNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
