@@ -35,7 +35,7 @@ void AssetRenderNode::draw() {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1F00;
+	input.flags = 0x1000;
 	Render_Asset(proto,input);
 }
 
@@ -57,6 +57,62 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mask Translate",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mask Size",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Mask Rotation",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Transform",ImFlow::ConnectionFilter::SameType(),TransformResult()));
+	return info;
+}
+
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
+}
+
+
+void AssetCircleRenderNode::draw() {
+	AssetCircleInputData input{};
+	input.mainColor = getInVal<ColorVariable>("Main Color");
+	input.scndColor = getInVal<ColorVariable>("Secondary Color");
+	input.tertColor = getInVal<ColorVariable>("Tertiary Color");
+	input.mainAsset = getInVal<AssetVariable>("Asset");
+	input.blend = getInVal<FloatVariable>("Blend");
+	input.premul = getInVal<FloatVariable>("Premul");
+	input.mins = getInVal<Float2Variable>("Mins");
+	input.maxs = getInVal<Float2Variable>("Maxs");
+	input.texMins = getInVal<Float2Variable>("Texture Mins");
+	input.texMaxs = getInVal<Float2Variable>("Texture Maxs");
+	input.style_1E = getInVal<FloatVariable>("Inner Slice Blend");
+	input.style_20 = getInVal<FloatVariable>("Slice Begin");
+	input.style_22 = getInVal<FloatVariable>("Slice End");
+	input.ellipseSize = getInVal<Float2Variable>("Ellipse Size");
+	input.innerMask = getInVal<FloatVariable>("Inner Mask");
+	input.vingette = getInVal<FloatVariable>("Vingette");
+
+	input.transform = getInVal<TransformResult>("Transform");
+	input.flags = 0x2000;
+	Render_AssetSmall(proto,input);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Main Color", ImFlow::ConnectionFilter::SameType(), ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Secondary Color",ImFlow::ConnectionFilter::SameType(), ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Tertiary Color",ImFlow::ConnectionFilter::SameType(), ColorVariable(1.f,1.f,1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Asset", ImFlow::ConnectionFilter::SameType(), AssetVariable("white")));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Blend",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Premul",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Maxs",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Texture Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Texture Maxs",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Inner Slice Blend",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Slice Begin",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Slice End",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Ellipse Size",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Inner Mask",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Vingette",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Transform",ImFlow::ConnectionFilter::SameType(),TransformResult()));
 	return info;
 }
@@ -220,6 +276,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextRenderNode::GetPinInfo() {
 
 void AddRenderNodes(NodeEditor& editor) {
 	editor.AddNodeType<AssetRenderNode>();
+	editor.AddNodeType<AssetCircleRenderNode>();
 	editor.AddNodeType<TextStyleNode>();
 	editor.AddNodeType<TextSizeNode>();
 	editor.AddNodeType<TextRenderNode>();

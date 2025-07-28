@@ -138,18 +138,20 @@ struct StyleDescriptorShader_t
     Color color0 = Color(1.f,1.f,1.f,1.f);
     Color color1 = Color(0.f,0.f,0.f,0.f);
     Color color2 = Color(0.f,0.f,0.f,0.f);
-    float float_30 = 1.f;
-    float float_34 = 0.f;
-    float float_38 = 0.f;
-    float float_3C = 0.f;
-    float float_40 = 0.f;
-    float float_44 = 0.f;
-    float float_48 = 0.f;
-    float float_4C = 0.f;
-    float float_50 = 0.f;
+    float blend = 1.f;
+    float premul = 0.f;
+    float _anon_0 = 0.f;
+    float _anon_1 = 0.f;
+    float _anon_2 = 0.f;
+    float _anon_3 = 0.f;
+    float _anon_4 = 0.f;
+    float _anon_5 = 0.f;
+    float _anon_6 = 0.f;
     BYTE gap_54[12];
     
 };
+
+
 
 struct ArgVal {
 
@@ -186,6 +188,7 @@ private:
     
     ID3D11Texture2D* depthTexture;
     ID3D11DepthStencilView* depthStencil;
+    ID3D11DepthStencilState* depthStencilState;
     ID3D11RasterizerState* rasterState;
     D3D11_VIEWPORT viewport;
 

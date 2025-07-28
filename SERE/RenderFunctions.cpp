@@ -5,6 +5,8 @@
 #undef max
 #undef min
 
+#define TAU 6.2831855f
+
 bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	__int16 unknown8Index; // bp
 	//testStruct* a5; // r9
@@ -146,8 +148,8 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	desc.color0 = input.mainColor.value;
 	desc.color1 = input.maskColor.value;
 	desc.color2 = input.tertColor.value;
-	desc.float_30 = input.blend.value;
-	desc.float_34 = input.premul.value;
+	desc.blend = input.blend.value;
+	desc.premul = input.premul.value;
 	proto.styleDescriptor.push_back(desc);
 	v39 = _mm_add_ps(_mm_mul_ps(v13, texSize), texMins);
 	v40 = _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[assetIndex].m128_10, imageAtlases[atlasIndex].offsets[assetIndex].m128_10, _MM_SHUFFLE(3, 2, 3, 2));
@@ -487,6 +489,193 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 	return (const CHAR*)a4;
 }
 
+bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) {
+	__int16 uint8_18; // r9
+
+	__int64 result; // rax
+	__int64 transformIndex; // r14
+
+	__m128 v11; // xmm2
+	int v12; // ebx
+	__m128 v13; // xmm6
+	__m128 v14; // xmm1
+	__m128 v15; // xmm7
+	uint32_t assetHash; // rcx
+	__int64 uint16_6; // rax
+	uint32_t v18; // rsi
+	__int16 assetIndex; // r12
+	__int16 pixelBufferElementCount; // cx
+	__int16 v22; // r15
+	__m128 v23; // xmm10
+	__m128 v24; // xmm11
+	__m128 v25; // xmm12
+	__m128 v26; // xmm13
+	__m128 v27; // xmm15
+	__m128 v28; // xmm14
+	float v30; // xmm9_4
+	__int64 v31; // rdx
+	__int64 v32; // r10
+
+	float v34; // xmm5_4
+	__m128 v35; // xmm4
+	__m128 v36; // xmm3
+	textureOffset_* v37; // rcx
+	__m128 v38; // xmm0
+	__m128 v39; // xmm4
+	__m128 v40; // xmm1
+	__m128 v41; // xmm3
+	__m128 v42; // xmm5
+	__m128 v43; // xmm4
+	__m128 v44; // xmm0
+	__m128 v46; // xmm6
+	__m128 v47; // xmm3
+	__m128 v48; // xmm2
+	__m128 v49; // xmm0
+	__m128 v50; // xmm6
+	__m128 v51; // xmm3
+	__m128 v52; // xmm4
+	__m128i si128; // xmm2
+	__m128 v54; // xmm6
+	__m128 v55; // xmm1
+	__m128 v56; // xmm0
+	__m128 v57; // xmm6
+
+	float v59; // [rsp+20h] [rbp-198h]
+	__m128 v60; // [rsp+30h] [rbp-188h]
+	__m128 v61; // [rsp+40h] [rbp-178h]
+
+	float v64; // [rsp+1C8h] [rbp+10h]
+	float v65; // [rsp+1D0h] [rbp+18h]
+	RenderQuad quad;
+
+	const TransformResult& transform = data.transform;
+	if ( data.mainColor.value.alpha <= 0.0 )
+		return 1LL;
+	v11 = _mm_sub_ps(
+		_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(3,3,3,3)),
+			_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(0,0,0,0))),
+		_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(2,2,2,2)),
+			_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(1,1,1,1))));
+	if ( _mm_movemask_ps(_mm_cmpeq_ps(v11, _mm_setzero_ps())) )
+		return 1LL;
+	v12 = _mm_movemask_ps(v11) & 2;
+	v13 = _mm_div_ps(_mm_xor_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(0,2,1,3)), _mm_set_ps(0,-0.0,-0.0,0)), v11);
+	v14 = _mm_mul_ps(_mm_xor_ps(v13, _mm_set1_ps(-0.0)), _mm_shuffle_ps(transform.position,transform.position, _MM_SHUFFLE(3,1,2,0)));
+	v15 = _mm_add_ps(_mm_shuffle_ps(v14,v14, _MM_SHUFFLE(1,0,3,2)), v14);
+	assetHash = data.mainAsset.hash;
+	if ( assetHash == 0xFFFFFFFF )
+		return 1LL;
+	quad.assetIndex2 = -1;
+
+
+
+	assetIndex = imageAssetMap[assetHash].imageIndex;//g_AssetIndexData[v16].assetIndex;
+	//pixelBufferElementCount = a4->pixelBufferElementCount;
+	v22 = data.flags | imageAssetMap[assetHash].flags;
+	quad.assetIndex = assetIndex;
+	quad.flags = v22;
+	quad.styleDescriptorIndex = proto.styleDescriptor.size();// + pixelBufferElementCount;
+	StyleDescriptorShader_t styleDesc;
+	styleDesc.color0 = data.mainColor.value;
+	styleDesc.color1 = data.scndColor.value;
+	styleDesc.color2 = data.tertColor.value;
+	styleDesc.blend = data.blend.value;
+	styleDesc.premul = data.premul.value;
+	styleDesc._anon_0 = data.style_1E.value;
+	styleDesc._anon_1 = data.style_20.value * TAU;
+	styleDesc._anon_2 = data.style_22.value * TAU;
+	styleDesc._anon_3 = data.ellipseSize.value.x;
+	styleDesc._anon_4 = data.ellipseSize.value.y;
+	styleDesc._anon_5 = data.innerMask.value;
+	styleDesc._anon_6 = 1.0f / fmaxf(1.1754944e-38f, data.vingette.value);
+	proto.styleDescriptor.push_back(styleDesc);
+	v23 = _mm_set_ps(0,0,0,data.mins.value.x);
+	v24 = _mm_set_ps(0,0,0,data.mins.value.y);
+	v25 = _mm_set_ps(0,0,0,data.maxs.value.x);
+	v26 = _mm_set_ps(0,0,0,data.maxs.value.y);
+	v64 = data.texMins.value.x;
+	v65 = data.texMins.value.y;
+	v27 = _mm_set_ps(0,0,0,data.texMaxs.value.x);
+	v28 = _mm_set_ps(0,0,0,data.texMaxs.value.y);
+	v59 = data.vingette.value;
+
+
+	if ( fminf(transform.inputSize.m128_f32[0], transform.inputSize.m128_f32[2]) <= 0.0 )
+		return 1LL;
+	proto.AddImageAtlasSegment( &imageAtlases[imageAssetMap[assetHash].atlasIndex]);
+
+	v35 = _mm_unpacklo_ps(v27, v28);
+	v36 = _mm_setzero_ps();
+	v37 = &imageAtlases[imageAssetMap[assetHash].atlasIndex].offsets[assetIndex];//&uiImageAtlases[g_AssetIndexData[v18].atlasIndex].textureOffsets[assetIndex];
+	v38 = _mm_unpacklo_ps(_mm_set_ps(0,0,0,v64), _mm_set_ps(0,0,0,v65));
+	v39 = _mm_movelh_ps(v35, v35);
+	v28.m128_f32[0] = (float)(v28.m128_f32[0] - v65) * v59;
+	v60 = _mm_movelh_ps(v38, v38);
+	v61 = _mm_max_ps(_mm_sub_ps(v39, v60), _mm_set1_ps(1.1754944e-38f));
+	v40 = xmm_12A4E830a[((__int64)v22 >> 4) & 3];
+	v36.m128_f32[0] = (float)((float)(transform.inputSize.m128_f32[0] * v59) * (float)(v27.m128_f32[0] - v64)) / transform.inputSize.m128_f32[0];
+	v41 = _mm_unpacklo_ps(v36, v28);
+	v42 = _mm_div_ps(
+		_mm_add_ps(
+			_mm_sub_ps(v37->m128_0, _mm_xor_ps(_mm_and_ps(_mm_min_ps(v60, v39), v40), _mm_set_ps(0,0,-0.0,-0.0))),
+			_mm_movelh_ps(v41, v41)),
+		_mm_or_ps(
+			_mm_and_ps(_mm_andnot_ps(_mm_set1_ps(-0.0), v61), v40),
+			_mm_andnot_ps(v40, _mm_set1_ps(1))));
+	if ( _mm_movemask_ps(_mm_cmplt_ps(v42, _mm_set1_ps(-3.4028235e38))) )
+		return 1LL;
+	v43 = _mm_xor_ps(
+		_mm_min_ps(
+			_mm_movelh_ps(_mm_xor_ps(_mm_unpacklo_ps(v23, v24), _mm_set1_ps(-0.0)), _mm_unpacklo_ps(v25, v26)),
+			v42),
+		_mm_set_ps(0,0,-0.0,-0.0));
+	if ( _mm_movemask_ps(_mm_cmple_ps(_mm_shuffle_ps(v43,v43, _MM_SHUFFLE(3,2,3,2)), (__m128)_mm_shuffle_ps(v43,v43, _MM_SHUFFLE(1,0,1,0)))) )
+		return 1LL;
+	v44 = _mm_shuffle_ps(v37->m128_10,v37->m128_10,_MM_SHUFFLE(3,2,3,2));
+	v46 = _mm_mul_ps(v13, _mm_set1_ps(2));
+	v47 = _mm_mul_ps(_mm_mul_ps(v13, v61), v44);
+
+
+	v48 = _mm_add_ps(
+		_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v15, v61), v60), v44),
+		_mm_shuffle_ps(v37->m128_10,_mm_setzero_ps(),_MM_SHUFFLE(1,0,0,0)));
+
+	v49 = _mm_movelh_ps(v47, v46);
+	v50 = _mm_movehl_ps(v46, v47);
+	v51 = _mm_shuffle_ps(v43,v43,  _MM_SHUFFLE(1,3,3,1));
+	v52 = _mm_shuffle_ps(v43,v43,  _MM_SHUFFLE(2,2,0,0));
+	quad.xUvVector = v49;
+	quad.yUvVector = v50;
+	quad.UvBase = _mm_movelh_ps(
+		v48,
+		_mm_sub_ps(_mm_mul_ps(v15, _mm_set1_ps(2.f)), _mm_set1_ps(1.f)));
+
+	quad.m128_30 = _mm_setzero_ps();
+	quad.m128_40 = _mm_setzero_ps();
+	quad.m128_50 = _mm_setzero_ps();
+	v54 = _mm_add_ps(
+		_mm_add_ps(
+			_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(2,2,2,2)), v51),
+			_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(0,0,0,0)), v52)),
+		_mm_shuffle_ps(transform.position,transform.position, _MM_SHUFFLE(0,0,0,0)));
+	v55 = _mm_add_ps(
+		_mm_add_ps(
+			_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(3,3,3,3)), v51),
+			_mm_mul_ps(_mm_shuffle_ps(transform.directionVector,transform.directionVector, _MM_SHUFFLE(1,1,1,1)), v52)),
+		_mm_shuffle_ps(transform.position,transform.position, 85));
+	v56 = _mm_unpacklo_ps(v54, v55);
+	v57 = _mm_unpackhi_ps(v54, v55);
+	if ( v12 == 2 )
+	{
+		v56 = _mm_shuffle_ps(v56,v56, _MM_SHUFFLE(1,0,3,2));
+		v57 = _mm_shuffle_ps(v57,v56, _MM_SHUFFLE(1,0,3,2));
+	}
+	*(__m128 *)&quad.vert[0][0] = v56;
+	*(__m128 *)&quad.vert[2][0] = v57;
+	proto.AddQuad(quad);
+	return true;
+}
+
 
 bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform) {
 	//struct_v1* v4; // r12 MAPDST
@@ -702,15 +891,15 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 		style.color0 = data.styles[i].mainColor.value;
 		style.color1 = data.styles[i].scndColor.value;
 		style.color2 = data.styles[i].tertColor.value;
-		style.float_30 = data.styles[i].blend.value;
-		style.float_34 = data.styles[i].premul.value;
-		style.float_38 = v17 * data.styles[i].dropShadowOffset.value.x * atlas->widthRatio;
-		style.float_3C = v17 * data.styles[i].dropShadowOffset.value.y * atlas->heightRatio;
-		style.float_40 = data.styles[i].dropShadowHardness.value;
-		style.float_44 = 1.f / fmax(std::numeric_limits<float>::min(),data.styles[i].dropShadowBlur.value);
-		style.float_48 = v17 * data.styles[i].backgroundSize.value;
-		style.float_4C = v17 * data.styles[i].boltness.value;
-		style.float_50 = 1.f / fmaxf(1.1754944e-38f, v17 * data.styles[i].blur.value);
+		style.blend = data.styles[i].blend.value;
+		style.premul = data.styles[i].premul.value;
+		style._anon_0 = v17 * data.styles[i].dropShadowOffset.value.x * atlas->widthRatio;
+		style._anon_1 = v17 * data.styles[i].dropShadowOffset.value.y * atlas->heightRatio;
+		style._anon_2 = data.styles[i].dropShadowHardness.value;
+		style._anon_3 = 1.f / fmax(std::numeric_limits<float>::min(),data.styles[i].dropShadowBlur.value);
+		style._anon_4 = v17 * data.styles[i].backgroundSize.value;
+		style._anon_5 = v17 * data.styles[i].boltness.value;
+		style._anon_6 = 1.f / fmaxf(1.1754944e-38f, v17 * data.styles[i].blur.value);
 
 		proto.styleDescriptor.push_back(style);
 	}

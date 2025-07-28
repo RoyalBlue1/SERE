@@ -43,6 +43,47 @@ struct AssetInputData {
 
 };
 
+struct AssetCircleInputData {
+	ColorVariable mainColor;
+	ColorVariable scndColor;
+	ColorVariable tertColor;
+	AssetVariable mainAsset;
+	Float2Variable mins;
+	Float2Variable maxs;
+	Float2Variable texMins;
+	Float2Variable texMaxs;
+	FloatVariable blend;
+	FloatVariable premul;
+	FloatVariable style_1E;
+	FloatVariable style_20;
+	FloatVariable style_22;
+	Float2Variable ellipseSize;
+	FloatVariable innerMask;
+	FloatVariable vingette;
+	int flags;
+	TransformResult transform;
+	AssetCircleInputData():
+		mainColor(1.f,1.f,1.f,1.f),
+		scndColor(0.f,0.f,0.f,0.f),
+		tertColor(0.f,0.f,0.f,0.f),
+		mainAsset("white"),
+		blend(1.f),
+		premul(0.f),
+		mins(0.f,0.f),
+		maxs(1.f,1.f),
+		texMins(0.f,0.f),
+		texMaxs(1.f,1.f),
+		style_1E(1.f),
+		style_20(0.f),
+		style_22(1.f),
+		ellipseSize(1.f,1.f),
+		innerMask(1.f),
+		vingette(0.f),
+		flags(0x1),
+		transform()
+	{}
+};
+
 struct TextStyleData {
 	ColorVariable mainColor;
 	ColorVariable scndColor;
@@ -75,8 +116,7 @@ struct TextStyleData {
 		boltness(0.f),
 		blur(0.f),
 		style_32(0.f)
-
-		{ }
+	{ }
 };
 
 
@@ -113,5 +153,6 @@ struct TextInputData {
 };
 
 bool Render_Asset(RenderInstance& proto,AssetInputData& input);
+bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data);
 bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform);
 __m128 GetTextSize(TextInputData& data);
