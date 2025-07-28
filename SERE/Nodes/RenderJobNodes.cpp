@@ -47,11 +47,62 @@ void AssetRenderNode::draw() {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1F00;
+	input.flags = 0x1000;
 	Render_Asset(proto,input);
 }
 
 std::vector<PinInfo> AssetRenderNode::GetPinInfo() {
+	return {};
+}
+
+AssetSmallRenderNode::AssetSmallRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
+	setTitle(name);
+	setStyle(styles.GetNodeStyle(category));
+	ImFlow::BaseNode::addIN<ColorVariable>("Main Color", ColorVariable(1.f,1.f,1.f,1.f), ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
+	ImFlow::BaseNode::addIN<ColorVariable>("Secondary Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
+	ImFlow::BaseNode::addIN<ColorVariable>("Tertiary Color",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(), styles.colorVariable);
+	ImFlow::BaseNode::addIN<AssetVariable>("Main Asset",AssetVariable("white"), ImFlow::ConnectionFilter::SameType(), styles.assetVariable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Blend",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Premul",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Mins",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Maxs",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Texture Mins",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Texture Maxs",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Inner Slice Blend",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Slice Begin",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Slice End",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<Float2Variable>("Ellipse Size",Float2Variable(1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Inner Mask",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<FloatVariable>("Vingette",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
+	ImFlow::BaseNode::addIN<TransformResult>("Transform", proto.transformResults[2],ImFlow::ConnectionFilter::SameType(),styles.transformResult);
+}
+
+
+void AssetSmallRenderNode::draw() {
+	AssetSmallInputData input{};
+	input.mainColor = getInVal<ColorVariable>("Main Color");
+	input.scndColor = getInVal<ColorVariable>("Secondary Color");
+	input.tertColor = getInVal<ColorVariable>("Tertiary Color");
+	input.mainAsset = getInVal<AssetVariable>("Main Asset");
+	input.blend = getInVal<FloatVariable>("Blend");
+	input.premul = getInVal<FloatVariable>("Premul");
+	input.mins = getInVal<Float2Variable>("Mins");
+	input.maxs = getInVal<Float2Variable>("Maxs");
+	input.texMins = getInVal<Float2Variable>("Texture Mins");
+	input.texMaxs = getInVal<Float2Variable>("Texture Maxs");
+	input.style_1E = getInVal<FloatVariable>("Inner Slice Blend");
+	input.style_20 = getInVal<FloatVariable>("Slice Begin");
+	input.style_22 = getInVal<FloatVariable>("Slice End");
+	input.ellipseSize = getInVal<Float2Variable>("Ellipse Size");
+	input.innerMask = getInVal<FloatVariable>("Inner Mask");
+	input.vingette = getInVal<FloatVariable>("Vingette");
+
+	input.transform = getInVal<TransformResult>("Transform");
+	input.flags = 0x2000;
+	Render_AssetSmall(proto,input);
+}
+
+std::vector<PinInfo> AssetSmallRenderNode::GetPinInfo() {
 	return {};
 }
 
@@ -199,6 +250,7 @@ std::vector<PinInfo> TextRenderNode::GetPinInfo() {
 
 void AddRenderNodes(NodeEditor& editor) {
 	editor.AddNodeType<AssetRenderNode>();
+	editor.AddNodeType<AssetSmallRenderNode>();
 	editor.AddNodeType<TextStyleNode>();
 	editor.AddNodeType<TextSizeNode>();
 	editor.AddNodeType<TextRenderNode>();

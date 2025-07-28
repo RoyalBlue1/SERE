@@ -18,6 +18,19 @@ public:
 	static std::vector<PinInfo> GetPinInfo();
 };
 
+class AssetSmallRenderNode : public ImFlow::BaseNode {
+public:
+	static inline std::string name = "Render Small Image";
+	static inline std::string category = "Image Render";
+private:
+	RenderInstance& proto;
+public:
+	explicit AssetSmallRenderNode(RenderInstance& prot,NodeStyles& styles);
+	void draw() override;
+
+	static std::vector<PinInfo> GetPinInfo();
+};
+
 
 class TextStyleNode : public ImFlow::BaseNode {
 public:
