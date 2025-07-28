@@ -4,13 +4,15 @@ SplitFloat2Node::SplitFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<Float2Variable>("In",Float2Variable(0.f,0.f),ImFlow::ConnectionFilter::SameType(),styles.float2Variable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("X",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
 		return FloatVariable(in.value.x,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Y",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Y")->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
 		return FloatVariable(in.value.y,in.isConstant);
 
@@ -24,18 +26,22 @@ void SplitFloat2Node::draw() {
 
 }
 
-std::vector<PinInfo> SplitFloat2Node::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat2Node::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("In",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("X"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Y"));
+	return info;
 }
 
 MergeFloat2Node::MergeFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("X",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Y",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<Float2Variable>("Out",styles.float2Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<Float2Variable>("Out")->behaviour([this]() {
 
 		const FloatVariable& inX = getInVal<FloatVariable>("X");
 		const FloatVariable& inY = getInVal<FloatVariable>("Y");
@@ -53,26 +59,32 @@ void MergeFloat2Node::draw() {
 	ImGui::Text("%f",inY.value);
 }
 
-std::vector<PinInfo> MergeFloat2Node::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat2Node::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("X",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Y",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Out"));
+	return info;
 }
 
 SplitFloat3Node::SplitFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<Float3Variable>("In",Float3Variable(0.f,0.f,0.f), ImFlow::ConnectionFilter::SameType(), styles.float3Variable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("X",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
 		return FloatVariable(in.value.x,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Y",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Y")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
 		return FloatVariable(in.value.y,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Z",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Z")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
 		return FloatVariable(in.value.z,in.isConstant);
 
@@ -87,19 +99,23 @@ void SplitFloat3Node::draw() {
 
 }
 
-std::vector<PinInfo> SplitFloat3Node::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat3Node::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float3Variable>>("In",ImFlow::ConnectionFilter::SameType(),Float3Variable(0.f,0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("X"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Y"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Z"));
+	return info;
 }
 
 MergeFloat3Node::MergeFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("X",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Y",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Z",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<Float3Variable>("Out",styles.float3Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<Float3Variable>("Out")->behaviour([this]() {
 
 		const FloatVariable& inX = getInVal<FloatVariable>("X");
 		const FloatVariable& inY = getInVal<FloatVariable>("Y");
@@ -120,32 +136,39 @@ void MergeFloat3Node::draw() {
 	ImGui::Text("%f",inZ.value);
 }
 
-std::vector<PinInfo> MergeFloat3Node::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat3Node::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("X",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Y",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Z",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Out"));
+	return info;
 }
 
 SplitColorNode::SplitColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<ColorVariable>("In",ColorVariable(1.f,1.f,1.f,1.f),ImFlow::ConnectionFilter::SameType(),styles.colorVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Red",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Red")->behaviour([this]() {
 
 		const ColorVariable& in = getInVal<ColorVariable>("In");
 		return FloatVariable(in.value.red,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Green",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Green")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
 		return FloatVariable(in.value.green,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Blue",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Blue")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
 		return FloatVariable(in.value.blue,in.isConstant);
 
 	});
-	ImFlow::BaseNode::addOUT<FloatVariable>("Alpha",styles.floatVariable)->behaviour([this]() {
+	getOut<FloatVariable>("Alpha")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
 		return FloatVariable(in.value.alpha,in.isConstant);
 
@@ -160,20 +183,25 @@ void SplitColorNode::draw() {
 	ImGui::Text("%f",col.value.alpha);
 }
 
-std::vector<PinInfo> SplitColorNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> SplitColorNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("In",ImFlow::ConnectionFilter::SameType(),ColorVariable(0.f,0.f,0.f,0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Red"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Green"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Blue"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Alpha"));
+	
+	return info;
 }
 
 RGBToColorNode::RGBToColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("Red",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Green",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Blue",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Alpha",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<ColorVariable>("Out",styles.float2Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<ColorVariable>("Out")->behaviour([this]() {
 		const FloatVariable& inRed = getInVal<FloatVariable>("Red");
 		const FloatVariable& inGreen = getInVal<FloatVariable>("Green");
 		const FloatVariable& inBlue = getInVal<FloatVariable>("Blue");
@@ -195,20 +223,24 @@ void RGBToColorNode::draw() {
 	ImGui::Text("%f",inAlpha.value);
 }
 
-std::vector<PinInfo> RGBToColorNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> RGBToColorNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Red",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Green",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Blue",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Alpha",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Out"));
+	return info;
 }
 
 HSVToColorNode::HSVToColorNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("Hue",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Saturation",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Vibrance",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("Alpha",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<ColorVariable>("Out",styles.float2Variable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<ColorVariable>("Out")->behaviour([this]() {
 
 		const FloatVariable& inH = getInVal<FloatVariable>("Hue");
 		const FloatVariable& inS = getInVal<FloatVariable>("Saturation");
@@ -299,8 +331,14 @@ void HSVToColorNode::draw() {
 	ImGui::Text("%f",inAlpha.value);
 }
 
-std::vector<PinInfo> HSVToColorNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> HSVToColorNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Hue",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Saturation",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Vibrance",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Alpha",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Out"));
+	return info;
 }
 
 void AddSplitMergeNodes(NodeEditor& editor) {

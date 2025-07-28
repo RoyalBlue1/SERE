@@ -53,6 +53,9 @@ namespace ImFlow
 
     template<typename T> class InPin;
     template<typename T> class OutPin;
+    class PinProto;
+    template<typename T> class InPinProto;
+    template<typename T> class OutPinProto;
     class Pin; class BaseNode;
     class ImNodeFlow; class ConnectionFilter;
 
@@ -574,7 +577,7 @@ namespace ImFlow
          * @return Shared pointer to the newly added pin
          */
         template<typename T>
-        std::shared_ptr<InPin<T>> addIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<InPin<T>> addIN(std::shared_ptr<PinProto> proto, T defReturn, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Input to the node
@@ -590,7 +593,7 @@ namespace ImFlow
          * @return Shared pointer to the newly added pin
          */
         template<typename T, typename U>
-        std::shared_ptr<InPin<T>> addIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<InPin<T>> addIN_uid(const U& uid, std::shared_ptr<PinProto> proto, T defReturn, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Remove input pin
@@ -620,7 +623,7 @@ namespace ImFlow
          * @return Const reference to the value of the connected link for the current frame of defReturn
          */
         template<typename T>
-        const T& showIN(const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        const T& showIN(std::shared_ptr<PinProto> proto, T defReturn, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Show a temporary input pin
@@ -637,7 +640,7 @@ namespace ImFlow
          * @return Const reference to the value of the connected link for the current frame of defReturn
          */
         template<typename T, typename U>
-        const T& showIN_uid(const U& uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style = nullptr);
+        const T& showIN_uid(const U& uid, std::shared_ptr<PinProto> proto, T defReturn, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Output to the node
@@ -650,8 +653,9 @@ namespace ImFlow
          * @param style Style of the pin
          * @return Shared pointer to the newly added pin. Must be used to set the behaviour
          */
+
         template<typename T>
-        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT(const std::string& name, std::shared_ptr<PinStyle> style = nullptr);
+        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT(std::shared_ptr<PinProto> proto,std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Output to the node
@@ -665,8 +669,10 @@ namespace ImFlow
          * @param style Style of the pin
          * @return Shared pointer to the newly added pin. Must be used to set the behaviour
          */
+
         template<typename T, typename U>
-        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT_uid(const U& uid, const std::string& name, std::shared_ptr<PinStyle> style = nullptr);
+        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT_uid(const U& uid, std::shared_ptr<PinProto> proto, std::shared_ptr<PinStyle> style = nullptr);
+
 
         /**
          * @brief <BR>Remove output pin
@@ -695,7 +701,7 @@ namespace ImFlow
          * @param style Style of the pin
          */
         template<typename T>
-        void showOUT(const std::string& name, std::function<T()> behaviour, std::shared_ptr<PinStyle> style = nullptr);
+        void showOUT(std::shared_ptr<PinProto> proto, std::function<T()> behaviour, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Show a temporary output pin
@@ -711,7 +717,7 @@ namespace ImFlow
          * @param style Style of the pin
          */
         template<typename T, typename U>
-        void showOUT_uid(const U& uid, const std::string& name, std::function<T()> behaviour, std::shared_ptr<PinStyle> style = nullptr);
+        void showOUT_uid(const U& uid, std::shared_ptr<PinProto> proto, std::function<T()> behaviour, std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Get Input value from an InPin
@@ -884,6 +890,20 @@ namespace ImFlow
          * @brief <BR>Update the isSelected status of the node
          */
         void updatePublicStatus() { m_selected = m_selectedNext; }
+
+    protected:
+        template<typename T,typename U>
+        std::shared_ptr<OutPin<T>> getOut(const U& uid);
+
+        template<typename T>
+        std::shared_ptr<OutPin<T>> getOut(const char* uid);
+
+        template<typename T,typename U>
+        std::shared_ptr<InPin<T>> getIn(const U& uid);
+
+        template<typename T>
+        std::shared_ptr<InPin<T>> getIn(const char* uid);
+
     private:
         NodeUID m_uid = 0;
         std::string m_title;
@@ -914,6 +934,59 @@ namespace ImFlow
     };
 
     /**
+    * @brief Pin Prototype
+    */
+    class PinProto : public std::enable_shared_from_this<PinProto> {
+    public:
+        std::string name;
+
+        virtual void CreatePin(BaseNode* node) = 0;
+        virtual bool CanCreateLink(PinProto* other) = 0;
+        virtual [[nodiscard]] const std::type_info& getDataType() const = 0;
+        virtual PinType GetPinType() const = 0;
+    protected:
+        PinProto(std::string n):name(n){}
+    };
+
+
+    template<typename T> class InPinProto : public PinProto {
+    public:
+        InPinProto(std::string name,
+            std::function<bool(const std::type_info&, const std::type_info&)> filter,
+            T defaultVal):
+            PinProto(name),
+            typeFilter(filter),
+            defaultValue(defaultVal){ }
+
+        void CreatePin(BaseNode* node) override {
+            //TODO styles
+            node->addIN<T>(shared_from_this(),defaultValue);
+        }
+        bool CanCreateLink(PinProto* other)override;
+        [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
+        PinType GetPinType() const override {return PinType_Input;}
+    private:
+        std::function<bool(const std::type_info&, const std::type_info&)> typeFilter;
+        T defaultValue;
+    };
+
+
+    template<typename T> class OutPinProto : public PinProto {
+    public:
+        OutPinProto(std::string name):
+            PinProto(name){ }
+
+        void CreatePin(BaseNode* node) override {
+            //TODO styles
+            node->addOUT<T>(shared_from_this());
+        }
+        bool CanCreateLink(PinProto* other)override;
+        [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
+        PinType GetPinType()const override {return PinType_Output;}
+    };
+
+
+    /**
      * @brief Generic base class for pins
      */
     class Pin
@@ -928,8 +1001,8 @@ namespace ImFlow
          * @param inf Pointer to the Grid Handler the pin is in (same as parent)
          * @param style Style of the pin
          */
-        explicit Pin(PinUID uid, std::string name, std::shared_ptr<PinStyle> style, PinType kind, BaseNode* parent, ImNodeFlow** inf)
-            :m_uid(uid), m_name(std::move(name)), m_type(kind), m_parent(parent), m_inf(inf), m_style(std::move(style))
+        explicit Pin(PinUID uid, std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf,std::shared_ptr<PinProto> proto)
+            :m_uid(uid), m_parent(parent), m_inf(inf),m_proto(std::move(proto)), m_style(std::move(style))
             {
                 if(!m_style)
                     m_style = PinStyle::cyan();
@@ -1003,7 +1076,7 @@ namespace ImFlow
          * @brief <BR>Get pin's name
          * @return Const reference to pin's name
          */
-        const std::string& getName() { return m_name; }
+        const std::string& getName() { return m_proto->name; }
 
         /**
          * @brief <BR>Get pin's position
@@ -1027,7 +1100,7 @@ namespace ImFlow
          * @brief <BR>Get pin's type
          * @return The pin type. Either Input or Output
          */
-        PinType getType() { return m_type; }
+        PinType getType() { return m_proto->GetPinType(); }
 
         /**
          * @brief <BR>Get pin's data type (aka: \<T>)
@@ -1042,6 +1115,12 @@ namespace ImFlow
         std::shared_ptr<PinStyle>& getStyle() { return m_style; }
 
         /**
+        * @brief <BR>Get pin's prototype
+        * @return Pointer to Pins Prototype
+        */
+        PinProto* getProto(){ return m_proto.get(); }
+
+        /**
          * @brief <BR>Get pin's link attachment point (socket)
          * @return Grid coordinates to the attachment point between the link and the pin's socket
          */
@@ -1051,7 +1130,7 @@ namespace ImFlow
          * @brief <BR>Calculate pin's width pre-rendering
          * @return The with of the pin once it will be rendered
          */
-        float calcWidth() { return ImGui::CalcTextSize(m_name.c_str()).x; }
+        float calcWidth() { return ImGui::CalcTextSize(m_proto->name.c_str()).x; }
 
         /**
          * @brief <BR>Set pin's position
@@ -1060,10 +1139,9 @@ namespace ImFlow
         void setPos(ImVec2 pos) { m_pos = pos; }
     protected:
         PinUID m_uid;
-        std::string m_name;
         ImVec2 m_pos = ImVec2(0.f, 0.f);
         ImVec2 m_size = ImVec2(0.f, 0.f);
-        PinType m_type;
+        std::shared_ptr<PinProto> m_proto = nullptr;
         BaseNode* m_parent = nullptr;
         ImNodeFlow** m_inf;
         std::shared_ptr<PinStyle> m_style;
@@ -1108,8 +1186,8 @@ namespace ImFlow
          * @param inf Pointer to the Grid Handler the pin is in (same as parent)
          * @param style Style of the pin
          */
-        explicit InPin(PinUID uid, const std::string& name, T defReturn, std::function<bool(const std::type_info&, const std::type_info&)> filter, std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
-            : Pin(uid, name, style, PinType_Input, parent, inf), m_emptyVal(defReturn), m_filter(std::move(filter)) {}
+        explicit InPin(PinUID uid, std::shared_ptr<PinProto> proto, T defReturn,std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
+            : Pin(uid, style, parent, inf, proto),m_emptyVal(defReturn) {}
 
         /**
          * @brief <BR>Create link between pins
@@ -1144,7 +1222,7 @@ namespace ImFlow
          * @brief <BR>Get InPin's connection filter
          * @return InPin's connection filter configuration
          */
-        [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_filter; }
+        [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_proto->filter; }
 
         /**
          * @brief <BR>Get pin's data type (aka: \<T>)
@@ -1163,10 +1241,12 @@ namespace ImFlow
          * @return Reference to the value of the connected OutPin. Or the default value if not connected
          */
         const T& val();
+
+        void setEmptyVal(T& val){m_emptyVal = val;}
+
     private:
         std::shared_ptr<Link> m_link;
         T m_emptyVal;
-        std::function<bool(const std::type_info&, const std::type_info&)> m_filter;
         bool m_allowSelfConnection = false;
     };
 
@@ -1186,8 +1266,8 @@ namespace ImFlow
          * @param inf Pointer to the Grid Handler the pin is in (same as parent)
          * @param style Style of the pin
          */
-        explicit OutPin(PinUID uid, const std::string& name, std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
-            :Pin(uid, name, style, PinType_Output, parent, inf) {}
+        explicit OutPin(PinUID uid, std::shared_ptr<PinProto> proto,std::shared_ptr<PinStyle> style, BaseNode* parent, ImNodeFlow** inf)
+            :Pin(uid, style,parent, inf, proto) {}
 
         /**
          * @brief <BR>When parent gets deleted, remove the links

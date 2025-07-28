@@ -5,9 +5,10 @@ MultiplyNode::MultiplyNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -27,17 +28,22 @@ void MultiplyNode::draw() {
 
 }
 
-std::vector<PinInfo> MultiplyNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> MultiplyNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 AdditionNode::AdditionNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
 		bool isConstant = a.isConstant&&b.isConstant;
@@ -57,8 +63,12 @@ void AdditionNode::draw() {
 
 }
 
-std::vector<PinInfo> AdditionNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> AdditionNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 
@@ -66,9 +76,10 @@ SubtractNode::SubtractNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f), ImFlow::ConnectionFilter::SameType(), styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
 		bool isConstant = a.isConstant&&b.isConstant;
@@ -88,8 +99,12 @@ void SubtractNode::draw() {
 
 }
 
-std::vector<PinInfo> SubtractNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> SubtractNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
@@ -98,9 +113,10 @@ DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	style = styles.GetNodeStyle(category);
 	errorStyle = styles.errorNode;
 	setStyle(style);
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(2.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
 		bool isConstant = a.isConstant&&b.isConstant;
@@ -128,8 +144,12 @@ void DivideNode::draw() {
 
 }
 
-std::vector<PinInfo> DivideNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> DivideNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
@@ -138,9 +158,10 @@ ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	style = styles.GetNodeStyle(category);
 	errorStyle = styles.errorNode;
 	setStyle(style);
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(1.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -170,8 +191,12 @@ void ModuloNode::draw() {
 
 }
 
-std::vector<PinInfo> ModuloNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> ModuloNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 
@@ -179,9 +204,10 @@ AbsoluteNode::AbsoluteNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		return FloatVariable(abs(a.value),a.isConstant);
 	});
@@ -197,17 +223,21 @@ void AbsoluteNode::draw() {
 }
 
 
-std::vector<PinInfo> AbsoluteNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> AbsoluteNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 SineNode::SineNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		return FloatVariable(sin(a.value),a.isConstant);
@@ -224,17 +254,21 @@ void SineNode::draw() {
 
 }
 
-std::vector<PinInfo> SineNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> SineNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 ExponentNode::ExponentNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addIN<FloatVariable>("B",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
 		bool isConstant = a.isConstant&&b.isConstant;
@@ -255,16 +289,22 @@ void ExponentNode::draw() {
 }
 
 
-std::vector<PinInfo> ExponentNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> ExponentNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 MappingNode::MappingNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
-	ImFlow::BaseNode::addIN<FloatVariable>("A",FloatVariable(0.f),ImFlow::ConnectionFilter::SameType(),styles.floatVariable);
-	ImFlow::BaseNode::addOUT<FloatVariable>("Res",styles.floatVariable)->behaviour([this]() {
+	for (auto& pin : GetPinInfo()) {
+		pin->CreatePin(this);
+	}
+	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		return FloatVariable(map.MapVar(a.value), true);
 	});
@@ -283,8 +323,11 @@ void MappingNode::draw() {
 }
 
 
-std::vector<PinInfo> MappingNode::GetPinInfo() {
-	return {};
+std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A",ImFlow::ConnectionFilter::SameType(),FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
 }
 
 
