@@ -291,6 +291,7 @@ namespace ImFlow {
                 if (on_free_space() && m_droppedLinkPopUp && (!m_draggingExistingLink)) {
                     if (m_droppedLinkPupUpComboKey == ImGuiKey_None || ImGui::IsKeyDown(m_droppedLinkPupUpComboKey)) {
                         m_droppedLinkLeft = m_dragOut;
+                        m_lastRightClickPos = screen2grid( ImGui::GetMousePos());
                         ImGui::OpenPopup("DroppedLinkPopUp");
                     }
                 }

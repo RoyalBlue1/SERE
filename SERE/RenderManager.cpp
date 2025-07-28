@@ -847,11 +847,7 @@ void RenderInstance::initBuffers_v30() {
 	bufferInit.MiscFlags = 0;
 	bufferInit.StructureByteStride = 0;
 	device->CreateBuffer(&bufferInit, 0i64, &modelInstanceBuffer);
-	deviceContext->VSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
-	deviceContext->PSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
 
-	deviceContext->VSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
-	deviceContext->PSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
 
 
 	CBufCommonPerCamera cam{};
@@ -1149,6 +1145,13 @@ void RenderInstance::EndFrame() {
 	if(indices.size()==0)return;
 	deviceContext->OMSetRenderTargets(1,&targetView,depthStencil);
 	deviceContext->OMSetBlendState(blendState,NULL,0xFFFFFFFF);
+
+	deviceContext->VSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
+	deviceContext->PSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
+
+	deviceContext->VSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
+	deviceContext->PSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
+
 
 	D3D11_MAPPED_SUBRESOURCE map;
 	deviceContext->Map(vertexBuffer,0,D3D11_MAP_WRITE_DISCARD,0,&map);

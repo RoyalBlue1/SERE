@@ -24,7 +24,7 @@ struct NodeStyles {
 	std::shared_ptr<ImFlow::PinStyle> assetVariable;
 	std::shared_ptr<ImFlow::PinStyle> textData;
 	
-	
+	std::map<std::string,std::shared_ptr<ImFlow::PinStyle>> pinStyles;
 	
 	std::map<std::string,std::shared_ptr<ImFlow::NodeStyle>> nodeStyles;
 	std::shared_ptr<ImFlow::NodeStyle> defaultNode;
@@ -79,13 +79,12 @@ struct NodeStyles {
 	}
 };
 
-struct PinInfo {
 
-};
+
 
 struct NodeType {
-	void (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
-	std::vector<PinInfo> (*GetPinInfo)();
+	std::shared_ptr<ImFlow::BaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::vector<std::shared_ptr<ImFlow::PinProto>> (*GetPinInfo)();
 };
 
 
@@ -93,11 +92,11 @@ typedef std::map<std::string,NodeType> NodeCategory;
 
 
 
-template<class T> void AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
-	mINF.placeNode<T>(proto,styles);
+template<class T> std::shared_ptr<ImFlow::BaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
+	return mINF.placeNode<T>(proto,styles);
 }
 
-template<class T> std::vector<PinInfo> GetPinInfo() {
+template<class T> std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo() {
 	return T::GetPinInfo();
 }
 
@@ -108,6 +107,9 @@ template<class T> NodeType CreateNodeType() {
 	type.GetPinInfo = GetPinInfo<T>;
 	return type;
 }
+
+
+
 
 struct NodeEditor{
 	ImFlow::ImNodeFlow mINF;
@@ -120,15 +122,14 @@ struct NodeEditor{
 		mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 			RightClickPopup(node);
 		});
-
-
-		
-		
+		mINF.droppedLinkPopUpContent([this](ImFlow::Pin* pin) {
+			LinkDroppedPopup(pin);
+		});
 		
 	}
 
 	void RightClickPopup(ImFlow::BaseNode* node);
-
+	void LinkDroppedPopup(ImFlow::Pin* pin);
 	void draw();
 
 
@@ -151,7 +152,7 @@ struct NodeEditor{
 
 
 struct Variable {
-	bool isConstant = true;
+	bool isConstant;
 	int globalId;
 	Variable(bool isConst,int globId):isConstant(isConst),globalId(globId){}
 };

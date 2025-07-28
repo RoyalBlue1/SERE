@@ -14,7 +14,7 @@ public:
 	explicit TimeNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 void AddGlobalNodes(NodeEditor& editor);
