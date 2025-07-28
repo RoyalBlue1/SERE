@@ -489,7 +489,7 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 	return (const CHAR*)a4;
 }
 
-bool Render_AssetSmall(RenderInstance& proto, const AssetSmallInputData& data) {
+bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) {
 	__int16 uint8_18; // r9
 
 	__int64 result; // rax

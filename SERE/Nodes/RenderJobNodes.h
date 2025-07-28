@@ -7,7 +7,7 @@ void AddRenderNodes(NodeEditor& editor);
 
 class AssetRenderNode : public ImFlow::BaseNode {
 public:
-	static inline std::string name = "Render Image";
+	static inline std::string name = "Render Image Image Mask";
 	static inline std::string category = "Image Render";
 private:
 	RenderInstance& proto;
@@ -18,17 +18,17 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
-class AssetSmallRenderNode : public ImFlow::BaseNode {
+class AssetCircleRenderNode : public ImFlow::BaseNode {
 public:
-	static inline std::string name = "Render Small Image";
+	static inline std::string name = "Render Image Circle Mask";
 	static inline std::string category = "Image Render";
 private:
 	RenderInstance& proto;
 public:
-	explicit AssetSmallRenderNode(RenderInstance& prot,NodeStyles& styles);
+	explicit AssetCircleRenderNode(RenderInstance& prot,NodeStyles& styles);
 	void draw() override;
 
-	static std::vector<PinInfo> GetPinInfo();
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
 

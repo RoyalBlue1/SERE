@@ -43,7 +43,7 @@ struct AssetInputData {
 
 };
 
-struct AssetSmallInputData {
+struct AssetCircleInputData {
 	ColorVariable mainColor;
 	ColorVariable scndColor;
 	ColorVariable tertColor;
@@ -62,7 +62,7 @@ struct AssetSmallInputData {
 	FloatVariable vingette;
 	int flags;
 	TransformResult transform;
-	AssetSmallInputData():
+	AssetCircleInputData():
 		mainColor(1.f,1.f,1.f,1.f),
 		scndColor(0.f,0.f,0.f,0.f),
 		tertColor(0.f,0.f,0.f,0.f),
@@ -153,6 +153,6 @@ struct TextInputData {
 };
 
 bool Render_Asset(RenderInstance& proto,AssetInputData& input);
-bool Render_AssetSmall(RenderInstance& proto, const AssetSmallInputData& data);
+bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data);
 bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform);
 __m128 GetTextSize(TextInputData& data);
