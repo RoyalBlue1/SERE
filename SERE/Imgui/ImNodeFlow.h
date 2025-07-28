@@ -940,7 +940,7 @@ namespace ImFlow
     public:
         std::string name;
 
-        virtual void CreatePin(BaseNode* node) = 0;
+        virtual void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) = 0;
         virtual bool CanCreateLink(PinProto* other) = 0;
         virtual [[nodiscard]] const std::type_info& getDataType() const = 0;
         virtual PinType GetPinType() const = 0;
@@ -958,9 +958,9 @@ namespace ImFlow
             typeFilter(filter),
             defaultValue(defaultVal){ }
 
-        void CreatePin(BaseNode* node) override {
-            //TODO styles
-            node->addIN<T>(shared_from_this(),defaultValue);
+        void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) override {
+            std::string typeName = typeid(T).name();
+            node->addIN<T>(shared_from_this(),defaultValue,styles[typeName]);
         }
         bool CanCreateLink(PinProto* other)override;
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
@@ -976,9 +976,9 @@ namespace ImFlow
         OutPinProto(std::string name):
             PinProto(name){ }
 
-        void CreatePin(BaseNode* node) override {
-            //TODO styles
-            node->addOUT<T>(shared_from_this());
+        void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) override {
+            std::string typeName = typeid(T).name();
+            node->addOUT<T>(shared_from_this(),styles[typeName]);
         }
         bool CanCreateLink(PinProto* other)override;
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
