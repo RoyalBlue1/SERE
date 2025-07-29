@@ -40,7 +40,7 @@ void AssetSelectionPopup(const char* id, uint32_t* hash) {
 
 		ImGui::BeginTable("Assets", 6);
 		for (const auto& [assetHash, asset] : imageAssetMap) {
-			if (caseInsensitiveSearch(asset.name, search))
+			if (search.size() && caseInsensitiveSearch(asset.name, search))
 				continue;
 
 			ImGui::TableNextColumn();
