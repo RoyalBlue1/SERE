@@ -10,7 +10,7 @@ IntVarNode::IntVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	maxVal = 32;
 	value = 0;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<IntVariable>("Value")->behaviour([this]() {
 		return IntVariable(value);
@@ -35,7 +35,7 @@ BoolVarNode::BoolVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setStyle(styles.GetNodeStyle(category));
 	value = false;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<BoolVariable>("Value")->behaviour([this]() {
 		return BoolVariable(value);
@@ -63,7 +63,7 @@ FloatVarNode::FloatVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	maxVal = 1;
 	value = 0;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Value")->behaviour([this]() {
 		return FloatVariable(value);
@@ -96,7 +96,7 @@ Float2VarNode::Float2VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	value[0] = 0;
 	value[1] = 0;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float2Variable>("Value")->behaviour([this]() {
 		return Float2Variable(value[0],value[1]);
@@ -131,7 +131,7 @@ Float3VarNode::Float3VarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	value[1] = 0;
 	value[2] = 0;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float3Variable>("Value")->behaviour([this]() {
 		return Float3Variable(value[0],value[1],value[2]);
@@ -165,7 +165,7 @@ ColorVarNode::ColorVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	value[2] = 1.f;
 	value[3] = 1.f;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<ColorVariable>("Value")->behaviour([this]() {
 		return ColorVariable(value[0],value[1],value[2],value[3]);
@@ -190,7 +190,7 @@ StringVarNode::StringVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<StringVariable>("Value")->behaviour([this]() {
 		return StringVariable(value);
@@ -216,7 +216,7 @@ AssetVarNode::AssetVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	hash = loadAsset("white");
 	showSelectionUi = false;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<AssetVariable>("Value")->behaviour([this]() {
 		return AssetVariable(hash);
@@ -248,7 +248,7 @@ SizeVarNode::SizeVarNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	value[2] = 1.f;
 	value[3] = 1.f;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<TransformSize>("Value")->behaviour([this]() {
 		TransformSize var;

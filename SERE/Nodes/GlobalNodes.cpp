@@ -6,7 +6,7 @@ TimeNode::TimeNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Time")->behaviour([this]() {
 		return FloatVariable(proto.globals.currentTime,false,1);
