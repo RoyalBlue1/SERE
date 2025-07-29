@@ -5,7 +5,7 @@ SplitFloat2Node::SplitFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
@@ -39,7 +39,7 @@ MergeFloat2Node::MergeFloat2Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float2Variable>("Out")->behaviour([this]() {
 
@@ -72,7 +72,7 @@ SplitFloat3Node::SplitFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
@@ -113,7 +113,7 @@ MergeFloat3Node::MergeFloat3Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float3Variable>("Out")->behaviour([this]() {
 
@@ -150,7 +150,7 @@ SplitColorNode::SplitColorNode(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Red")->behaviour([this]() {
 
@@ -199,7 +199,7 @@ RGBToColorNode::RGBToColorNode(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<ColorVariable>("Out")->behaviour([this]() {
 		const FloatVariable& inRed = getInVal<FloatVariable>("Red");
@@ -238,7 +238,7 @@ HSVToColorNode::HSVToColorNode(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<ColorVariable>("Out")->behaviour([this]() {
 

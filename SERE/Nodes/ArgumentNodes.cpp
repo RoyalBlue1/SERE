@@ -9,7 +9,7 @@ IntArgNode::IntArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<IntVariable>("Value")->behaviour([this]() {
 		return IntVariable(proto.arguments[argName].defaultVal.intVal,false);
@@ -35,7 +35,7 @@ BoolArgNode::BoolArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<BoolVariable>("Value")->behaviour([this]() {
 		return BoolVariable(proto.arguments[argName].defaultVal.intVal,false);
@@ -61,7 +61,7 @@ FloatArgNode::FloatArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Value")->behaviour([this]() {
 		return FloatVariable(proto.arguments[argName].defaultVal.floatVal[0],false);
@@ -86,7 +86,7 @@ Float2ArgNode::Float2ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float2Variable>("Value")->behaviour([this]() {
 		return Float2Variable(
@@ -115,7 +115,7 @@ Float3ArgNode::Float3ArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<Float3Variable>("Value")->behaviour([this]() {
 		return Float3Variable(
@@ -146,7 +146,7 @@ ColorArgNode::ColorArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<ColorVariable>("Value")->behaviour([this]() {
 		return ColorVariable(
@@ -178,7 +178,7 @@ StringArgNode::StringArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<StringVariable>("Value")->behaviour([this]() {
 		return StringVariable(proto.arguments[argName].defaultVal.stringVal,false);
@@ -204,7 +204,7 @@ AssetArgNode::AssetArgNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<AssetVariable>("Value")->behaviour([this]() {
 		return AssetVariable(proto.arguments[argName].defaultVal.stringVal,false);

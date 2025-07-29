@@ -6,7 +6,7 @@ MultiplyNode::MultiplyNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
@@ -41,7 +41,7 @@ AdditionNode::AdditionNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -77,7 +77,7 @@ SubtractNode::SubtractNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -114,7 +114,7 @@ DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	errorStyle = styles.errorNode;
 	setStyle(style);
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -159,7 +159,7 @@ ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	errorStyle = styles.errorNode;
 	setStyle(style);
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
@@ -205,7 +205,7 @@ AbsoluteNode::AbsoluteNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -235,7 +235,7 @@ SineNode::SineNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
@@ -266,7 +266,7 @@ ExponentNode::ExponentNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -302,7 +302,7 @@ MappingNode::MappingNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
