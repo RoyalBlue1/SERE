@@ -41,7 +41,7 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 		}
 
 	}
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (ImGui::BeginMenu("Debug")) {
 		if (ImGui::MenuItem("Spawn All Node Types")) {
 			for (auto& [catName, category] : nodeTypes) {
@@ -61,7 +61,7 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 	if(!pin)return;
 	ImFlow::PinType neededPinType = pin->getType()==ImFlow::PinType_Input?
 		ImFlow::PinType_Output:ImFlow::PinType_Input;
-	std::string searchString;
+	static std::string searchString;
 	ImGui::InputText("Search",&searchString,ImGuiInputTextFlags_AutoSelectAll);
 	for (auto& [catName, category] : nodeTypes) {
 		bool searchHit = catName.find(searchString) != std::string::npos;
@@ -75,6 +75,7 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 				if(searchString.size()&&(!searchHit))continue;
 				std::string menuName = std::format("{} > {}",nodeName,pinInfo->name);
 				if (ImGui::MenuItem(menuName.c_str())) {
+					searchString = "";
 					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF,proto,styles);
 					if (pinInfo->GetPinType() == ImFlow::PinType_Input) {
 						node->inPin(pinInfo->name.c_str())->createLink(pin);
