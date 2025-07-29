@@ -11,74 +11,14 @@
 
 
 struct NodeStyles {
-	std::shared_ptr<ImFlow::PinStyle> transformResult;
-	std::shared_ptr<ImFlow::PinStyle> transformSize;
+	std::map<std::string, std::shared_ptr<ImFlow::PinStyle>> pinStyles;
 
-	std::shared_ptr<ImFlow::PinStyle> intVariable;
-	std::shared_ptr<ImFlow::PinStyle> boolVariable;
-	std::shared_ptr<ImFlow::PinStyle> floatVariable;
-	std::shared_ptr<ImFlow::PinStyle> float2Variable;
-	std::shared_ptr<ImFlow::PinStyle> float3Variable;
-	std::shared_ptr<ImFlow::PinStyle> colorVariable;
-	std::shared_ptr<ImFlow::PinStyle> stringVariable;
-	std::shared_ptr<ImFlow::PinStyle> assetVariable;
-	std::shared_ptr<ImFlow::PinStyle> textData;
-	
-	std::map<std::string,std::shared_ptr<ImFlow::PinStyle>> pinStyles;
-	
-	std::map<std::string,std::shared_ptr<ImFlow::NodeStyle>> nodeStyles;
+	std::map<std::string, std::shared_ptr<ImFlow::NodeStyle>> nodeStyles;
 	std::shared_ptr<ImFlow::NodeStyle> defaultNode;
 	std::shared_ptr<ImFlow::NodeStyle> errorNode;
-	NodeStyles() {
-		transformResult = std::make_shared<ImFlow::PinStyle>(IM_COL32(191,90,90,255),1,4.f,4.67f,3.7f,1.f);
-		transformSize = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,191,93,255),1,4.f,4.67f,3.7f,1.f);
-
-		intVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(87,155,185,255),0,4.f,4.67f,3.7f,1.f);
-		boolVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(90,117,191,255),0,4.f,4.67f,3.7f,1.f);
-		floatVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		float2Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		float3Variable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		colorVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		stringVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-		assetVariable = std::make_shared<ImFlow::PinStyle>(IM_COL32(255,255,255,255),0,4.f,4.67f,3.7f,1.f);
-
-
-		
-
-		nodeStyles.emplace(
-			"Math",
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(17, 61, 173, 255), ImColor(233, 241, 244, 255), 6.5f));
-		nodeStyles.emplace(
-			"Transform", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(27, 173, 17, 255), ImColor(233, 241, 244, 255), 6.5f));
-		nodeStyles.emplace(
-			"Render", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f));
-		nodeStyles.emplace(
-			"Constant", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,17,170,255),ImColor(233,241,244,255),6.5f));
-		nodeStyles.emplace(
-			"Argument", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(113,17,173,255),ImColor(233,241,244,255),6.5f));
-		nodeStyles.emplace(
-			"Split Merge", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(17,149,173,255),ImColor(233,241,244,255),6.5f));
-		nodeStyles.emplace(
-			"Global", 
-			std::make_shared<ImFlow::NodeStyle>(IM_COL32(57,17,132,255),ImColor(233,241,244,255),6.5f));
-
-		defaultNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f);
-		errorNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
-		errorNode->bg = IM_COL32(132,23,17,255);
-	}
-
-	std::shared_ptr<ImFlow::NodeStyle> GetNodeStyle(std::string name) {
-		if(nodeStyles.contains(name))
-			return nodeStyles[name];
-		return defaultNode;
-	}
+	NodeStyles();
+	std::shared_ptr<ImFlow::NodeStyle> GetNodeStyle(std::string name);
 };
-
 
 
 
@@ -236,3 +176,5 @@ struct AssetVariable :Variable {
 	AssetVariable() :Variable(true, -1), hash(INVALID_ASSET) {}
 };
 
+
+	

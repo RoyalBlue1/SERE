@@ -11,7 +11,7 @@ AssetRenderNode::AssetRenderNode(RenderInstance& prot, NodeStyles& styles):proto
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
 }
@@ -65,7 +65,7 @@ AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& prot, NodeStyles& s
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
 }
@@ -124,7 +124,7 @@ TextStyleNode::TextStyleNode(RenderInstance& prot, NodeStyles& styles) :proto(pr
 	setStyle(styles.GetNodeStyle(category));
 	currentFont = &fonts[0].fonts.begin()->second;
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<TextStyleData>("Style")->behaviour([this]() {
 		TextStyleData res;
@@ -191,7 +191,7 @@ TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot)
 	setStyle(styles.GetNodeStyle(category));
 
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<TextInputData>("Text Data")->behaviour([this]() {
 		
@@ -254,7 +254,7 @@ TextRenderNode::TextRenderNode(RenderInstance& prot, NodeStyles& styles) :proto(
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 }

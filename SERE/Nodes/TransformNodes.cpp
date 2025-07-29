@@ -9,7 +9,7 @@ Transform0Node::Transform0Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res; 
@@ -39,7 +39,7 @@ Transform1Node::Transform1Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Source")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -75,7 +75,7 @@ Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -134,7 +134,7 @@ Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -194,7 +194,7 @@ Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -270,7 +270,7 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -348,7 +348,7 @@ Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
@@ -423,7 +423,7 @@ Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
@@ -517,7 +517,7 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setStyle(styles.GetNodeStyle(category));
 
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
@@ -625,7 +625,7 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 	setStyle(styles.GetNodeStyle(category));
 
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
@@ -742,7 +742,7 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 	setStyle(styles.GetNodeStyle(category));
 
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
@@ -853,7 +853,7 @@ Transform11Node::Transform11Node(RenderInstance& prot,NodeStyles & styles):proto
 	setTitle(name);
 	setStyle(styles.GetNodeStyle(category));
 	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this);
+		pin->CreatePin(this,styles.pinStyles);
 	}
 	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
