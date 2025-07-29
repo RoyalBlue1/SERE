@@ -1,6 +1,8 @@
 #include "CustomImGuiWidgets.h"
 #include "Imgui/imgui_stdlib.h"
 
+#include "Util.h"
+
 #include "Imgui/implot.h"
 #undef min;
 #undef max;
@@ -38,7 +40,7 @@ void AssetSelectionPopup(const char* id, uint32_t* hash) {
 
 		ImGui::BeginTable("Assets", 6);
 		for (const auto& [assetHash, asset] : imageAssetMap) {
-			if (asset.name.find(search) == std::string::npos)
+			if (caseInsensitiveSearch(asset.name, search))
 				continue;
 
 			ImGui::TableNextColumn();

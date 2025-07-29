@@ -3,6 +3,8 @@
 
 #include "imgui/imgui_stdlib.h"
 
+#include "Util.h"
+
 #include "Nodes/ArgumentNodes.h"
 #include "Nodes/TransformNodes.h"
 #include "Nodes/RenderJobNodes.h"
@@ -54,16 +56,6 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 		ImGui::EndMenu();
 	}
 #endif
-}
-
-static bool caseInsensitiveSearch(const std::string& strHaystack, const std::string& strNeedle)
-{
-	auto it = std::search(
-		strHaystack.begin(), strHaystack.end(),
-		strNeedle.begin(), strNeedle.end(),
-		[](unsigned char ch1, unsigned char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-	);
-	return (it != strHaystack.end());
 }
 
 void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
