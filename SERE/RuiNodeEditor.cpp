@@ -87,8 +87,6 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 			}
 		}
 	}
-
-
 }
 
 NodeStyles::NodeStyles() {

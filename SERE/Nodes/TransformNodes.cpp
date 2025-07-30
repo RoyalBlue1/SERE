@@ -4,19 +4,14 @@
 
 __m128 xmmword_12A146C0 = _mm_castsi128_ps(_mm_set_epi32(0xFFFFFFFF,0,0,0xFFFFFFFF));
 
-Transform0Node::Transform0Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res; 
-		res.index = proto.transformResults.size();
+		res.index = render.transformResults.size();
 		res.directionVector = _mm_and_ps(getInVal<TransformSize>("Size").size, (__m128)xmmword_12A146C0);
 		res.position = _mm_setzero_ps();
-		proto.transformResults.push_back(res);
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -27,6 +22,12 @@ void Transform0Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+void Transform0Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform0Node::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<TransformSize>>("Size",ImFlow::ConnectionFilter::SameType(),TransformSize(_mm_set1_ps(64.f))));
@@ -34,24 +35,19 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform0Node::GetPinInfo() {
 	return info;
 }
 
-Transform1Node::Transform1Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Source")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Source")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformResult& parent = getInVal<TransformResult>("Source");
 		const TransformSize& size = getInVal<TransformSize>("Size");
 
-		res.index = proto.transformResults.size();
+		res.index = render.transformResults.size();
 		res.position = parent.position;
 		res.directionVector = parent.directionVector;
 		res.inputSize = size.size;
-		proto.transformResults.push_back(res);
+		render.transformResults.push_back(res);
 		return res;
 	});;
 }
@@ -62,6 +58,12 @@ void Transform1Node::draw() {
 	ImGui::PopItemWidth();
 }
 
+void Transform1Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform1Node::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Source",ImFlow::ConnectionFilter::SameType(),TransformResult()));
@@ -70,14 +72,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform1Node::GetPinInfo() {
 	return info;
 }
 
-Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 
@@ -86,7 +83,7 @@ Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const TransformSize& size = getInVal<TransformSize>("Size");
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 
-		__m128 elementSizeRatio = _mm_set_ps(0,0,proto.elementHeightRatio,proto.elementWidthRatio);
+		__m128 elementSizeRatio = _mm_set_ps(0,0,render.elementHeightRatio,render.elementWidthRatio);
 		__m128 elementSizeRatio_unpacked = _mm_unpacklo_ps(elementSizeRatio, elementSizeRatio);
 		__m128 v13 = _mm_and_ps(_mm_mul_ps(size.size, elementSizeRatio_unpacked), (__m128)xmmword_12A146C0);
 		__m128 v14 = _mm_shuffle_ps(
@@ -104,8 +101,8 @@ Transform2Node::Transform2Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 				parent.position),
 			_mm_add_ps((__m128)_mm_shuffle_ps(v19,v19, 78), v19));
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -114,6 +111,12 @@ void Transform2Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform2Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform2Node::GetPinInfo() {
@@ -129,14 +132,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform2Node::GetPinInfo() {
 	return info;
 }
 
-Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const Float2Variable& val_0 = getInVal<Float2Variable>("Val_0");
@@ -164,8 +162,8 @@ Transform3Node::Transform3Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 				_mm_add_ps(_mm_shuffle_ps(v14,v14, 78), v14),
 				parent.position),
 			_mm_add_ps(_mm_shuffle_ps(v13,v13, 78), v13));
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -174,6 +172,12 @@ void Transform3Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform3Node::GetPinInfo() {
@@ -189,14 +193,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform3Node::GetPinInfo() {
 	return info;
 }
 
-Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const Float2Variable& val_0 = getInVal<Float2Variable>("Val_0");
@@ -227,8 +226,8 @@ Transform4Node::Transform4Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 				parent.position),
 			_mm_add_ps(_mm_shuffle_ps(v15,v15, _MM_SHUFFLE(1,0,3,2)), v15));
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -237,6 +236,12 @@ void Transform4Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform4Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform4Node::GetPinInfo() {
@@ -252,9 +257,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform4Node::GetPinInfo() {
 	return info;
 }
 
-void sub_100520(RenderInstance& proto,__m128* a2,__m128* a3) {
-	__m128 m128_10 = *(__m128 *)&proto.drawInfo.ruiUnk3[0].screenWidth;
-	__m128 m128_20 = *(__m128 *)&proto.drawInfo.ruiUnk3[0].float_10;
+void sub_100520(RenderInstance& render,__m128* a2,__m128* a3) {
+	__m128 m128_10 = *(__m128 *)&render.drawInfo.ruiUnk3[0].screenWidth;
+	__m128 m128_20 = *(__m128 *)&render.drawInfo.ruiUnk3[0].float_10;
 
 	__m128 v6 = _mm_mul_ps(m128_20, m128_20);
 	__m128 v7 = _mm_mul_ps(m128_10, m128_10);
@@ -265,14 +270,9 @@ void sub_100520(RenderInstance& proto,__m128* a2,__m128* a3) {
 	*a3 = _mm_shuffle_ps(v10,v10, _MM_SHUFFLE(1,1,1,1));
 }
 
-Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const Float2Variable& val_0 = getInVal<Float2Variable>("Val_0");
@@ -283,7 +283,7 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 		__m128 v25;
 		__m128 v26;
-		sub_100520(proto, &v25, &v26);
+		sub_100520(render, &v25, &v26);
 
 		__m128 v6 = _mm_unpacklo_ps(v25, v26);
 		
@@ -318,8 +318,8 @@ Transform5Node::Transform5Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		res.position = _mm_sub_ps(v19, _mm_add_ps(_mm_shuffle_ps(v24,v24, 78), (__m128)v24));
 		res.inputSize = size.size;
 
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -328,6 +328,12 @@ void Transform5Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform5Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform5Node::GetPinInfo() {
@@ -343,26 +349,20 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform5Node::GetPinInfo() {
 	return info;
 }
 
-Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const Float2Variable& val_0 = getInVal<Float2Variable>("Val_0");
 		const Float2Variable& val_3 = getInVal<Float2Variable>("Val_3");
 		const TransformSize& size = getInVal<TransformSize>("Size");
-		const TransformSize& parentSize = getInVal<TransformSize>("ParentSize");
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 
 		__m128 v25;
 		__m128 v26;
-		sub_100520(proto, &v25, &v26);
+		sub_100520(render, &v25, &v26);
 
 		__m128 v6 = _mm_unpacklo_ps(v25, v26);
 
@@ -393,8 +393,8 @@ Transform6Node::Transform6Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		res.directionVector = v23;
 		res.position = _mm_sub_ps(v19, _mm_add_ps(_mm_shuffle_ps(v24,v24, 78), (__m128)v24));
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -403,6 +403,12 @@ void Transform6Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform6Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform6Node::GetPinInfo() {
@@ -418,16 +424,10 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform6Node::GetPinInfo() {
 	return info;
 }
 
-Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
-
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
+Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	
-	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
-	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformSize& size = getInVal<TransformSize>("Size");
@@ -478,8 +478,8 @@ Transform7Node::Transform7Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -488,6 +488,12 @@ void Transform7Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform7Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform7Node::GetPinInfo() {
@@ -511,16 +517,10 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform7Node::GetPinInfo() {
 	return info;
 }
 
-Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
-	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformSize& size = getInVal<TransformSize>("Size");
@@ -531,9 +531,9 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const Float2Variable& translate = getInVal<Float2Variable>("Translate");
 		const Float2Variable& point = getInVal<Float2Variable>("Point 1");
 
-		__m128 v5 = _mm_set_ps(proto.elementHeight,proto.elementWidth,proto.elementHeight,proto.elementWidth);
+		__m128 v5 = _mm_set_ps(render.elementHeight,render.elementWidth,render.elementHeight,render.elementWidth);
 
-		__m128 v8 = _mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeightRatio,proto.elementWidthRatio);
+		__m128 v8 = _mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio);
 
 
 		__m128 v14 = _mm_shuffle_ps(
@@ -586,8 +586,8 @@ Transform8Node::Transform8Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 
 
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -596,6 +596,12 @@ void Transform8Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform8Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform8Node::GetPinInfo() {
@@ -619,16 +625,10 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform8Node::GetPinInfo() {
 	return info;
 }
 
-Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
-	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformSize& size = getInVal<TransformSize>("Size");
@@ -639,9 +639,9 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		const Float2Variable& translate = getInVal<Float2Variable>("Translate");
 		const Float2Variable& point = getInVal<Float2Variable>("Point 1");
 
-		__m128 v5 = _mm_set_ps(proto.elementHeight,proto.elementWidth,proto.elementHeight,proto.elementWidth);
+		__m128 v5 = _mm_set_ps(render.elementHeight,render.elementWidth,render.elementHeight,render.elementWidth);
 
-		__m128 v6 = _mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeightRatio,proto.elementWidthRatio);
+		__m128 v6 = _mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio);
 
 
 		__m128 v15 = _mm_shuffle_ps(
@@ -703,8 +703,8 @@ Transform9Node::Transform9Node(RenderInstance& prot,NodeStyles& styles):proto(pr
 		res.directionVector = v33;
 		res.position = _mm_sub_ps(v23, _mm_add_ps((__m128)_mm_shuffle_ps(v34,v34, _MM_SHUFFLE(1,0,3,2)), (__m128)v34));
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -713,6 +713,12 @@ void Transform9Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform9Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform9Node::GetPinInfo() {
@@ -736,17 +742,11 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform9Node::GetPinInfo() {
 	return info;
 }
 
-Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(proto.transformResults[2]);
-	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(proto.transformResults[2]);
-	getIn<TransformResult>("Pin 3 Parent")->setEmptyVal(proto.transformResults[2]);
+	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Pin 3 Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformSize& size = getInVal<TransformSize>("Size");
@@ -814,8 +814,8 @@ Transform10Node::Transform10Node(RenderInstance& prot,NodeStyles& styles):proto(
 		res.position = _mm_sub_ps(v11, _mm_add_ps((__m128)_mm_shuffle_ps(v16,v16, 78), (__m128)v16));
 
 		res.inputSize = size.size;
-		res.index = proto.transformResults.size();
-		proto.transformResults.push_back(res);
+		res.index = render.transformResults.size();
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -824,6 +824,12 @@ void Transform10Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform10Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform10Node::GetPinInfo() {
@@ -849,13 +855,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform10Node::GetPinInfo() {
 	return info;
 }
 
-Transform11Node::Transform11Node(RenderInstance& prot,NodeStyles & styles):proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res;
 		const TransformSize& size = getInVal<TransformSize>("Size");
@@ -866,8 +868,8 @@ Transform11Node::Transform11Node(RenderInstance& prot,NodeStyles & styles):proto
 		__m128 v2 = _mm_set_ps(0,0,0, 2147483600.0);
 		__m128 v3 = _mm_xor_ps(
 			_mm_mul_ps(
-				(__m128)_mm_set_ps(proto.elementWidth,proto.elementHeight,proto.elementWidth,proto.elementHeight),
-				(__m128)_mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeightRatio,proto.elementWidthRatio)),
+				(__m128)_mm_set_ps(render.elementWidth,render.elementHeight,render.elementWidth,render.elementHeight),
+				(__m128)_mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio)),
 			_mm_set_ps(0,-0.0f,0,-0.0f));
 
 
@@ -949,6 +951,12 @@ void Transform11Node::draw() {
 	ImGui::PushItemWidth(90);
 
 	ImGui::PopItemWidth();
+}
+
+void Transform11Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform11Node::GetPinInfo(){

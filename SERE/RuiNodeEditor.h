@@ -6,7 +6,8 @@
 
 #include "imgui/ImNodeFlow.h"
 #include "RenderManager.h"
-
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "ThirdParty/rapidjson/document.h"
 
 
 
@@ -20,10 +21,33 @@ struct NodeStyles {
 	std::shared_ptr<ImFlow::NodeStyle> GetNodeStyle(std::string name);
 };
 
-
+class RuiBaseNode : public ImFlow::BaseNode {
+public:
+	virtual void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+		ImVec2 pos = getPos();
+		obj.AddMember("PosX",pos.x,allocator);
+		obj.AddMember("PosY",pos.y,allocator);
+	}
+	//virtual void Export() = 0;
+protected:
+	RenderInstance& render;
+	NodeStyles& styles;
+	RuiBaseNode( std::string name,
+		std::string category,
+		std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,
+		RenderInstance& rend,
+		NodeStyles& style
+	):render(rend),styles(style) {
+		setTitle(name);
+		setStyle(styles.GetNodeStyle(category));
+		for (auto& pin : pinInfo) {
+			pin->CreatePin(this,styles.pinStyles);
+		}
+	}
+};
 
 struct NodeType {
-	std::shared_ptr<ImFlow::BaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::shared_ptr<RuiBaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
 	std::vector<std::shared_ptr<ImFlow::PinProto>> (*GetPinInfo)();
 };
 
@@ -31,8 +55,7 @@ struct NodeType {
 typedef std::map<std::string,NodeType> NodeCategory;
 
 
-
-template<class T> std::shared_ptr<ImFlow::BaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
+template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
 	return mINF.placeNode<T>(proto,styles);
 }
 
