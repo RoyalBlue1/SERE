@@ -39,7 +39,7 @@ add_executable (SERE
 	"Nodes/SplitMergeNodes.cpp"
 	"Nodes/MathNodes.cpp"
 	"Nodes/GlobalNodes.cpp"
-	"ThirdParty/yyjson.cpp"
+	
 	"ThirdParty/DDSTextureLoader11.cpp"
 	)
 

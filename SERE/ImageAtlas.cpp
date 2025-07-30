@@ -4,9 +4,11 @@
 #include <filesystem>
 #include <fstream>
 
-#include "ThirdParty/yyjson.h"
+#include "ThirdParty/rapidjson/document.h"
 #include "Thirdparty/DDSTextureLoader11.h"
 
+
+#undef GetObject
 namespace fs = std::filesystem;
 
 
@@ -21,106 +23,176 @@ void loadImageAtlases(ID3D11Device* d11Device) {
 		fs::path jsonName = dirEntry;
 		if(jsonName.extension()!=".json")continue;
 
-		yyjson_read_err jsonErr;
-		yyjson_doc* doc = yyjson_read_file(jsonName.string().c_str(), 0, NULL, &jsonErr);
-		if (doc) {
-			ImageAtlas atlas;
-			atlas.name = jsonName.filename().replace_extension("").string();
-			yyjson_val* offsets = yyjson_obj_get(yyjson_doc_get_root(doc),"textureOffsets");
-			size_t idx,size;
-			yyjson_val *entry;
-			yyjson_arr_foreach(offsets, idx, size, entry) {
-				textureOffset_ offset;
-				offset.m128_0.m128_f32[0] = yyjson_get_num(yyjson_obj_get(entry, "f0"));
-				offset.m128_0.m128_f32[1] = yyjson_get_num(yyjson_obj_get(entry,"f1"));
-				offset.m128_0.m128_f32[2] = yyjson_get_num(yyjson_obj_get(entry,"endX"));
-				offset.m128_0.m128_f32[3] = yyjson_get_num(yyjson_obj_get(entry,"endY"));
-				offset.m128_10.m128_f32[0] = yyjson_get_num(yyjson_obj_get(entry,"startX"));
-				offset.m128_10.m128_f32[1] = yyjson_get_num(yyjson_obj_get(entry,"startY"));
-				offset.m128_10.m128_f32[2] = yyjson_get_num(yyjson_obj_get(entry,"unkX"));
-				offset.m128_10.m128_f32[3] = yyjson_get_num(yyjson_obj_get(entry,"unkY"));
-				atlas.offsets.push_back(offset);
-			}
-			yyjson_val* dimentions = yyjson_obj_get(yyjson_doc_get_root(doc),"textureDimentions");
-			yyjson_arr_foreach(dimentions, idx, size, entry) {
-				ImageAtlasTextureDimention_ dim;
-				dim.width = yyjson_get_num(yyjson_obj_get(entry, "width"));
-				dim.height = yyjson_get_num(yyjson_obj_get(entry, "height"));
-				atlas.dimentions.push_back(dim);
-			}
-			yyjson_val* hashes = yyjson_obj_get(yyjson_doc_get_root(doc),"textureHashes");
-			yyjson_arr_foreach(hashes, idx, size, entry) {
-				uint32_t hash = yyjson_get_uint(yyjson_obj_get(entry,"hash"));
-				uint16_t flags = yyjson_get_uint(yyjson_obj_get(entry,"flags"));
-				std::string name = yyjson_get_str(yyjson_obj_get(entry,"name"));
-				imageAssetMap.insert({ hash, {name,imageAtlases.size(),atlas.hashes.size(),flags} });
-				atlas.hashes.push_back(hash);
-				atlas.names.push_back(name);
+		std::ifstream jsonFile{jsonName};
+		if(jsonFile.fail())return;
+		std::stringstream jsonStringStream;
+		while (jsonFile.peek() != EOF)
+			jsonStringStream << (char)jsonFile.get();
+		jsonFile.close();
 
-			}
-			yyjson_val* renderOffsets = yyjson_obj_get(yyjson_doc_get_root(doc),"renderOffsets");
-			yyjson_arr_foreach(renderOffsets, idx, size, entry) {
-				uiImageAtlasUnk_ offset;
-				offset.m128_0.m128_f32[0] = yyjson_get_num(yyjson_obj_get(entry, "f0"));
-				offset.m128_0.m128_f32[1] = yyjson_get_num(yyjson_obj_get(entry,"f1"));
-				offset.m128_0.m128_f32[2] = yyjson_get_num(yyjson_obj_get(entry,"endX"));
-				offset.m128_0.m128_f32[3] = yyjson_get_num(yyjson_obj_get(entry,"endY"));
-				offset.m128_10.m128_f32[0] = yyjson_get_num(yyjson_obj_get(entry,"startX"));
-				offset.m128_10.m128_f32[1] = yyjson_get_num(yyjson_obj_get(entry,"startY"));
-				offset.m128_10.m128_f32[2] = yyjson_get_num(yyjson_obj_get(entry,"unkX"));
-				offset.m128_10.m128_f32[3] = yyjson_get_num(yyjson_obj_get(entry,"unkY"));
-				atlas.renderOffsets.push_back(offset);
-			}
-			yyjson_val* jsonShaderData = yyjson_obj_get(yyjson_doc_get_root(doc),"shaderData");
-			
-			yyjson_arr_foreach(jsonShaderData, idx, size, entry) {
-				ShaderData_t shdDat;
-				shdDat.minX = yyjson_get_num(yyjson_obj_get(entry, "minX"));
-				shdDat.minY = yyjson_get_num(yyjson_obj_get(entry, "minY"));
-				shdDat.sizeX = yyjson_get_num(yyjson_obj_get(entry, "maxX"));
-				shdDat.sizeY = yyjson_get_num(yyjson_obj_get(entry, "maxY"));
-				atlas.shaderData.push_back(shdDat);
-			}
-			yyjson_doc_free(doc);
-			fs::path ddsName = jsonName.replace_extension("dds");
+		rapidjson::Document doc;
+		doc.Parse(jsonStringStream.str().c_str());
+		rapidjson::ParseErrorCode error = doc.GetParseError();
+		if(doc.HasParseError())return;
 
-			DirectX::CreateDDSTextureFromFile(d11Device,ddsName.wstring().c_str(), &atlas.imageResource, &atlas.imageResourceView);
+		rapidjson::GenericObject root = doc.GetObject();
 
-			if (atlas.shaderData.size()) {
-				D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
-				D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
-				D3D11_BUFFER_DESC boundsBufferDesc;
-
-				boundsBufferDesc.ByteWidth = 16 * atlas.shaderData.size();
-				boundsBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-				boundsBufferDesc.MiscFlags = 64;
-				boundsBufferDesc.StructureByteStride = 16;
-				boundsBufferDesc.BindFlags =  8;
-				boundsBufferDesc.CPUAccessFlags = 0;
-
-				boundSubresoureDesc.pSysMem = atlas.shaderData.data();
-				boundSubresoureDesc.SysMemPitch = 0;
-				boundSubresoureDesc.SysMemSlicePitch = 0;
-
-				if (HRESULT res = d11Device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &atlas.boundsBuffer); res || (atlas.boundsBuffer ==NULL)) {
-					printf("D3D11Decive::CreateBuffer returned 0x%x\n",(uint32_t)res);
-				};
-				boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
-				boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
-				boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
-				boundsShaderResourceViewDesc.Buffer.NumElements = atlas.shaderData.size();
-				if (HRESULT res = d11Device->CreateShaderResourceView(atlas.boundsBuffer, &boundsShaderResourceViewDesc, &atlas.boundsResourceView); res) {
-					printf("D3D11Decive::CreateShaderResourceView returned 0x%x\n",(uint32_t)res);
-				}
-			}
-			else {
-				atlas.boundsBuffer = NULL;
-				atlas.boundsResourceView = NULL;
-			}
+		if((!root.HasMember("textureOffsets")&&root["textureOffsets"].IsArray()))return;
+		if((!root.HasMember("textureDimentions")&&root["textureDimentions"].IsArray()))return;
+		if((!root.HasMember("textureHashes")&&root["textureHashes"].IsArray()))return;
+		if((!root.HasMember("renderOffsets")&&root["renderOffsets"].IsArray()))return;
+		if((!root.HasMember("shaderData")&&root["shaderData"].IsArray()))return;
 
 
-			imageAtlases.push_back(atlas);
+
+		ImageAtlas atlas;
+		atlas.name = jsonName.filename().replace_extension("").string();
+		rapidjson::GenericArray textureOffsets = root["textureOffsets"].GetArray();
+		for(auto itr = textureOffsets.Begin();itr != textureOffsets.End();itr++) {
+			if(!itr->IsObject())continue;
+			rapidjson::GenericObject texOff = itr->GetObject();
+
+			if(!(texOff.HasMember("f0")&&texOff["f0"].IsNumber()))continue;
+			if(!(texOff.HasMember("f1")&&texOff["f1"].IsNumber()))continue;
+			if(!(texOff.HasMember("endX")&&texOff["endX"].IsNumber()))continue;
+			if(!(texOff.HasMember("endY")&&texOff["endY"].IsNumber()))continue;
+			if(!(texOff.HasMember("startX")&&texOff["startX"].IsNumber()))continue;
+			if(!(texOff.HasMember("startY")&&texOff["startY"].IsNumber()))continue;
+			if(!(texOff.HasMember("unkX")&&texOff["unkX"].IsNumber()))continue;
+			if(!(texOff.HasMember("unkY")&&texOff["unkY"].IsNumber()))continue;
+
+
+			textureOffset_ offset;
+			offset.m128_0.m128_f32[0] = texOff["f0"].GetFloat();
+			offset.m128_0.m128_f32[1] = texOff["f1"].GetFloat();
+			offset.m128_0.m128_f32[2] = texOff["endX"].GetFloat();
+			offset.m128_0.m128_f32[3] = texOff["endY"].GetFloat();
+			offset.m128_10.m128_f32[0] = texOff["startX"].GetFloat();
+			offset.m128_10.m128_f32[1] = texOff["startY"].GetFloat();
+			offset.m128_10.m128_f32[2] = texOff["unkX"].GetFloat();
+			offset.m128_10.m128_f32[3] = texOff["unkY"].GetFloat();
+			atlas.offsets.push_back(offset);
 		}
+
+		rapidjson::GenericArray textureDimentions = root["textureDimentions"].GetArray();
+		for(auto itr = textureDimentions.Begin();itr != textureDimentions.End();itr++) {
+			if(!itr->IsObject())continue;
+			rapidjson::GenericObject dimObj = itr->GetObject();
+
+			if(!(dimObj.HasMember("width")&&dimObj["width"].IsInt()))continue;
+			if(!(dimObj.HasMember("height")&&dimObj["height"].IsInt()))continue;
+
+			ImageAtlasTextureDimention_ dim;
+			dim.width = dimObj["width"].GetInt();
+			dim.height = dimObj["height"].GetInt();
+			atlas.dimentions.push_back(dim);
+		}
+		rapidjson::GenericArray textureHashes = root["textureHashes"].GetArray();
+		for(auto itr = textureHashes.Begin();itr != textureHashes.End();itr++) {
+			if(!itr->IsObject())continue;
+			rapidjson::GenericObject hashObj = itr->GetObject();
+
+			if(!(hashObj.HasMember("hash")&&hashObj["hash"].IsUint()))continue;
+			if(!(hashObj.HasMember("flags")&&hashObj["flags"].IsUint()))continue;
+
+			uint32_t hash = hashObj["hash"].GetUint();
+			uint16_t flags = hashObj["flags"].GetUint();
+			std::string name;
+			if(hashObj.HasMember("name")&&hashObj["name"].IsString())
+				name = hashObj["name"].GetString();
+			else
+				name = std::format("0x{:X}",hash);
+			imageAssetMap.insert({ hash, {name,imageAtlases.size(),atlas.hashes.size(),flags} });
+			atlas.hashes.push_back(hash);
+			atlas.names.push_back(name);
+
+		}
+
+		rapidjson::GenericArray renderOffsets = root["renderOffsets"].GetArray();
+		for(auto itr = renderOffsets.Begin();itr != renderOffsets.End();itr++) {
+			if(!itr->IsObject())continue;
+			rapidjson::GenericObject renderOff = itr->GetObject();
+
+			if(!(renderOff.HasMember("f0")&&renderOff["f0"].IsNumber()))continue;
+			if(!(renderOff.HasMember("f1")&&renderOff["f1"].IsNumber()))continue;
+			if(!(renderOff.HasMember("endX")&&renderOff["endX"].IsNumber()))continue;
+			if(!(renderOff.HasMember("endY")&&renderOff["endY"].IsNumber()))continue;
+			if(!(renderOff.HasMember("startX")&&renderOff["startX"].IsNumber()))continue;
+			if(!(renderOff.HasMember("startY")&&renderOff["startY"].IsNumber()))continue;
+			if(!(renderOff.HasMember("unkX")&&renderOff["unkX"].IsNumber()))continue;
+			if(!(renderOff.HasMember("unkY")&&renderOff["unkY"].IsNumber()))continue;
+
+
+			uiImageAtlasUnk_ offset;
+			offset.m128_0.m128_f32[0] = renderOff["f0"].GetFloat();
+			offset.m128_0.m128_f32[1] = renderOff["f1"].GetFloat();
+			offset.m128_0.m128_f32[2] = renderOff["endX"].GetFloat();
+			offset.m128_0.m128_f32[3] = renderOff["endY"].GetFloat();
+			offset.m128_10.m128_f32[0] = renderOff["startX"].GetFloat();
+			offset.m128_10.m128_f32[1] = renderOff["startY"].GetFloat();
+			offset.m128_10.m128_f32[2] = renderOff["unkX"].GetFloat();
+			offset.m128_10.m128_f32[3] = renderOff["unkY"].GetFloat();
+
+			atlas.renderOffsets.push_back(offset);
+		}
+			
+		rapidjson::GenericArray shaderData = root["shaderData"].GetArray();
+		for(auto itr = shaderData.Begin();itr != shaderData.End();itr++) {
+			if(!itr->IsObject())continue;
+			rapidjson::GenericObject shaderData = itr->GetObject();
+
+			if(!(shaderData.HasMember("minX")&&shaderData["minX"].IsNumber()))continue;
+			if(!(shaderData.HasMember("minY")&&shaderData["minY"].IsNumber()))continue;
+			if(!(shaderData.HasMember("maxX")&&shaderData["maxX"].IsNumber()))continue;
+			if(!(shaderData.HasMember("maxY")&&shaderData["maxY"].IsNumber()))continue;
+
+			ShaderData_t shdDat;
+			shdDat.minX = shaderData["minX"].GetFloat();
+			shdDat.minY = shaderData["minY"].GetFloat();
+			shdDat.sizeX = shaderData["maxX"].GetFloat();
+			shdDat.sizeY = shaderData["maxY"].GetFloat();
+			atlas.shaderData.push_back(shdDat);
+		}
+
+		fs::path ddsName = jsonName.replace_extension("dds");
+
+		DirectX::CreateDDSTextureFromFile(d11Device,ddsName.wstring().c_str(), &atlas.imageResource, &atlas.imageResourceView);
+
+		if (atlas.shaderData.size()) {
+			D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
+			D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
+			D3D11_BUFFER_DESC boundsBufferDesc;
+
+			boundsBufferDesc.ByteWidth = 16 * atlas.shaderData.size();
+			boundsBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+			boundsBufferDesc.MiscFlags = 64;
+			boundsBufferDesc.StructureByteStride = 16;
+			boundsBufferDesc.BindFlags =  8;
+			boundsBufferDesc.CPUAccessFlags = 0;
+
+			boundSubresoureDesc.pSysMem = atlas.shaderData.data();
+			boundSubresoureDesc.SysMemPitch = 0;
+			boundSubresoureDesc.SysMemSlicePitch = 0;
+
+			if (HRESULT res = d11Device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &atlas.boundsBuffer); res || (atlas.boundsBuffer ==NULL)) {
+				printf("D3D11Decive::CreateBuffer returned 0x%x\n",(uint32_t)res);
+			};
+			boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
+			boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
+			boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
+			boundsShaderResourceViewDesc.Buffer.NumElements = atlas.shaderData.size();
+			if (HRESULT res = d11Device->CreateShaderResourceView(atlas.boundsBuffer, &boundsShaderResourceViewDesc, &atlas.boundsResourceView); res) {
+				printf("D3D11Decive::CreateShaderResourceView returned 0x%x\n",(uint32_t)res);
+			}
+		}
+		else {
+			atlas.boundsBuffer = NULL;
+			atlas.boundsResourceView = NULL;
+		}
+
+
+		imageAtlases.push_back(atlas);
+		
 
 
 	}

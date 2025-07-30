@@ -4,8 +4,10 @@
 
 #include <fstream>
 #include "ThirdParty/DDSTextureLoader11.h"
-#include "ThirdParty/yyjson.h"
+#include "ThirdParty/rapidjson/document.h"
 
+
+#undef GetObject
 
 std::vector<FontAtlas_t> fonts;
 std::map<uint16_t,size_t> fontAtlasIndices;
@@ -24,77 +26,143 @@ struct FontShaderData_t {
 };
 
 void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
-    yyjson_read_err jsonErr;
-    yyjson_doc* doc = yyjson_read_file(jsonPath.string().c_str(), 0, NULL, &jsonErr);
-    if (doc) {
+    std::ifstream jsonFile{jsonPath};
+    if(jsonFile.fail())return;
+    std::stringstream jsonStringStream;
+    while (jsonFile.peek() != EOF)
+        jsonStringStream << (char)jsonFile.get();
+    jsonFile.close();
 
-        width = yyjson_get_int(yyjson_obj_get(yyjson_doc_get_root(doc),"width"));
-        height = yyjson_get_int(yyjson_obj_get(yyjson_doc_get_root(doc),"height"));
-        widthRatio = yyjson_get_num(yyjson_obj_get(yyjson_doc_get_root(doc),"widthRatio"));
-        heightRatio = yyjson_get_num(yyjson_obj_get(yyjson_doc_get_root(doc),"heightRatio"));
-        unk_2 = yyjson_get_int(yyjson_obj_get(yyjson_doc_get_root(doc),"unk_2"));
-        yyjson_val* fnts = yyjson_obj_get(yyjson_doc_get_root(doc),"fonts");
-        size_t idx,size;
-        yyjson_val *fontEntry;
-        yyjson_arr_foreach(fnts, idx, size, fontEntry) {
-            Font_t font;
-            font.name = yyjson_get_str(yyjson_obj_get(fontEntry, "name"));
-            font.fontIndex = yyjson_get_int(yyjson_obj_get(fontEntry, "fontId"));
-            font.proportionScaleX = yyjson_get_num(yyjson_obj_get(fontEntry, "proportionScaleX"));
-            font.proportionScaleY = yyjson_get_num(yyjson_obj_get(fontEntry, "proportionScaleY"));
-            font.float_24 = yyjson_get_num(yyjson_obj_get(fontEntry, "unk_24"));
-            font.float_28 = yyjson_get_num(yyjson_obj_get(fontEntry, "unk_28"));
-            font.unicodeIndex = yyjson_get_int(yyjson_obj_get(fontEntry,"unicodeIndex"));
-            yyjson_val* uniChunks = yyjson_obj_get(fontEntry,"unicodeChunks");
-            size_t i_idx,i_size;
-            yyjson_val *entry;
-            yyjson_arr_foreach(uniChunks,i_idx,i_size,entry){
-                font.unicodeChunk.push_back(yyjson_get_uint(entry));
-            }
-            yyjson_val* glyphCh = yyjson_obj_get(fontEntry,"glyphChunks");
-            yyjson_arr_foreach(glyphCh, i_idx, i_size,entry ) {
-                GlyphChunk_t chunk;
-                chunk.glyphIndex = yyjson_get_int(yyjson_obj_get(entry, "unicodeChunksIndex"));
-                chunk.mask = yyjson_get_uint(yyjson_obj_get(entry, "mask"));
-                font.glyphChunks.push_back(chunk);
-            }
-            yyjson_val* props = yyjson_obj_get(fontEntry,"proportions");
-            yyjson_arr_foreach(props, i_idx, i_size, entry) {
-                Proportion_t prop;
-                prop.scaleBounds = yyjson_get_num(yyjson_obj_get(entry, "scaleBounds"));
-                prop.scaleSize = yyjson_get_num(yyjson_obj_get(entry, "scaleSize"));
-                font.proportions.push_back(prop);
-            }
-            yyjson_val* glyphs = yyjson_obj_get(fontEntry,"glyphs");
-            yyjson_arr_foreach(glyphs, i_idx, i_size, entry) {
-                Glyph_t glyph;
-                glyph.float_0 = yyjson_get_num(yyjson_obj_get(entry, "unk_0"));
-                glyph.kerningStartIndex = yyjson_get_int(yyjson_obj_get(entry, "kerningBaseIndex"));
-                glyph.byte_6 = yyjson_get_int(yyjson_obj_get(entry, "unk_6"));
-                glyph.proportionIndex = yyjson_get_int(yyjson_obj_get(entry, "proportionIndex"));
-                glyph.posBaseX = yyjson_get_num(yyjson_obj_get(entry, "posBaseX"));
-                glyph.posBaseY = yyjson_get_num(yyjson_obj_get(entry, "posBaseY"));
-                glyph.posMinX = yyjson_get_num(yyjson_obj_get(entry, "posMinX"));
-                glyph.posMinY = yyjson_get_num(yyjson_obj_get(entry, "posMinY"));
-                glyph.posMaxX = yyjson_get_num(yyjson_obj_get(entry, "posMaxX"));
-                glyph.posMaxY = yyjson_get_num(yyjson_obj_get(entry, "posMaxY"));
-                font.glyphs.push_back(glyph);
-            }
-            yyjson_val* kerning = yyjson_obj_get(fontEntry,"KerningInfo");
-            yyjson_arr_foreach(kerning, i_idx, i_size, entry) {
-                KerningInfo_t kern;
-                kern.otherChar = yyjson_get_int(yyjson_obj_get(entry, "otherIndex"));
-                kern.kerningDistance = yyjson_get_num(yyjson_obj_get(entry,"distance"));
-                font.kerningInfos.push_back(kern);
-            }
-            fonts.emplace(font.fontIndex,font);
+    rapidjson::Document doc;
+    doc.Parse(jsonStringStream.str().c_str());
+    if(doc.HasParseError())return;
+    
+    rapidjson::GenericObject root = doc.GetObject();
+
+
+
+    if(!(root.HasMember("width")&&root["width"].IsUint()))return;
+    if(!(root.HasMember("height")&&root["height"].IsUint()))return;
+    if(!(root.HasMember("widthRatio")&&root["widthRatio"].IsNumber()))return; 
+    if(!(root.HasMember("heightRatio")&&root["heightRatio"].IsNumber()))return;
+    if(!(root.HasMember("unk_2")&&root["unk_2"].IsUint()))return;
+    if((!root.HasMember("fonts")&&root["fonts"].IsArray()))return;
+    if(!(root.HasMember("unk_18")&&root["unk_18"].IsArray()))return;
+
+    width = root["width"].GetUint();
+    widthRatio = root["widthRatio"].GetFloat();
+    height = root["height"].GetUint();
+    heightRatio = root["heightRatio"].GetFloat();
+    unk_2 = root["unk_2"].GetUint();
+    
+    rapidjson::GenericArray fontArray = root["fonts"].GetArray();
+
+    for(auto fontItr = fontArray.Begin();fontItr != fontArray.End();fontItr++) {
+        if(!fontItr->IsObject())continue;
+        rapidjson::GenericObject fontObj = fontItr->GetObject();
+
+        if(!(fontObj.HasMember("name")&&fontObj["name"].IsString()))continue;
+        if(!(fontObj.HasMember("fontId")&&fontObj["fontId"].IsInt()))continue;
+        if(!(fontObj.HasMember("proportionScaleX")&&fontObj["proportionScaleX"].IsNumber()))continue;
+        if(!(fontObj.HasMember("proportionScaleY")&&fontObj["proportionScaleY"].IsNumber()))continue;
+        if(!(fontObj.HasMember("unk_24")&&fontObj["unk_24"].IsNumber()))continue;
+        if(!(fontObj.HasMember("unk_28")&&fontObj["unk_28"].IsNumber()))continue;
+        if(!(fontObj.HasMember("unicodeIndex")&&fontObj["unicodeIndex"].IsInt()))continue;
+        if(!(fontObj.HasMember("unicodeChunks")&&fontObj["unicodeChunks"].IsArray()))continue;
+        if(!(fontObj.HasMember("glyphChunks")&&fontObj["glyphChunks"].IsArray()))continue;
+        if(!(fontObj.HasMember("proportions")&&fontObj["proportions"].IsArray()))continue;
+        if(!(fontObj.HasMember("glyphs")&&fontObj["glyphs"].IsArray()))continue;
+        if(!(fontObj.HasMember("KerningInfo")&&fontObj["KerningInfo"].IsArray()))continue;
+        
+        
+
+        Font_t font;
+        font.name = fontObj["name"].GetString();
+        font.fontIndex = fontObj["fontId"].GetInt();
+        font.proportionScaleX = fontObj["proportionScaleX"].GetFloat();
+        font.proportionScaleY = fontObj["proportionScaleY"].GetFloat();
+        font.float_24 = fontObj["unk_24"].GetFloat();
+        font.float_28 = fontObj["unk_28"].GetFloat();
+        font.unicodeIndex = fontObj["unicodeIndex"].GetInt();
+        rapidjson::GenericArray unicodeChunks = fontObj["unicodeChunks"].GetArray();
+        for(auto itr = unicodeChunks.Begin();itr != unicodeChunks.End();itr++){
+            if(!itr->IsInt())continue;
+            font.unicodeChunk.push_back(itr->GetInt());
         }
-        yyjson_val* unk18 = yyjson_obj_get(yyjson_doc_get_root(doc),"unk_18");
-        yyjson_val* unk;
-        yyjson_arr_foreach(unk18, idx, size, unk) {
-            unk_18.push_back(yyjson_get_int(unk));
+        rapidjson::GenericArray glyphCh = fontObj["glyphChunks"].GetArray();
+        for(auto itr = glyphCh.Begin();itr != glyphCh.End();itr++) {
+            if(!itr->IsObject())continue;
+            rapidjson::GenericObject ch = itr->GetObject();
+
+            if(!(ch.HasMember("unicodeChunksIndex")&&ch["unicodeChunksIndex"].IsInt()))continue;
+            if(!(ch.HasMember("mask")&&ch["mask"].IsUint64()))continue;
+
+            GlyphChunk_t chunk;
+            chunk.glyphIndex = ch["unicodeChunksIndex"].GetInt();
+            chunk.mask = ch["mask"].GetUint64();
+            font.glyphChunks.push_back(chunk);
         }
+        rapidjson::GenericArray props = fontObj["proportions"].GetArray();
+        for(auto itr = props.Begin();itr != props.End();itr++) {
+            if(!itr->IsObject())continue;
+            rapidjson::GenericObject propObj = itr->GetObject();
+
+            if(!(propObj.HasMember("scaleBounds")&&propObj["scaleBounds"].IsNumber()))continue;
+            if(!(propObj.HasMember("scaleSize")&&propObj["scaleSize"].IsNumber()))continue;
+
+            Proportion_t prop;
+            prop.scaleBounds = propObj["scaleBounds"].GetFloat();
+            prop.scaleSize = propObj["scaleSize"].GetFloat();
+            font.proportions.push_back(prop);
+        }
+        rapidjson::GenericArray glyphs = fontObj["glyphs"].GetArray();
+        for(auto itr = glyphs.Begin();itr != glyphs.End();itr++) {
+            if(!itr->IsObject())continue;
+            rapidjson::GenericObject glyphObj = itr->GetObject();
+
+            if(!(glyphObj.HasMember("unk_0")&&glyphObj["unk_0"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("kerningBaseIndex")&&glyphObj["kerningBaseIndex"].IsInt()))continue;
+            if(!(glyphObj.HasMember("unk_6")&&glyphObj["unk_6"].IsInt()))continue;
+            if(!(glyphObj.HasMember("proportionIndex")&&glyphObj["proportionIndex"].IsInt()))continue;
+            if(!(glyphObj.HasMember("posBaseX")&&glyphObj["posBaseX"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("posBaseY")&&glyphObj["posBaseY"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("posMinX")&&glyphObj["posMinX"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("posMinY")&&glyphObj["posMinY"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("posMaxX")&&glyphObj["posMaxX"].IsNumber()))continue;
+            if(!(glyphObj.HasMember("posMaxY")&&glyphObj["posMaxY"].IsNumber()))continue;
+            Glyph_t glyph;
+            glyph.float_0 = glyphObj["unk_0"].GetFloat();
+            glyph.kerningStartIndex = glyphObj["kerningBaseIndex"].GetInt();
+            glyph.byte_6 = glyphObj["unk_6"].GetInt();
+            glyph.proportionIndex = glyphObj["proportionIndex"].GetInt();
+            glyph.posBaseX = glyphObj["posBaseX"].GetFloat();
+            glyph.posBaseY = glyphObj["posBaseY"].GetFloat();
+            glyph.posMinX = glyphObj["posMinX"].GetFloat();
+            glyph.posMinY = glyphObj["posMinY"].GetFloat();
+            glyph.posMaxX = glyphObj["posMaxX"].GetFloat();
+            glyph.posMaxY = glyphObj["posMaxY"].GetFloat();
+            font.glyphs.push_back(glyph);
+        }
+        rapidjson::GenericArray kernings = fontObj["KerningInfo"].GetArray();
+        for(auto itr = kernings.Begin();itr != kernings.End();itr++) {
+            if(!itr->IsObject())continue;
+            rapidjson::GenericObject kernObj = itr->GetObject();
+            if(!(kernObj.HasMember("otherIndex")&&kernObj["otherIndex"].IsInt()))continue;
+            if(!(kernObj.HasMember("distance")&&kernObj["distance"].IsNumber()))continue;
+
+            KerningInfo_t kern;
+            kern.otherChar = kernObj["otherIndex"].GetInt();
+            kern.kerningDistance = kernObj["distance]"].GetFloat();
+            font.kerningInfos.push_back(kern);
+        }
+        fonts.emplace(font.fontIndex,font);
     }
+    rapidjson::GenericArray unk18 = root["unk_18"].GetArray();
+    for(auto itr = unk18.Begin();itr != unk18.End();itr++) {
+        if(!itr->IsInt())continue;
+        unk_18.push_back(itr->GetInt());
+    }
+    
 
     fs::path ddsName = jsonPath.replace_extension("dds");
 
