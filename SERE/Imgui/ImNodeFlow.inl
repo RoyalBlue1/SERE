@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ImNodeFlow.h"
-
+#include <random>
 namespace ImFlow
 {
     inline void smart_bezier(const ImVec2& p1, const ImVec2& p2, ImU32 color, float thickness)
@@ -44,8 +44,11 @@ namespace ImFlow
         n->setHandler(this);
         if (!n->getStyle())
             n->setStyle(NodeStyle::cyan());
-
-        auto uid = reinterpret_cast<uintptr_t>(n.get());
+        std::random_device rd;
+        std::mt19937_64 gen(rd()); 
+        std::uniform_int_distribution<uint64_t> dis;
+        auto uid = dis(gen);
+        while(m_nodes.contains(uid))uid = dis(gen);
         n->setUID(uid);
         m_nodes[uid] = n;
         return n;
@@ -55,6 +58,21 @@ namespace ImFlow
     std::shared_ptr<T> ImNodeFlow::placeNodeAt(const ImVec2& pos, Params&&... args)
     {
         return addNode<T>(screen2grid(pos), std::forward<Params>(args)...);
+    }
+
+    template<typename T, typename... Params>
+    std::shared_ptr<T> ImNodeFlow::recreateNode(const ImVec2& pos,uint64_t uid, Params&&... args)
+    {
+        static_assert(std::is_base_of<BaseNode, T>::value, "Pushed type is not a subclass of BaseNode!");
+
+        std::shared_ptr<T> n = std::make_shared<T>(std::forward<Params>(args)...);
+        n->setPos(pos);
+        n->setHandler(this);
+        if (!n->getStyle())
+            n->setStyle(NodeStyle::cyan());
+        n->setUID(uid);
+        m_nodes[uid] = n;
+        return n;
     }
 
     template<typename T, typename... Params>
