@@ -11,6 +11,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform0Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform0Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -24,6 +25,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform1Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform1Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -38,6 +40,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform2Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform2Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -51,6 +54,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform3Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform3Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -64,6 +68,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform4Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform4Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -77,6 +82,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform5Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform5Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -90,6 +96,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform6Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform6Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -103,6 +110,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform7Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform7Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -116,6 +124,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform8Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform8Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -129,6 +138,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform9Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform9Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -142,6 +152,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform10Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform10Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -155,6 +166,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform11Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform11Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -168,6 +180,7 @@ public:
 	static inline std::string category = "Transform";
 
 	explicit Transform12Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform12Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -180,7 +193,8 @@ public:
 	static inline std::string name = "Transform 13";
 	static inline std::string category = "Transform";
 
-	explicit Transform13Node(RenderInstance& prot);
+	explicit Transform13Node(RenderInstance& prot,NodeStyles& styles);
+	explicit Transform13Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

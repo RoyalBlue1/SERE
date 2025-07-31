@@ -12,6 +12,7 @@ AssetRenderNode::AssetRenderNode(RenderInstance& rend,NodeStyles& style):RuiBase
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
+AssetRenderNode::AssetRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
 
 void AssetRenderNode::draw() {
 	AssetInputData input{};
@@ -68,6 +69,7 @@ AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,NodeStyles& st
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {}
 
 void AssetCircleRenderNode::draw() {
 	AssetCircleInputData input{};
@@ -125,6 +127,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo
 
 TextStyleNode::TextStyleNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
+	currentFont = &fonts[0].fonts.begin()->second;
+
 	getOut<TextStyleData>("Style")->behaviour([this]() {
 		TextStyleData res;
 		res.mainColor = getInVal<ColorVariable>("mainColor");
@@ -146,14 +150,28 @@ TextStyleNode::TextStyleNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 	});
 }
 
+TextStyleNode::TextStyleNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
+	if (obj.HasMember("FontName") && obj["FontName"].IsString()) {
+		std::string fontName = obj["FontName"].GetString();
+		for (auto& fontAtlas : fonts) {
+			for (auto& [index, font] : fontAtlas.fonts) {
+				if (font.name == fontName) {
+					currentFont = &font;
+				}
+			}
+		}
+	}
+	
+}
+
 void TextStyleNode::draw() {
 	ImGui::PushItemWidth(130.f);
 	if(ImGui::BeginCombo("Font", currentFont->name.c_str())) {
 		for (auto& atlas : fonts) {
-			for (auto& font : atlas.fonts) {
-				bool isSelected = font.first == currentFont->fontIndex;
-				if (ImGui::Selectable(font.second.name.c_str(), isSelected)) {
-					currentFont = &font.second;
+			for (auto& [index,font] : atlas.fonts) {
+				bool isSelected = index == currentFont->fontIndex;
+				if (ImGui::Selectable(font.name.c_str(), isSelected)) {
+					currentFont = &font;
 				}
 				if (isSelected) {
 					ImGui::SetItemDefaultFocus();
@@ -228,7 +246,7 @@ TextSizeNode::TextSizeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 
 }
 
-
+TextSizeNode::TextSizeNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
 
 void TextSizeNode::draw() {
 
@@ -261,6 +279,8 @@ TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 }
+
+TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){}
 
 void TextRenderNode::draw() {
 	const TextInputData& data = getInVal<TextInputData>("Data");

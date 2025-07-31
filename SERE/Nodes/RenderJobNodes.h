@@ -11,6 +11,7 @@ public:
 	static inline std::string category = "Image Render";
 
 	explicit AssetRenderNode(RenderInstance& prot,NodeStyles& styles);
+	explicit AssetRenderNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -23,6 +24,7 @@ public:
 	static inline std::string category = "Image Render";
 
 	explicit AssetCircleRenderNode(RenderInstance& prot,NodeStyles& styles);
+	explicit AssetCircleRenderNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -36,6 +38,7 @@ public:
 	static inline std::string category = "Text Render";
 
 	explicit TextStyleNode(RenderInstance& prot,NodeStyles& styles);
+	explicit TextStyleNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -52,6 +55,7 @@ public:
 	static inline std::string category = "Text Render";
 
 	explicit TextSizeNode(RenderInstance& prot,NodeStyles& styles);
+	explicit TextSizeNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -64,6 +68,7 @@ public:
 	static inline std::string category = "Text Render";
 
 	explicit TextRenderNode(RenderInstance& prot,NodeStyles& styles);
+	explicit TextRenderNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

@@ -3,12 +3,14 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <filesystem>
 
 #include "imgui/ImNodeFlow.h"
 #include "RenderManager.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"
 
+namespace fs = std::filesystem;
 
 
 struct NodeStyles {
@@ -27,6 +29,7 @@ public:
 		ImVec2 pos = getPos();
 		obj.AddMember("PosX",pos.x,allocator);
 		obj.AddMember("PosY",pos.y,allocator);
+		obj.AddMember("Id",getUID(),allocator);
 	}
 	//virtual void Export() = 0;
 protected:
@@ -48,6 +51,7 @@ protected:
 
 struct NodeType {
 	std::shared_ptr<RuiBaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::shared_ptr<RuiBaseNode> (*RecreateNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	std::vector<std::shared_ptr<ImFlow::PinProto>> (*GetPinInfo)();
 };
 
@@ -63,13 +67,28 @@ template<class T> std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo() {
 	return T::GetPinInfo();
 }
 
+template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj){
+	if(!(obj.HasMember("Id")&&obj["Id"].IsUint64()))return nullptr;
+	if(!(obj.HasMember("PosX")&&obj["PosX"].IsNumber()))return nullptr;
+	if(!(obj.HasMember("PosY")&&obj["PosY"].IsNumber()))return nullptr;
+
+	ImVec2 pos;
+	pos.x = obj["PosX"].GetFloat();
+	pos.y = obj["PosY"].GetFloat();
+	uint64_t uid = obj["Id"].GetUint64();
+
+	return mINF.recreateNode<T>(pos,uid,proto,styles,obj);
+}
 
 template<class T> NodeType CreateNodeType() {
 	NodeType type;
 	type.AddNode = AddNode<T>;
 	type.GetPinInfo = GetPinInfo<T>;
+	type.RecreateNode = RecreateNode<T>;
 	return type;
 }
+
+
 
 
 
@@ -94,7 +113,8 @@ struct NodeEditor{
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
 	void draw();
-
+	void Serialize(const fs::path& path);
+	void Deserialize(const fs::path& path);
 
 	template<class T> void AddNodeType() {
 		

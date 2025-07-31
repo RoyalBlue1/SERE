@@ -11,6 +11,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit IntVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit IntVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -28,6 +29,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit BoolVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit BoolVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -43,6 +45,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit FloatVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit FloatVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -60,6 +63,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit Float2VarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit Float2VarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -77,6 +81,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit Float3VarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit Float3VarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -94,6 +99,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit ColorVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit ColorVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -109,6 +115,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit StringVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit StringVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -124,6 +131,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -140,6 +148,7 @@ public:
 	static inline std::string category = "Constant";
 
 	explicit SizeVarNode(RenderInstance& prot,NodeStyles& styles);
+	explicit SizeVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

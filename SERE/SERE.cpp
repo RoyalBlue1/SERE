@@ -294,8 +294,16 @@ int main(int, char**)
 
      
         ShowExampleAppDockSpace(&use_docking_space);
-        //ImGui::ShowDemoWindow(&show_demo_window);
-        //showTextEditor(textEdit);
+        
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::MenuItem("Save Graph")) {
+                nodeEdit.Serialize("test.json");
+            }
+            if (ImGui::MenuItem("Load Graph")) {
+                nodeEdit.Deserialize("test.json");
+            }
+            ImGui::EndMainMenuBar();
+        }
 
         render.StartFrame(ImGui::GetCurrentContext()->Time);
         nodeEdit.draw();

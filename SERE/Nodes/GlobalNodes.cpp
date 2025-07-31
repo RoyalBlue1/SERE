@@ -9,6 +9,14 @@ TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,cate
 
 }
 
+TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getOut<FloatVariable>("Time")->behaviour([this]() {
+		return FloatVariable(render.globals.currentTime,false,1);
+	});
+
+}
+
 void TimeNode::draw() {
 
 

@@ -12,6 +12,18 @@ IntArgNode::IntArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,
 	});
 }
 
+IntArgNode::IntArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
+
+	getOut<IntVariable>("Value")->behaviour([this]() {
+		return IntVariable(render.arguments[argName].defaultVal.intVal,false);
+
+	});
+}
+
+
 void IntArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
@@ -33,6 +45,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> IntArgNode::GetPinInfo() {
 }
 
 BoolArgNode::BoolArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getOut<BoolVariable>("Value")->behaviour([this]() {
+		return BoolVariable(render.arguments[argName].defaultVal.intVal,false);
+	});
+}
+
+BoolArgNode::BoolArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+	
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
 
 	getOut<BoolVariable>("Value")->behaviour([this]() {
 		return BoolVariable(render.arguments[argName].defaultVal.intVal,false);
@@ -67,6 +89,16 @@ FloatArgNode::FloatArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 }
 
+FloatArgNode::FloatArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
+
+	getOut<FloatVariable>("Value")->behaviour([this]() {
+		return FloatVariable(render.arguments[argName].defaultVal.floatVal[0],false);
+	});
+}
+
 void FloatArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
@@ -88,6 +120,20 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> FloatArgNode::GetPinInfo() {
 }
 
 Float2ArgNode::Float2ArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getOut<Float2Variable>("Value")->behaviour([this]() {
+		return Float2Variable(
+			render.arguments[argName].defaultVal.floatVal[0],
+			render.arguments[argName].defaultVal.floatVal[1],
+			false);
+
+	});
+}
+
+Float2ArgNode::Float2ArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
 
 	getOut<Float2Variable>("Value")->behaviour([this]() {
 		return Float2Variable(
@@ -127,6 +173,20 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 			render.arguments[argName].defaultVal.floatVal[2],
 			false);
 
+	});
+}
+
+Float3ArgNode::Float3ArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
+
+	getOut<Float3Variable>("Value")->behaviour([this]() {
+		return Float3Variable(
+			render.arguments[argName].defaultVal.floatVal[0],
+			render.arguments[argName].defaultVal.floatVal[1],
+			render.arguments[argName].defaultVal.floatVal[2],
+			false);
 
 	});
 }
@@ -160,8 +220,21 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 			render.arguments[argName].defaultVal.floatVal[2],
 			render.arguments[argName].defaultVal.floatVal[3],
 			false);
+	});
+}
 
+ColorArgNode::ColorArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
+
+	getOut<ColorVariable>("Value")->behaviour([this]() {
+		return ColorVariable(
+			render.arguments[argName].defaultVal.floatVal[0],
+			render.arguments[argName].defaultVal.floatVal[1],
+			render.arguments[argName].defaultVal.floatVal[2],
+			render.arguments[argName].defaultVal.floatVal[3],
+			false);
 	});
 }
 
@@ -193,6 +266,17 @@ StringArgNode::StringArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 	});
 }
 
+StringArgNode::StringArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
+
+	getOut<StringVariable>("Value")->behaviour([this]() {
+		return StringVariable(render.arguments[argName].defaultVal.stringVal,false);
+
+	});
+}
+
 void StringArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
@@ -214,6 +298,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> StringArgNode::GetPinInfo() {
 }
 
 AssetArgNode::AssetArgNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getOut<AssetVariable>("Value")->behaviour([this]() {
+		return AssetVariable(render.arguments[argName].defaultVal.stringVal,false);
+	});
+}
+
+AssetArgNode::AssetArgNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
+		argName = obj["ArgName"].GetString();
 
 	getOut<AssetVariable>("Value")->behaviour([this]() {
 		return AssetVariable(render.arguments[argName].defaultVal.stringVal,false);

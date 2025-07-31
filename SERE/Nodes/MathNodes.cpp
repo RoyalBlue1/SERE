@@ -1,7 +1,7 @@
 #include "Nodes/MathNodes.h"
 
 
-MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
@@ -13,6 +13,9 @@ MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 
 }
+
+MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
+
 
 void MultiplyNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -49,6 +52,8 @@ AdditionNode::AdditionNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 
 }
+
+AdditionNode::AdditionNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
 
 void AdditionNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -87,6 +92,8 @@ SubtractNode::SubtractNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 
 }
 
+SubtractNode::SubtractNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
+
 void SubtractNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -121,6 +128,8 @@ DivideNode::DivideNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,
 	});
 
 }
+
+DivideNode::DivideNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
 
 void DivideNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -168,6 +177,8 @@ ModuloNode::ModuloNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,
 
 }
 
+ModuloNode::ModuloNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
+
 void ModuloNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -210,6 +221,8 @@ AbsoluteNode::AbsoluteNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 
 }
 
+AbsoluteNode::AbsoluteNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
+
 void AbsoluteNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 
@@ -242,6 +255,8 @@ SineNode::SineNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,cate
 	});
 
 }
+
+SineNode::SineNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
 
 void SineNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -277,6 +292,8 @@ ExponentNode::ExponentNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 
 }
 
+ExponentNode::ExponentNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
+
 void ExponentNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -309,6 +326,8 @@ MappingNode::MappingNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(nam
 
 }
 
+MappingNode::MappingNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){}
+
 void MappingNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	ImGui::Text("A %f",a.value);
@@ -337,8 +356,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 
 void AddMathNodes(NodeEditor& editor) {
 
-	editor.AddNodeType<MultiplyNode>();
 	editor.AddNodeType<AdditionNode>();
+	editor.AddNodeType<MultiplyNode>();
 	editor.AddNodeType<SubtractNode>();
 	editor.AddNodeType<DivideNode>();
 	editor.AddNodeType<ModuloNode>();

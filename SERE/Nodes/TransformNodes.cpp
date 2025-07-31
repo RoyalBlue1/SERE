@@ -16,6 +16,8 @@ Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
+Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform0Node(rend,style){}
+
 void Transform0Node::draw() {
 	ImGui::PushItemWidth(90);
 
@@ -51,6 +53,8 @@ Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});;
 }
+
+Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform1Node(rend,style){}
 
 void Transform1Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -106,6 +110,8 @@ Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform2Node(rend,style){}
 
 void Transform2Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -167,6 +173,8 @@ Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform3Node(rend,style){}
 
 void Transform3Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -231,6 +239,8 @@ Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform4Node(rend,style){}
 
 void Transform4Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -324,6 +334,8 @@ Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
+Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform5Node(rend,style){}
+
 void Transform5Node::draw() {
 	ImGui::PushItemWidth(90);
 
@@ -398,6 +410,8 @@ Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform6Node(rend,style){}
 
 void Transform6Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -483,6 +497,8 @@ Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform7Node(rend,style){}
 
 void Transform7Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -591,6 +607,8 @@ Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		return res;
 	});
 }
+
+Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform8Node(rend,style){}
 
 void Transform8Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -709,6 +727,8 @@ Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
+Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform9Node(rend,style){}
+
 void Transform9Node::draw() {
 	ImGui::PushItemWidth(90);
 
@@ -819,6 +839,8 @@ Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style):RuiBase
 		return res;
 	});
 }
+
+Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform10Node(rend,style){}
 
 void Transform10Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -946,6 +968,8 @@ Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style):RuiBase
 		return res;
 	});
 }
+
+Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform11Node(rend,style){}
 
 void Transform11Node::draw() {
 	ImGui::PushItemWidth(90);
