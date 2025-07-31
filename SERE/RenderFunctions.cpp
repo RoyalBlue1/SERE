@@ -1,6 +1,6 @@
 #include "RenderFunctions.h"
 #include "RenderManager.h"
-#include "IntrinUtil.h"
+#include "Util.h"
 
 #undef max
 #undef min

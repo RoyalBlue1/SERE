@@ -3,6 +3,8 @@
 
 #include "imgui/imgui_stdlib.h"
 
+#include "Util.h"
+
 #include "Nodes/ArgumentNodes.h"
 #include "Nodes/TransformNodes.h"
 #include "Nodes/RenderJobNodes.h"
@@ -151,33 +153,61 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 #endif
 }
 
-
 void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
-	if(!pin)return;
-	ImFlow::PinType neededPinType = pin->getType()==ImFlow::PinType_Input?
-		ImFlow::PinType_Output:ImFlow::PinType_Input;
-	static std::string searchString;
-	ImGui::InputText("Search",&searchString,ImGuiInputTextFlags_AutoSelectAll);
-	for (auto& [catName, category] : nodeTypes) {
-		bool searchHit = catName.find(searchString) != std::string::npos;
-		for (auto& [nodeName, nodeType] : category) {
-			searchHit |= nodeName.find(searchString) != std::string::npos;
-			for (auto& pinInfo : nodeType.GetPinInfo()) {
-				searchHit |= pinInfo->name.find(searchString) != std::string::npos;
-				if(pin->getType()==pinInfo->GetPinType())continue;
-				if(!pinInfo->CanCreateLink(pin->getProto()))continue;
+	if (!pin)
+		return;
 
-				if(searchString.size()&&(!searchHit))continue;
-				std::string menuName = std::format("{} > {}",nodeName,pinInfo->name);
-				if (ImGui::MenuItem(menuName.c_str())) {
-					searchString = "";
-					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF,proto,styles);
+	ImFlow::PinType neededPinType = pin->getType() == ImFlow::PinType_Input ?
+		ImFlow::PinType_Output : ImFlow::PinType_Input;
+
+	static std::string searchString;
+
+	// force keyboard focus to the InputText when first showing the window
+	if (ImGui::GetCurrentWindow()->Appearing)
+		ImGui::SetKeyboardFocusHere();
+	// if enter is pressed, select the first thing we find
+	bool selectFirstOption = ImGui::InputText("Search", &searchString, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+
+	for (auto& [catName, category] : nodeTypes)
+	{
+		bool searchHit = caseInsensitiveSearch(catName, searchString);
+
+		bool hasCategoryHeader = false;
+		for (auto& [nodeName, nodeType] : category)
+		{
+			searchHit |= caseInsensitiveSearch(nodeName, searchString);
+			for (auto& pinInfo : nodeType.GetPinInfo())
+			{
+				searchHit |= caseInsensitiveSearch(pinInfo->name, searchString);
+
+				if (pin->getType() == pinInfo->GetPinType())
+					continue;
+				if (!pinInfo->CanCreateLink(pin->getProto()))
+					continue;
+				if (searchString.size() && !searchHit)
+					continue;
+
+				if (!hasCategoryHeader)
+				{
+					ImGui::MenuItem(catName.c_str(), nullptr, nullptr, false);
+					hasCategoryHeader = true;
+				}
+
+				std::string menuName = std::format("{} > {}", nodeName, pinInfo->name);
+				if (selectFirstOption || ImGui::MenuItem(menuName.c_str())) {
+					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF, proto, styles);
+					// create the pin
 					if (pinInfo->GetPinType() == ImFlow::PinType_Input) {
 						node->inPin(pinInfo->name.c_str())->createLink(pin);
 					}
 					else {
 						node->outPin(pinInfo->name.c_str())->createLink(pin);
 					}
+
+					// clear the search for next time and exit
+					searchString = "";
+					ImGui::CloseCurrentPopup(); // todo: return value for this function so the caller can handle this? we may not be a popup i guess
+					return;
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 #include "RenderManager.h"
 #include <fstream>
-#include "IntrinUtil.h"
+#include "Util.h"
 
 void RenderInstance::AddQuad(RenderQuad& quad) {
 	indices.push_back((uint16_t)verts.size()+0);
