@@ -43,8 +43,11 @@ add_executable (SERE
 	"ThirdParty/DDSTextureLoader11.cpp"
 	)
 
-target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )#${PROJECT_SOURCE_DIR}/include)
-#target_link_libraries(SERE PUBLIC Zep::Zep)
+target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
+
+add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Assets ${CMAKE_CURRENT_BINARY_DIR}/Assets)
+add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/DroidSans.ttf ${CMAKE_CURRENT_BINARY_DIR}/Imgui/DroidSans.ttf)
+
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET SERE PROPERTY CXX_STANDARD 20)
