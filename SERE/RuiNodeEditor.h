@@ -93,13 +93,14 @@ template<class T> NodeType CreateNodeType() {
 
 
 
-struct NodeEditor{
+class NodeEditor{
+private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& proto;
 	NodeStyles styles;
 
 	std::map<std::string,NodeCategory> nodeTypes;
-
+public:
 	NodeEditor(RenderInstance& prot):proto(prot) {
 		mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 			RightClickPopup(node);
@@ -112,9 +113,11 @@ struct NodeEditor{
 
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
-	void draw();
-	void Serialize(const fs::path& path);
-	void Deserialize(const fs::path& path);
+	void Draw();
+	void Serialize();
+	void Deserialize();
+	void Export();
+	void Clear();
 
 	template<class T> void AddNodeType() {
 		

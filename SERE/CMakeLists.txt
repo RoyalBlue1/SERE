@@ -4,6 +4,8 @@
 
 # Add source to this project's executable.
 
+add_subdirectory(Thirdparty/nativefiledialog-extended)
+
 set(CMAKE_INCLUDE_CURRENT_DIR,ON)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -44,7 +46,7 @@ add_executable (SERE
 	)
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )#${PROJECT_SOURCE_DIR}/include)
-#target_link_libraries(SERE PUBLIC Zep::Zep)
+target_link_libraries(SERE PUBLIC nfd)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET SERE PROPERTY CXX_STANDARD 20)

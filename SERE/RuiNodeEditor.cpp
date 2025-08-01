@@ -16,9 +16,10 @@
 #include "Thirdparty/rapidjson/istreamwrapper.h"
 #include "ThirdParty/rapidjson/prettywriter.h"
 #include "ThirdParty/rapidjson/stringbuffer.h"
+#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
-void NodeEditor::draw() {
+void NodeEditor::Draw() {
 	ImGui::Begin("Node Editor");
 	
 	mINF.update();
@@ -26,7 +27,25 @@ void NodeEditor::draw() {
 	ImGui::End();
 }
 
-void NodeEditor::Serialize(const fs::path& path) {
+void NodeEditor::Clear() {
+	for (auto& [uid,node] : mINF.getNodes()) {
+		node->destroy();
+	}
+}
+
+void NodeEditor::Serialize() {
+
+	if(!mINF.getNodesCount())return;
+
+	NFD::Guard nfdGuard;
+	nfdfilteritem_t filter("Graph", "json");
+	NFD::UniquePath nfdPath;
+	if(NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
+	
+	fs::path path(nfdPath.get());
+
+
+
 	rapidjson::Document doc;
 	doc.SetObject();
 	rapidjson::GenericValue<rapidjson::UTF8<>> nodeArray;
@@ -62,7 +81,18 @@ void NodeEditor::Serialize(const fs::path& path) {
 
 }
 
-void NodeEditor::Deserialize(const fs::path& path) {
+void NodeEditor::Deserialize() {
+
+
+	NFD::Guard nfdGuard;
+	nfdfilteritem_t filter("Graph","json");
+	NFD::UniquePath nfdPath;
+	if(NFD::OpenDialog(nfdPath,&filter,1) != NFD_OKAY) return;
+	
+
+	fs::path path (nfdPath.get());
+
+
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		printf("Error Opening JSON File %s\n",path.string().c_str());

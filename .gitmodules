@@ -1,1 +1,4 @@
 
+[submodule "SERE/ThirdParty/nativefiledialog-extended"]
+	path = SERE/ThirdParty/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git

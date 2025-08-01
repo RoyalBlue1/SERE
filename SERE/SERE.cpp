@@ -24,6 +24,8 @@
 #include "Nodes/SplitMergeNodes.h"
 #include "Nodes/TransformNodes.h"
 
+#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
+
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;
 static ID3D11DeviceContext*     g_pd3dDeviceContext = nullptr;
@@ -296,17 +298,23 @@ int main(int, char**)
         ShowExampleAppDockSpace(&use_docking_space);
         
         if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::MenuItem("Save Graph")) {
-                nodeEdit.Serialize("test.json");
-            }
-            if (ImGui::MenuItem("Load Graph")) {
-                nodeEdit.Deserialize("test.json");
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New")) {
+                   nodeEdit.Clear();
+                }
+                if (ImGui::MenuItem("Save Graph")) {
+                    nodeEdit.Serialize();
+                }
+                if (ImGui::MenuItem("Load Graph")) {
+                    nodeEdit.Deserialize();
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }
 
         render.StartFrame(ImGui::GetCurrentContext()->Time);
-        nodeEdit.draw();
+        nodeEdit.Draw();
         render.EndFrame();
         render.DrawImage();
         
