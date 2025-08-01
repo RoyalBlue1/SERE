@@ -1,15 +1,18 @@
 #include "GlobalNodes.h"
 
 
-TimeNode::TimeNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Time")->behaviour([this]() {
-		return FloatVariable(proto.globals.currentTime,false,1);
+		return FloatVariable(render.globals.currentTime,false,1);
+	});
+
+}
+
+TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getOut<FloatVariable>("Time")->behaviour([this]() {
+		return FloatVariable(render.globals.currentTime,false,1);
 	});
 
 }
@@ -17,9 +20,15 @@ TimeNode::TimeNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 void TimeNode::draw() {
 
 
-	ImGui::Text("Time %f", proto.globals.currentTime);
+	ImGui::Text("Time %f", render.globals.currentTime);
 
 
+}
+
+void TimeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> TimeNode::GetPinInfo() {

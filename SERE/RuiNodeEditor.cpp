@@ -13,7 +13,13 @@
 #include "Nodes/MathNodes.h"
 #include "Nodes/GlobalNodes.h"
 
-void NodeEditor::draw() {
+#include "Thirdparty/rapidjson/istreamwrapper.h"
+#include "ThirdParty/rapidjson/prettywriter.h"
+#include "ThirdParty/rapidjson/stringbuffer.h"
+#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
+#undef GetObject
+
+void NodeEditor::Draw() {
 	ImGui::Begin("Node Editor");
 	
 	mINF.update();
@@ -21,6 +27,125 @@ void NodeEditor::draw() {
 	ImGui::End();
 }
 
+void NodeEditor::Clear() {
+	for (auto& [uid,node] : mINF.getNodes()) {
+		node->destroy();
+	}
+}
+
+void NodeEditor::Serialize() {
+
+	if(!mINF.getNodesCount())return;
+
+	NFD::Guard nfdGuard;
+	nfdfilteritem_t filter("Graph", "json");
+	NFD::UniquePath nfdPath;
+	if(NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
+	
+	fs::path path(nfdPath.get());
+
+
+
+	rapidjson::Document doc;
+	doc.SetObject();
+	rapidjson::GenericValue<rapidjson::UTF8<>> nodeArray;
+	nodeArray.SetArray();
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+
+		rapidjson::GenericValue<rapidjson::UTF8<>> val;
+		val.SetObject();
+		std::dynamic_pointer_cast<RuiBaseNode>(nodePtr)->Serialize(val,doc.GetAllocator());
+		nodeArray.PushBack(val,doc.GetAllocator());
+	}
+	doc.AddMember("Nodes",nodeArray,doc.GetAllocator());
+	rapidjson::GenericValue<rapidjson::UTF8<>> linkArray;
+	linkArray.SetArray();
+	for (auto& link : mINF.getLinks()) {
+		rapidjson::GenericValue<rapidjson::UTF8<>> val;
+		val.SetObject();
+		auto lnk = link.lock();
+		val.AddMember("LeftNode",lnk->left()->getParent()->getUID(), doc.GetAllocator());
+		val.AddMember("LeftPin",lnk->left()->getName(), doc.GetAllocator());
+		val.AddMember("RightNode",lnk->right()->getParent()->getUID(),doc.GetAllocator());
+		val.AddMember("RightPin",lnk->right()->getName(), doc.GetAllocator());
+		linkArray.PushBack(val,doc.GetAllocator());
+	}
+	doc.AddMember("Links",linkArray,doc.GetAllocator());
+
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	doc.Accept(writer);
+	std::ofstream outFile{path};
+	outFile.write(buffer.GetString(),buffer.GetSize());
+	outFile.close();
+
+}
+
+void NodeEditor::Deserialize() {
+
+
+	NFD::Guard nfdGuard;
+	nfdfilteritem_t filter("Graph","json");
+	NFD::UniquePath nfdPath;
+	if(NFD::OpenDialog(nfdPath,&filter,1) != NFD_OKAY) return;
+	
+
+	fs::path path (nfdPath.get());
+
+
+	std::ifstream file(path);
+	if (!file.is_open()) {
+		printf("Error Opening JSON File %s\n",path.string().c_str());
+		return;
+	}
+	rapidjson::IStreamWrapper wrap(file);
+	rapidjson::Document doc;
+	doc.ParseStream(wrap);
+	if (doc.HasParseError()) {
+		printf("Error in JSON File %s\n",path.string().c_str());
+		return;
+	}
+	rapidjson::GenericObject root = doc.GetObject();
+	if(!(root.HasMember("Nodes")&&root["Nodes"].IsArray()))return;
+	if(!(root.HasMember("Links")&&root["Links"].IsArray()))return;
+	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
+	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
+		if (!itr->IsObject()) {
+			printf("Node is not object");
+			continue;
+		}
+		rapidjson::GenericObject node = itr->GetObject();
+
+		if(!(node.HasMember("Name")&&node["Name"].IsString()))continue;
+		if(!(node.HasMember("Category")&&node["Category"].IsString()))continue;
+
+		std::string name = node["Name"].GetString();
+		std::string category = node["Category"].GetString();
+		nodeTypes[category][name].RecreateNode(mINF,proto,styles,node);
+		
+	}
+	rapidjson::GenericArray links = root["Links"].GetArray();
+	for (auto itr = links.Begin(); itr != links.End(); itr++) {
+		if(!itr->IsObject())continue;
+		rapidjson::GenericObject link = itr->GetObject();
+		if(!(link.HasMember("LeftNode")&&link["LeftNode"].IsUint64()))continue;
+		if(!(link.HasMember("LeftPin")&&link["LeftPin"].IsString()))continue;
+		if(!(link.HasMember("RightNode")&&link["RightNode"].IsUint64()))continue;
+		if(!(link.HasMember("RightPin")&&link["RightPin"].IsString()))continue;
+		uint64_t leftId = link["LeftNode"].GetUint64();
+		uint64_t rightId = link["RightNode"].GetUint64();
+		std::string leftPinName = link["LeftPin"].GetString();
+		std::string rightPinName = link["RightPin"].GetString();
+
+		if(!mINF.getNodes().contains(leftId))continue;
+		if(!mINF.getNodes().contains(rightId))continue;
+		auto left = mINF.getNodes()[leftId];
+		auto right = mINF.getNodes()[rightId];
+
+		left->outPin(leftPinName)->createLink(right->inPin(rightPinName));
+
+	}
+}
 
 void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 	if (node) {

@@ -355,6 +355,22 @@ namespace ImFlow
         template<typename T, typename... Params>
         std::shared_ptr<T> placeNodeAt(const ImVec2& pos, Params&&... args);
 
+
+        /**
+        * @brief <BR>Add a node to the grid with uid and grid position
+        * @tparam T Derived class of <BaseNode> to be added
+        * @tparam Params types of optional args to forward to derived class ctor
+        * @param pos position of the Node in grid coordinates
+        * @param uid uid of the node instead of being randomly creatid
+        * @param args Optional arguments to be forwarded to derived class ctor
+        * @return Shared pointer of the pushed type to the newly added node
+        *
+        * Inheritance is checked at compile time, \<T> MUST be derived from BaseNode.
+        */
+        template<typename T, typename... Params>
+        std::shared_ptr<T> recreateNode(const ImVec2& pos,uint64_t uid, Params&&... args);
+
+
         /**
          * @brief <BR>Add a node to the grid using mouse position
          * @tparam T Derived class of <BaseNode> to be added
@@ -364,6 +380,7 @@ namespace ImFlow
          *
          * Inheritance is checked at compile time, \<T> MUST be derived from BaseNode.
          */
+
         template<typename T, typename... Params>
         std::shared_ptr<T> placeNode(Params&&... args);
 

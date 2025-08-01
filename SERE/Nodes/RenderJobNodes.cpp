@@ -7,15 +7,12 @@
 
 
 
-AssetRenderNode::AssetRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
+AssetRenderNode::AssetRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
+AssetRenderNode::AssetRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
 
 void AssetRenderNode::draw() {
 	AssetInputData input{};
@@ -36,7 +33,13 @@ void AssetRenderNode::draw() {
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = 0x1000;
-	Render_Asset(proto,input);
+	Render_Asset(render,input);
+}
+
+void AssetRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
@@ -61,15 +64,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	return info;
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Transform")->setEmptyVal(proto.transformResults[2]);
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {}
 
 void AssetCircleRenderNode::draw() {
 	AssetCircleInputData input{};
@@ -92,7 +92,13 @@ void AssetCircleRenderNode::draw() {
 
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = 0x2000;
-	Render_AssetSmall(proto,input);
+	Render_AssetSmall(render,input);
+}
+
+void AssetCircleRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo() {
@@ -119,13 +125,10 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo
 
 
 
-TextStyleNode::TextStyleNode(RenderInstance& prot, NodeStyles& styles) :proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
+TextStyleNode::TextStyleNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
 	currentFont = &fonts[0].fonts.begin()->second;
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
+
 	getOut<TextStyleData>("Style")->behaviour([this]() {
 		TextStyleData res;
 		res.mainColor = getInVal<ColorVariable>("mainColor");
@@ -147,14 +150,28 @@ TextStyleNode::TextStyleNode(RenderInstance& prot, NodeStyles& styles) :proto(pr
 	});
 }
 
+TextStyleNode::TextStyleNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
+	if (obj.HasMember("FontName") && obj["FontName"].IsString()) {
+		std::string fontName = obj["FontName"].GetString();
+		for (auto& fontAtlas : fonts) {
+			for (auto& [index, font] : fontAtlas.fonts) {
+				if (font.name == fontName) {
+					currentFont = &font;
+				}
+			}
+		}
+	}
+	
+}
+
 void TextStyleNode::draw() {
 	ImGui::PushItemWidth(130.f);
 	if(ImGui::BeginCombo("Font", currentFont->name.c_str())) {
 		for (auto& atlas : fonts) {
-			for (auto& font : atlas.fonts) {
-				bool isSelected = font.first == currentFont->fontIndex;
-				if (ImGui::Selectable(font.second.name.c_str(), isSelected)) {
-					currentFont = &font.second;
+			for (auto& [index,font] : atlas.fonts) {
+				bool isSelected = index == currentFont->fontIndex;
+				if (ImGui::Selectable(font.name.c_str(), isSelected)) {
+					currentFont = &font;
 				}
 				if (isSelected) {
 					ImGui::SetItemDefaultFocus();
@@ -164,6 +181,13 @@ void TextStyleNode::draw() {
 		ImGui::EndCombo();
 	}
 	ImGui::PopItemWidth();
+}
+
+void TextStyleNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	obj.AddMember("FontName",currentFont->name, allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> TextStyleNode::GetPinInfo() {
@@ -186,13 +210,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextStyleNode::GetPinInfo() {
 	return info;
 }
 
-TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
+TextSizeNode::TextSizeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<TextInputData>("Text Data")->behaviour([this]() {
 		
 		TextInputData data;
@@ -227,11 +246,17 @@ TextSizeNode::TextSizeNode(RenderInstance& prot, NodeStyles& styles):proto(prot)
 
 }
 
-
+TextSizeNode::TextSizeNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
 
 void TextSizeNode::draw() {
 
 
+}
+
+void TextSizeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
@@ -250,19 +275,23 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
 }
 
 
-TextRenderNode::TextRenderNode(RenderInstance& prot, NodeStyles& styles) :proto(prot) {
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
-	getIn<TransformResult>("Parent")->setEmptyVal(proto.transformResults[2]);
+TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+
+	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 }
+
+TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){}
 
 void TextRenderNode::draw() {
 	const TextInputData& data = getInVal<TextInputData>("Data");
 	const TransformResult& parent = getInVal<TransformResult>("Parent");
-	Text_Render(proto,data,parent);
+	Text_Render(render,data,parent);
+}
+
+void TextRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> TextRenderNode::GetPinInfo() {

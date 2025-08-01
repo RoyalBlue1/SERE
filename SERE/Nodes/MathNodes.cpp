@@ -1,13 +1,8 @@
 #include "Nodes/MathNodes.h"
 
 
-MultiplyNode::MultiplyNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -19,6 +14,9 @@ MultiplyNode::MultiplyNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 }
 
+MultiplyNode::MultiplyNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
+
+
 void MultiplyNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -26,6 +24,12 @@ void MultiplyNode::draw() {
 	ImGui::Text("B %f",b.value);
 	ImGui::Text("Res %f",a.value*b.value);
 
+}
+
+void MultiplyNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> MultiplyNode::GetPinInfo() {
@@ -36,13 +40,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MultiplyNode::GetPinInfo() {
 	return info;
 }
 
-AdditionNode::AdditionNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+AdditionNode::AdditionNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -54,6 +53,8 @@ AdditionNode::AdditionNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 }
 
+AdditionNode::AdditionNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
+
 void AdditionNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -61,6 +62,12 @@ void AdditionNode::draw() {
 	ImGui::Text("B %f",b.value);
 	ImGui::Text("Res %f",a.value+b.value);
 
+}
+
+void AdditionNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> AdditionNode::GetPinInfo() {
@@ -72,13 +79,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AdditionNode::GetPinInfo() {
 }
 
 
-SubtractNode::SubtractNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+SubtractNode::SubtractNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -90,6 +92,8 @@ SubtractNode::SubtractNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 }
 
+SubtractNode::SubtractNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
+
 void SubtractNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -97,6 +101,12 @@ void SubtractNode::draw() {
 	ImGui::Text("B %f",b.value);
 	ImGui::Text("Res %f",a.value-b.value);
 
+}
+
+void SubtractNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> SubtractNode::GetPinInfo() {
@@ -107,15 +117,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SubtractNode::GetPinInfo() {
 	return info;
 }
 
-DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+DivideNode::DivideNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	style = styles.GetNodeStyle(category);
-	errorStyle = styles.errorNode;
-	setStyle(style);
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -126,6 +129,8 @@ DivideNode::DivideNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 }
 
+DivideNode::DivideNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
+
 void DivideNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -133,15 +138,21 @@ void DivideNode::draw() {
 	ImGui::Text("B %f",b.value);
 	if(b.value!=0.f)
 	{
-		setStyle(style);
+		setStyle(styles.GetNodeStyle(category));
 		ImGui::Text("Res %f", a.value / b.value);
 	}
 	else
 	{
-		setStyle(errorStyle);
+		setStyle(styles.errorNode);
 		ImGui::Text("Divide by 0");
 	}
 
+}
+
+void DivideNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> DivideNode::GetPinInfo() {
@@ -152,15 +163,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> DivideNode::GetPinInfo() {
 	return info;
 }
 
-ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+ModuloNode::ModuloNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	style = styles.GetNodeStyle(category);
-	errorStyle = styles.errorNode;
-	setStyle(style);
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -173,6 +177,8 @@ ModuloNode::ModuloNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 }
 
+ModuloNode::ModuloNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
+
 void ModuloNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -180,15 +186,21 @@ void ModuloNode::draw() {
 	ImGui::Text("B %f",b.value);
 	if(b.value!=0.f)
 	{
-		setStyle(style);
+		setStyle(styles.GetNodeStyle(category));
 		ImGui::Text("Res %f", std::fmodf(a.value,b.value));
 	}
 	else
 	{
-		setStyle(errorStyle);
+		setStyle(styles.errorNode);
 		ImGui::Text("Divide by 0");
 	}
 
+}
+
+void ModuloNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> ModuloNode::GetPinInfo() {
@@ -200,13 +212,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ModuloNode::GetPinInfo() {
 }
 
 
-AbsoluteNode::AbsoluteNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+AbsoluteNode::AbsoluteNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		return FloatVariable(abs(a.value),a.isConstant);
@@ -214,12 +221,20 @@ AbsoluteNode::AbsoluteNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 }
 
+AbsoluteNode::AbsoluteNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
+
 void AbsoluteNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 
 	ImGui::Text("A %f",a.value);
 	ImGui::Text("Res %f", abs(a.value));
 
+}
+
+void AbsoluteNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 
@@ -230,13 +245,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AbsoluteNode::GetPinInfo() {
 	return info;
 }
 
-SineNode::SineNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+SineNode::SineNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 
 		const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -246,12 +256,20 @@ SineNode::SineNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
 
 }
 
+SineNode::SineNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
+
 void SineNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 
 	ImGui::Text("A %f",a.value);
 	ImGui::Text("Res %f", sin(a.value));
 
+}
+
+void SineNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> SineNode::GetPinInfo() {
@@ -261,13 +279,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SineNode::GetPinInfo() {
 	return info;
 }
 
-ExponentNode::ExponentNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+ExponentNode::ExponentNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -279,6 +292,8 @@ ExponentNode::ExponentNode(RenderInstance& prot,NodeStyles& styles):proto(prot) 
 
 }
 
+ExponentNode::ExponentNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
+
 void ExponentNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
 	const FloatVariable& b = getInVal<FloatVariable>("B");
@@ -288,6 +303,11 @@ void ExponentNode::draw() {
 
 }
 
+void ExponentNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
+}
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> ExponentNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
@@ -297,19 +317,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ExponentNode::GetPinInfo() {
 	return info;
 }
 
-MappingNode::MappingNode(RenderInstance& prot,NodeStyles& styles):proto(prot) {
+MappingNode::MappingNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	setTitle(name);
-	setStyle(styles.GetNodeStyle(category));
-	for (auto& pin : GetPinInfo()) {
-		pin->CreatePin(this,styles.pinStyles);
-	}
 	getOut<FloatVariable>("Res")->behaviour([this]() {
 		const FloatVariable& a = getInVal<FloatVariable>("A");
 		return FloatVariable(map.MapVar(a.value), true);
 	});
 
 }
+
+MappingNode::MappingNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){}
 
 void MappingNode::draw() {
 	const FloatVariable& a = getInVal<FloatVariable>("A");
@@ -322,6 +339,12 @@ void MappingNode::draw() {
 
 }
 
+void MappingNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name",name,allocator);
+	obj.AddMember("Category",category,allocator);
+	//TODO export mapping
+	RuiBaseNode::Serialize(obj,allocator);
+}
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
@@ -333,8 +356,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 
 void AddMathNodes(NodeEditor& editor) {
 
-	editor.AddNodeType<MultiplyNode>();
 	editor.AddNodeType<AdditionNode>();
+	editor.AddNodeType<MultiplyNode>();
 	editor.AddNodeType<SubtractNode>();
 	editor.AddNodeType<DivideNode>();
 	editor.AddNodeType<ModuloNode>();

@@ -3,11 +3,14 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <filesystem>
 
 #include "imgui/ImNodeFlow.h"
 #include "RenderManager.h"
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "ThirdParty/rapidjson/document.h"
 
-
+namespace fs = std::filesystem;
 
 
 struct NodeStyles {
@@ -20,10 +23,35 @@ struct NodeStyles {
 	std::shared_ptr<ImFlow::NodeStyle> GetNodeStyle(std::string name);
 };
 
-
+class RuiBaseNode : public ImFlow::BaseNode {
+public:
+	virtual void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+		ImVec2 pos = getPos();
+		obj.AddMember("PosX",pos.x,allocator);
+		obj.AddMember("PosY",pos.y,allocator);
+		obj.AddMember("Id",getUID(),allocator);
+	}
+	//virtual void Export() = 0;
+protected:
+	RenderInstance& render;
+	NodeStyles& styles;
+	RuiBaseNode( std::string name,
+		std::string category,
+		std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,
+		RenderInstance& rend,
+		NodeStyles& style
+	):render(rend),styles(style) {
+		setTitle(name);
+		setStyle(styles.GetNodeStyle(category));
+		for (auto& pin : pinInfo) {
+			pin->CreatePin(this,styles.pinStyles);
+		}
+	}
+};
 
 struct NodeType {
-	std::shared_ptr<ImFlow::BaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::shared_ptr<RuiBaseNode> (*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style);
+	std::shared_ptr<RuiBaseNode> (*RecreateNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	std::vector<std::shared_ptr<ImFlow::PinProto>> (*GetPinInfo)();
 };
 
@@ -31,8 +59,7 @@ struct NodeType {
 typedef std::map<std::string,NodeType> NodeCategory;
 
 
-
-template<class T> std::shared_ptr<ImFlow::BaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
+template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles) {
 	return mINF.placeNode<T>(proto,styles);
 }
 
@@ -40,24 +67,40 @@ template<class T> std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo() {
 	return T::GetPinInfo();
 }
 
+template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj){
+	if(!(obj.HasMember("Id")&&obj["Id"].IsUint64()))return nullptr;
+	if(!(obj.HasMember("PosX")&&obj["PosX"].IsNumber()))return nullptr;
+	if(!(obj.HasMember("PosY")&&obj["PosY"].IsNumber()))return nullptr;
+
+	ImVec2 pos;
+	pos.x = obj["PosX"].GetFloat();
+	pos.y = obj["PosY"].GetFloat();
+	uint64_t uid = obj["Id"].GetUint64();
+
+	return mINF.recreateNode<T>(pos,uid,proto,styles,obj);
+}
 
 template<class T> NodeType CreateNodeType() {
 	NodeType type;
 	type.AddNode = AddNode<T>;
 	type.GetPinInfo = GetPinInfo<T>;
+	type.RecreateNode = RecreateNode<T>;
 	return type;
 }
 
 
 
 
-struct NodeEditor{
+
+
+class NodeEditor{
+private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& proto;
 	NodeStyles styles;
 
 	std::map<std::string,NodeCategory> nodeTypes;
-
+public:
 	NodeEditor(RenderInstance& prot):proto(prot) {
 		mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 			RightClickPopup(node);
@@ -70,8 +113,11 @@ struct NodeEditor{
 
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
-	void draw();
-
+	void Draw();
+	void Serialize();
+	void Deserialize();
+	void Export();
+	void Clear();
 
 	template<class T> void AddNodeType() {
 		
