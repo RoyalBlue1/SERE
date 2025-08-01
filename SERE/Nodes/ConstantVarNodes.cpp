@@ -293,11 +293,11 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::Ge
 	if(obj.HasMember("Value_Red")&&obj["Value_Red"].IsNumber())
 		value[0] = obj["Value_Red"].GetFloat();
 	if(obj.HasMember("Value_Green")&&obj["Value_Green"].IsNumber())
-		value[0] = obj["Value_Green"].GetFloat();
+		value[1] = obj["Value_Green"].GetFloat();
 	if(obj.HasMember("Value_Blue")&&obj["Value_Blue"].IsNumber())
-		value[0] = obj["Value_Blue"].GetFloat();
+		value[2] = obj["Value_Blue"].GetFloat();
 	if(obj.HasMember("Value_Alpha")&&obj["Value_Alpha"].IsNumber())
-		value[0] = obj["Value_Alpha"].GetFloat();
+		value[3] = obj["Value_Alpha"].GetFloat();
 
 	getOut<ColorVariable>("Value")->behaviour([this]() {
 		return ColorVariable(value[0],value[1],value[2],value[3]);
