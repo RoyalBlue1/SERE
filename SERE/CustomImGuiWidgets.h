@@ -1,7 +1,7 @@
 #include "Imgui/imgui.h"
 #include "ImageAtlas.h"
 #include <string>
-#include "Mapping.h"
+#include "RuiNodeEditor/Mapping.h"
 
 
 void AssetSelectionPopup(const char* id, uint32_t* hash);

@@ -1,20 +1,15 @@
 #include "GlobalNodes.h"
 
 
-TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TimeNode::TimeNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("Time")->behaviour([this]() {
-		return FloatVariable(render.globals.currentTime,false,1);
+		return FloatVariable(render.globals.currentTime,"globals->time");
 	});
 
 }
 
-TimeNode::TimeNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-
-	getOut<FloatVariable>("Time")->behaviour([this]() {
-		return FloatVariable(render.globals.currentTime,false,1);
-	});
-
+TimeNode::TimeNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TimeNode(rend,style) {
 }
 
 void TimeNode::draw() {

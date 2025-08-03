@@ -14,7 +14,7 @@
 #include "Imgui/implot.h"
 
 #include <d3d11.h>
-#include "RuiNodeEditor.h"
+#include "RuiNodeEditor/RuiNodeEditor.h"
 
 #include "Nodes/ArgumentNodes.h"
 #include "Nodes/ConstantVarNodes.h"

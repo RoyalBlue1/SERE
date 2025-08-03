@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RuiNodeEditor.h"
+#include "RuiNodeEditor/RuiNodeEditor.h"
 #include <intrin.h>
 
 struct AssetInputData {

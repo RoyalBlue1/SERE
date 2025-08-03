@@ -15,13 +15,17 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_executable (SERE
 	"SERE.cpp"
 	"SERE.rc"
-	"RuiNodeEditor.cpp"
-	"RenderManager.cpp"
 	"ImageAtlas.cpp"
 	"FontAtlas.cpp"
-	"RenderFunctions.cpp"
 	"CustomImGuiWidgets.cpp"
-	"Mapping.cpp"
+
+	"RuiNodeEditor/RuiNodeEditor.cpp"
+	"RuiNodeEditor/RuiNodeStyle.cpp"
+	"RuiNodeEditor/Mapping.cpp"
+
+	"RuiRendering/RenderFunctions.cpp"
+	"RuiRendering/RenderManager.cpp"
+
 	"imgui/imgui.cpp"
 	"imgui/imgui_demo.cpp"
 	"imgui/imgui_draw.cpp"
@@ -34,6 +38,7 @@ add_executable (SERE
 	"imgui/implot_demo.cpp"
 	"imgui/implot_items.cpp"
 	"imgui/imgui_stdlib.cpp"
+
 	"Nodes/ArgumentNodes.cpp"
 	"Nodes/TransformNodes.cpp"
 	"Nodes/RenderJobNodes.cpp"

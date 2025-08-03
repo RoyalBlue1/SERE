@@ -19,6 +19,20 @@
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
+NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
+	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
+		RightClickPopup(node);
+	});
+	mINF.droppedLinkPopUpContent([this](ImFlow::Pin* pin) {
+		LinkDroppedPopup(pin);
+	});
+	ImFlow::StyleManager& styles = mINF.getStyleManager();;
+	SetStyles(styles);
+
+}
+
+
+
 void NodeEditor::Draw() {
 	ImGui::Begin("Node Editor");
 	
@@ -121,7 +135,7 @@ void NodeEditor::Deserialize() {
 
 		std::string name = node["Name"].GetString();
 		std::string category = node["Category"].GetString();
-		nodeTypes[category][name].RecreateNode(mINF,proto,styles,node);
+		nodeTypes[category][name].RecreateNode(mINF,render,mINF.getStyleManager(), node);
 		
 	}
 	rapidjson::GenericArray links = root["Links"].GetArray();
@@ -160,7 +174,7 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 		if (ImGui::BeginMenu(categoryName.c_str())) {
 			for (const auto& [nodeName, nodeType] : category) {
 				if (ImGui::MenuItem(nodeName.c_str())) {
-					nodeType.AddNode(mINF,proto,styles);
+					nodeType.AddNode(mINF,render,mINF.getStyleManager());
 				}
 			}
 
@@ -173,7 +187,7 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 		if (ImGui::MenuItem("Spawn All Node Types")) {
 			for (auto& [catName, category] : nodeTypes) {
 				for (auto& [name, node] : category) {
-					node.AddNode(mINF,proto,styles);
+					node.AddNode(mINF,render,mINF.getStyleManager());
 				}
 			}
 
@@ -225,7 +239,7 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 
 				std::string menuName = std::format("{} > {}", nodeName, pinInfo->name);
 				if (selectFirstOption || ImGui::MenuItem(menuName.c_str())) {
-					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF, proto, styles);
+					std::shared_ptr<ImFlow::BaseNode> node = nodeType.AddNode(mINF, render, mINF.getStyleManager());
 					// create the pin
 					if (pinInfo->GetPinType() == ImFlow::PinType_Input) {
 						node->inPin(pinInfo->name.c_str())->createLink(pin);
@@ -244,71 +258,68 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 	}
 }
 
-NodeStyles::NodeStyles() {
-	pinStyles.emplace(
+
+void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
+	styles.AddPinStlye(
 		typeid(TransformResult).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(191,90,90,255),1,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(TransformSize).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(90,191,93,255),1,4.f,4.67f,3.7f,1.f));
 
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(IntVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(87,155,185,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(BoolVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(90,117,191,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(FloatVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(247,229,113,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(Float2Variable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(142,247,113,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(Float3Variable).name(),	
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,247,200,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(ColorVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,178,247,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(StringVariable).name(),	
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(133,113,247,255),0,4.f,4.67f,3.7f,1.f));
-	pinStyles.emplace(
+	styles.AddPinStlye(
 		typeid(AssetVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(218,113,247,255),0,4.f,4.67f,3.7f,1.f));
 
 
 
 
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Math",
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(17, 61, 173, 255), ImColor(233, 241, 244, 255), 6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Transform", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(27, 173, 17, 255), ImColor(233, 241, 244, 255), 6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Render", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Constant", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,17,170,255),ImColor(233,241,244,255),6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Argument", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(113,17,173,255),ImColor(233,241,244,255),6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Split Merge", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(17,149,173,255),ImColor(233,241,244,255),6.5f));
-	nodeStyles.emplace(
+	styles.AddNodeStlye(
 		"Global", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(57,17,132,255),ImColor(233,241,244,255),6.5f));
 
-	defaultNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f);
-	errorNode = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
-	errorNode->bg = IM_COL32(132,23,17,255);
+	
+	auto errorNodeStyle = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
+	errorNodeStyle->bg = IM_COL32(132,23,17,255);
+	styles.SetNodeErrorStyle(errorNodeStyle);
 }
 
-std::shared_ptr<ImFlow::NodeStyle> NodeStyles::GetNodeStyle(std::string name) {
-	if(nodeStyles.contains(name))
-		return nodeStyles[name];
-	return defaultNode;
-}

@@ -254,16 +254,16 @@ namespace ImFlow {
 
         // Display grid
         ImVec2 gridSize = ImGui::GetWindowSize();
-        float subGridStep = m_style.grid_size / m_style.grid_subdivisions;
-        for (float x = fmodf(m_context.scroll().x, m_style.grid_size); x < gridSize.x; x += m_style.grid_size)
-            draw_list->AddLine(ImVec2(x, 0.0f), ImVec2(x, gridSize.y), m_style.colors.grid);
-        for (float y = fmodf(m_context.scroll().y, m_style.grid_size); y < gridSize.y; y += m_style.grid_size)
-            draw_list->AddLine(ImVec2(0.0f, y), ImVec2(gridSize.x, y), m_style.colors.grid);
+        float subGridStep = m_styles.grid.grid_size / m_styles.grid.grid_subdivisions;
+        for (float x = fmodf(m_context.scroll().x, m_styles.grid.grid_size); x < gridSize.x; x += m_styles.grid.grid_size)
+            draw_list->AddLine(ImVec2(x, 0.0f), ImVec2(x, gridSize.y), m_styles.grid.colors.grid);
+        for (float y = fmodf(m_context.scroll().y, m_styles.grid.grid_size); y < gridSize.y; y += m_styles.grid.grid_size)
+            draw_list->AddLine(ImVec2(0.0f, y), ImVec2(gridSize.x, y), m_styles.grid.colors.grid);
         if (m_context.scale() > 0.7f) {
             for (float x = fmodf(m_context.scroll().x, subGridStep); x < gridSize.x; x += subGridStep)
-                draw_list->AddLine(ImVec2(x, 0.0f), ImVec2(x, gridSize.y), m_style.colors.subGrid);
+                draw_list->AddLine(ImVec2(x, 0.0f), ImVec2(x, gridSize.y), m_styles.grid.colors.subGrid);
             for (float y = fmodf(m_context.scroll().y, subGridStep); y < gridSize.y; y += subGridStep)
-                draw_list->AddLine(ImVec2(0.0f, y), ImVec2(gridSize.x, y), m_style.colors.subGrid);
+                draw_list->AddLine(ImVec2(0.0f, y), ImVec2(gridSize.x, y), m_styles.grid.colors.subGrid);
         }
 
         //set zoom to true so nodes might disable it if they need zoom priority
@@ -362,4 +362,23 @@ namespace ImFlow {
 
         m_context.end();
     }
+
+    StyleManager::StyleManager() {
+        defaultNodeStyle = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,40,17,255),ImColor(233,241,244,255),6.5f);
+    }
+
+
+    std::shared_ptr<ImFlow::NodeStyle> StyleManager::GetNodeStyle(std::string name) {
+        if(nodeStyles.contains(name))
+            return nodeStyles[name];
+        return defaultNodeStyle;
+    }
+
+
+    std::shared_ptr<ImFlow::PinStyle> StyleManager::GetPinStyle(std::string name) {
+        if(pinStyles.contains(name))
+            return pinStyles[name];
+        return defaultPinStyle;
+    }
+
 }

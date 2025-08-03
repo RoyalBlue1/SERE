@@ -1,5 +1,5 @@
 #include "RenderJobNodes.h"
-#include "RenderManager.h"
+#include "RuiRendering/RenderManager.h"
 
 
 
@@ -7,12 +7,12 @@
 
 
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
+AssetRenderNode::AssetRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
 
 void AssetRenderNode::draw() {
 	AssetInputData input{};
@@ -64,12 +64,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	return info;
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {}
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {}
 
 void AssetCircleRenderNode::draw() {
 	AssetCircleInputData input{};
@@ -125,7 +125,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo
 
 
 
-TextStyleNode::TextStyleNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextStyleNode::TextStyleNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	currentFont = &fonts[0].fonts.begin()->second;
 
@@ -150,7 +150,7 @@ TextStyleNode::TextStyleNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 	});
 }
 
-TextStyleNode::TextStyleNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
+TextStyleNode::TextStyleNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
 	if (obj.HasMember("FontName") && obj["FontName"].IsString()) {
 		std::string fontName = obj["FontName"].GetString();
 		for (auto& fontAtlas : fonts) {
@@ -210,7 +210,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextStyleNode::GetPinInfo() {
 	return info;
 }
 
-TextSizeNode::TextSizeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextSizeNode::TextSizeNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<TextInputData>("Text Data")->behaviour([this]() {
 		
@@ -246,7 +246,7 @@ TextSizeNode::TextSizeNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 
 }
 
-TextSizeNode::TextSizeNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
+TextSizeNode::TextSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
 
 void TextSizeNode::draw() {
 
@@ -275,12 +275,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
 }
 
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 }
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){}
+TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){}
 
 void TextRenderNode::draw() {
 	const TextInputData& data = getInVal<TextInputData>("Data");

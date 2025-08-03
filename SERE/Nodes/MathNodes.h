@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RuiNodeEditor.h"
+#include "RuiNodeEditor/RuiNodeEditor.h"
 #include "CustomImGuiWidgets.h"
 
 void AddMathNodes(NodeEditor& editor);
@@ -12,8 +12,8 @@ class MultiplyNode : public RuiBaseNode
 private:
 	
 public:
-	explicit MultiplyNode(RenderInstance& prot,NodeStyles& styles);
-	explicit MultiplyNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MultiplyNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit MultiplyNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -28,8 +28,8 @@ public:
 private:
 	
 public:
-	explicit AdditionNode(RenderInstance& prot,NodeStyles& styles);
-	explicit AdditionNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AdditionNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit AdditionNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -46,8 +46,8 @@ public:
 private:
 	
 public:
-	explicit SubtractNode(RenderInstance& prot,NodeStyles& styles);
-	explicit SubtractNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SubtractNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit SubtractNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -63,8 +63,8 @@ private:
 	std::shared_ptr<ImFlow::NodeStyle> style;
 	std::shared_ptr<ImFlow::NodeStyle> errorStyle;
 public:
-	explicit DivideNode(RenderInstance& prot,NodeStyles& style);
-	explicit DivideNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit DivideNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit DivideNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -81,8 +81,8 @@ private:
 	std::shared_ptr<ImFlow::NodeStyle> style;
 	std::shared_ptr<ImFlow::NodeStyle> errorStyle;
 public:
-	explicit ModuloNode(RenderInstance& prot,NodeStyles& style);
-	explicit ModuloNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ModuloNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit ModuloNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -98,8 +98,8 @@ private:
 	
 
 public:
-	explicit AbsoluteNode(RenderInstance& prot,NodeStyles& style);
-	explicit AbsoluteNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AbsoluteNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit AbsoluteNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -114,8 +114,8 @@ private:
 	
 
 public:
-	explicit SineNode(RenderInstance& prot,NodeStyles& style);
-	explicit SineNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SineNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit SineNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -131,8 +131,8 @@ private:
 	
 
 public:
-	explicit ExponentNode(RenderInstance& prot,NodeStyles& style);
-	explicit ExponentNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ExponentNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit ExponentNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -148,8 +148,8 @@ private:
 	
 	Mapping map;
 public:
-	explicit MappingNode(RenderInstance& prot,NodeStyles& style);
-	explicit MappingNode(RenderInstance& prot,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MappingNode(RenderInstance& prot,ImFlow::StyleManager& style);
+	explicit MappingNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

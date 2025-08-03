@@ -4,7 +4,7 @@
 
 __m128 xmmword_12A146C0 = _mm_castsi128_ps(_mm_set_epi32(0xFFFFFFFF,0,0,0xFFFFFFFF));
 
-Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform0Node::Transform0Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<TransformResult>("Out")->behaviour([this]() {
 		TransformResult res; 
@@ -16,7 +16,7 @@ Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform0Node::Transform0Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform0Node(rend,style){}
+Transform0Node::Transform0Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform0Node(rend,style){}
 
 void Transform0Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -37,7 +37,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform0Node::GetPinInfo() {
 	return info;
 }
 
-Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform1Node::Transform1Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Source")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -54,7 +54,7 @@ Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});;
 }
 
-Transform1Node::Transform1Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform1Node(rend,style){}
+Transform1Node::Transform1Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform1Node(rend,style){}
 
 void Transform1Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -76,7 +76,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform1Node::GetPinInfo() {
 	return info;
 }
 
-Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform2Node::Transform2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -111,7 +111,7 @@ Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform2Node::Transform2Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform2Node(rend,style){}
+Transform2Node::Transform2Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform2Node(rend,style){}
 
 void Transform2Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -138,7 +138,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform2Node::GetPinInfo() {
 	return info;
 }
 
-Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform3Node::Transform3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -174,7 +174,7 @@ Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform3Node::Transform3Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform3Node(rend,style){}
+Transform3Node::Transform3Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform3Node(rend,style){}
 
 void Transform3Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -201,7 +201,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform3Node::GetPinInfo() {
 	return info;
 }
 
-Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform4Node::Transform4Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -240,7 +240,7 @@ Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform4Node::Transform4Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform4Node(rend,style){}
+Transform4Node::Transform4Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform4Node(rend,style){}
 
 void Transform4Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -280,7 +280,7 @@ void sub_100520(RenderInstance& render,__m128* a2,__m128* a3) {
 	*a3 = _mm_shuffle_ps(v10,v10, _MM_SHUFFLE(1,1,1,1));
 }
 
-Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform5Node::Transform5Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -334,7 +334,7 @@ Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform5Node::Transform5Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform5Node(rend,style){}
+Transform5Node::Transform5Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform5Node(rend,style){}
 
 void Transform5Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -361,7 +361,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform5Node::GetPinInfo() {
 	return info;
 }
 
-Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform6Node::Transform6Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
@@ -411,7 +411,7 @@ Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform6Node::Transform6Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform6Node(rend,style){}
+Transform6Node::Transform6Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform6Node(rend,style){}
 
 void Transform6Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -438,7 +438,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform6Node::GetPinInfo() {
 	return info;
 }
 
-Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform7Node::Transform7Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
@@ -498,7 +498,7 @@ Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform7Node::Transform7Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform7Node(rend,style){}
+Transform7Node::Transform7Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform7Node(rend,style){}
 
 void Transform7Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -533,7 +533,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform7Node::GetPinInfo() {
 	return info;
 }
 
-Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform8Node::Transform8Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
@@ -608,7 +608,7 @@ Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform8Node::Transform8Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform8Node(rend,style){}
+Transform8Node::Transform8Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform8Node(rend,style){}
 
 void Transform8Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -643,7 +643,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform8Node::GetPinInfo() {
 	return info;
 }
 
-Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform9Node::Transform9Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
@@ -727,7 +727,7 @@ Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 	});
 }
 
-Transform9Node::Transform9Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform9Node(rend,style){}
+Transform9Node::Transform9Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform9Node(rend,style){}
 
 void Transform9Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -762,7 +762,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform9Node::GetPinInfo() {
 	return info;
 }
 
-Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform10Node::Transform10Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Pin 1 Parent")->setEmptyVal(render.transformResults[2]);
 	getIn<TransformResult>("Pin 2 Parent")->setEmptyVal(render.transformResults[2]);
@@ -840,7 +840,7 @@ Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style):RuiBase
 	});
 }
 
-Transform10Node::Transform10Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform10Node(rend,style){}
+Transform10Node::Transform10Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform10Node(rend,style){}
 
 void Transform10Node::draw() {
 	ImGui::PushItemWidth(90);
@@ -877,7 +877,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Transform10Node::GetPinInfo() {
 	return info;
 }
 
-Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 	getOut<TransformResult>("Out")->behaviour([this]() {
@@ -969,7 +969,7 @@ Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style):RuiBase
 	});
 }
 
-Transform11Node::Transform11Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform11Node(rend,style){}
+Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Transform11Node(rend,style){}
 
 void Transform11Node::draw() {
 	ImGui::PushItemWidth(90);

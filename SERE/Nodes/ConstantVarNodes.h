@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RuiNodeEditor.h"
+#include "RuiNodeEditor/RuiNodeEditor.h"
 
 void AddConstantVarNodes(NodeEditor& editor);
 
@@ -10,8 +10,8 @@ public:
 	static inline std::string name = "Integer Constant";
 	static inline std::string category = "Constant";
 
-	explicit IntVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit IntVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit IntVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit IntVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -28,8 +28,8 @@ public:
 	static inline std::string name = "Bool Constant";
 	static inline std::string category = "Constant";
 
-	explicit BoolVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit BoolVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit BoolVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit BoolVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -44,8 +44,8 @@ public:
 	static inline std::string name = "Float Constant";
 	static inline std::string category = "Constant";
 
-	explicit FloatVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit FloatVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit FloatVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit FloatVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -62,8 +62,8 @@ public:
 	static inline std::string name = "Vector2 Constant";
 	static inline std::string category = "Constant";
 
-	explicit Float2VarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit Float2VarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit Float2VarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit Float2VarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -80,8 +80,8 @@ public:
 	static inline std::string name = "Vector3 Constant";
 	static inline std::string category = "Constant";
 
-	explicit Float3VarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit Float3VarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit Float3VarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit Float3VarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -98,8 +98,8 @@ public:
 	static inline std::string name = "Color Constant";
 	static inline std::string category = "Constant";
 
-	explicit ColorVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit ColorVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ColorVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit ColorVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -114,8 +114,8 @@ public:
 	static inline std::string name = "String Constant";
 	static inline std::string category = "Constant";
 
-	explicit StringVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit StringVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit StringVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit StringVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -130,8 +130,8 @@ public:
 	static inline std::string name = "Asset Constant";
 	static inline std::string category = "Constant";
 
-	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit AssetVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AssetVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit AssetVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -147,8 +147,8 @@ public:
 	static inline std::string name = "Size Constant";
 	static inline std::string category = "Constant";
 
-	explicit SizeVarNode(RenderInstance& prot,NodeStyles& styles);
-	explicit SizeVarNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SizeVarNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit SizeVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

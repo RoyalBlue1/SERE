@@ -170,7 +170,7 @@ struct TransformSize {
 };
 
 struct Globals {
-    float currentTime = 0;
+    float currentTime = 0.f;
 };
 
 class RenderInstance
@@ -297,26 +297,26 @@ public:
 
     void SetSize(float width, float height) {
         elementHeight = height;
-        elementHeightRatio = 1/height;
+        elementHeightRatio = 1.f/height;
         elementWidth = width;
-        elementWidthRatio = 1/width;
+        elementWidthRatio = 1.f/width;
     
         memset(&drawInfo,0,sizeof(DrawInfo));
-        drawInfo.float_18 = 0;
-        drawInfo.float_1C = 1;
+        drawInfo.float_18 = 0.f;
+        drawInfo.float_1C = 1.f;
         drawInfo.ruiUnk3[0].screenWidth = width;
         drawInfo.ruiUnk3[0].screenHeight = height;
-        drawInfo.ruiUnk3[0].float_4 = 0;
-        drawInfo.ruiUnk3[0].float_8 = 0;
-        drawInfo.ruiUnk3[0].float_C = 1;
-        drawInfo.ruiUnk3[0].float_10 = 0;
-        drawInfo.ruiUnk3[0].float_18 = 0;
-        drawInfo.ruiUnk3[0].float_1C = 1;
+        drawInfo.ruiUnk3[0].float_4 = 0.f;
+        drawInfo.ruiUnk3[0].float_8 = 0.f;
+        drawInfo.ruiUnk3[0].float_C = 1.f;
+        drawInfo.ruiUnk3[0].float_10 = 0.f;
+        drawInfo.ruiUnk3[0].float_18 = 0.f;
+        drawInfo.ruiUnk3[0].float_1C = 1.f;
         drawInfo.ruiUnk3[1] = drawInfo.ruiUnk3[0];
-        drawInfo.ruiUnk3[0].float_20 = 0;
-        drawInfo.ruiUnk3[0].float_24 = 0;
-        drawInfo.ruiUnk3[0].float_28 = 0;
-        drawInfo.ruiUnk3[0].float_2C = 1;
+        drawInfo.ruiUnk3[0].float_20 = 0.f;
+        drawInfo.ruiUnk3[0].float_24 = 0.f;
+        drawInfo.ruiUnk3[0].float_28 = 0.f;
+        drawInfo.ruiUnk3[0].float_2C = 1.f;
     }
 
     RenderInstance(ID3D11Device* dev, ID3D11DeviceContext* context, float width, float height) {

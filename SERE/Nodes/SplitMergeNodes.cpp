@@ -1,20 +1,28 @@
 #include "SplitMergeNodes.h"
 
-SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
-		return FloatVariable(in.value.x,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.x",in.name);
+		}
+		return FloatVariable(in.value.x,name);
 
 	});
 	getOut<FloatVariable>("Y")->behaviour([this]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
-		return FloatVariable(in.value.y,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.y",in.name);
+		}
+		return FloatVariable(in.value.y,name);
 
 	});
 }
 
-SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat2Node(rend,style){}
+SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat2Node(rend,style){}
 
 void SplitFloat2Node::draw() {
 	const Float2Variable& in = getInVal<Float2Variable>("In");
@@ -38,20 +46,20 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat2Node::GetPinInfo() {
 	return info;
 }
 
-MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float2Variable>("Out")->behaviour([this]() {
 
 		const FloatVariable& inX = getInVal<FloatVariable>("X");
 		const FloatVariable& inY = getInVal<FloatVariable>("Y");
-		bool isConstant = inX.isConstant&&inY.isConstant;
+		std::string name = (inX.IsConstant() && inY.IsConstant())?"":Variable::UniqueName();
 
-		return Float2Variable(inX.value,inY.value,isConstant);
+		return Float2Variable(inX.value,inY.value,name);
 
 	});
 }
 
-MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat2Node(rend,style){}
+MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat2Node(rend,style){}
 
 void MergeFloat2Node::draw() {
 	const FloatVariable& inX = getInVal<FloatVariable>("X");
@@ -74,26 +82,38 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat2Node::GetPinInfo() {
 	return info;
 }
 
-SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("X")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
-		return FloatVariable(in.value.x,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.x",in.name);
+		}
+		return FloatVariable(in.value.x,name);
 
 	});
 	getOut<FloatVariable>("Y")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
-		return FloatVariable(in.value.y,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.y",in.name);
+		}
+		return FloatVariable(in.value.y,name);
 
 	});
 	getOut<FloatVariable>("Z")->behaviour([this]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
-		return FloatVariable(in.value.z,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.z",in.name);
+		}
+		return FloatVariable(in.value.z,name);
 
 	});
 }
 
-SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat3Node(rend,style){}
+SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat3Node(rend,style){}
 
 void SplitFloat3Node::draw() {
 	const Float3Variable& in = getInVal<Float3Variable>("In");
@@ -118,21 +138,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat3Node::GetPinInfo() {
 	return info;
 }
 
-MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float3Variable>("Out")->behaviour([this]() {
 
 		const FloatVariable& inX = getInVal<FloatVariable>("X");
 		const FloatVariable& inY = getInVal<FloatVariable>("Y");
 		const FloatVariable& inZ = getInVal<FloatVariable>("Z");
-		bool isConstant = inX.isConstant&&inY.isConstant&&inZ.isConstant;
-		return Float3Variable(inX.value,inY.value,inZ.value,isConstant);
+		std::string name = (inX.IsConstant() && inY.IsConstant()&&inZ.IsConstant())?"":Variable::UniqueName();
+		return Float3Variable(inX.value,inY.value,inZ.value,name);
 
 
 	});
 }
 
-MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat3Node(rend,style){}
+MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat3Node(rend,style){}
 
 void MergeFloat3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
@@ -158,32 +178,48 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat3Node::GetPinInfo() {
 	return info;
 }
 
-SplitColorNode::SplitColorNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("Red")->behaviour([this]() {
 
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		return FloatVariable(in.value.red,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.red",in.name);
+		}
+		return FloatVariable(in.value.red,name);
 
 	});
 	getOut<FloatVariable>("Green")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		return FloatVariable(in.value.green,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.green",in.name);
+		}
+		return FloatVariable(in.value.green,name);
 
 	});
 	getOut<FloatVariable>("Blue")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		return FloatVariable(in.value.blue,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.blue",in.name);
+		}
+		return FloatVariable(in.value.blue,name);
 
 	});
 	getOut<FloatVariable>("Alpha")->behaviour([this]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		return FloatVariable(in.value.alpha,in.isConstant);
+		std::string name = "";
+		if (!in.IsConstant()) {
+			name = std::format("{}.alpha",in.name);
+		}
+		return FloatVariable(in.value.alpha,name);
 
 	});
 }
 
-SplitColorNode::SplitColorNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitColorNode(rend,style){}
+SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitColorNode(rend,style){}
 
 void SplitColorNode::draw() {
 	const ColorVariable& col = getInVal<ColorVariable>("In");
@@ -210,20 +246,20 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitColorNode::GetPinInfo() {
 	return info;
 }
 
-RGBToColorNode::RGBToColorNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<ColorVariable>("Out")->behaviour([this]() {
 		const FloatVariable& inRed = getInVal<FloatVariable>("Red");
 		const FloatVariable& inGreen = getInVal<FloatVariable>("Green");
 		const FloatVariable& inBlue = getInVal<FloatVariable>("Blue");
 		const FloatVariable& inAlpha = getInVal<FloatVariable>("Alpha");
-		bool isConstant = inRed.isConstant&&inGreen.isConstant&&inBlue.isConstant&&inAlpha.isConstant;
-		return ColorVariable(inRed.value,inGreen.value,inBlue.value,inAlpha.value,isConstant);
+		std::string name = (inRed.IsConstant() && inGreen.IsConstant() && inBlue.IsConstant() && inAlpha.IsConstant())?"":Variable::UniqueName();
+		return ColorVariable(inRed.value,inGreen.value,inBlue.value,inAlpha.value,name);
 
 	});
 }
 
-RGBToColorNode::RGBToColorNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RGBToColorNode(rend,style){}
+RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RGBToColorNode(rend,style){}
 
 void RGBToColorNode::draw() {
 	const FloatVariable& inRed = getInVal<FloatVariable>("Red");
@@ -252,7 +288,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> RGBToColorNode::GetPinInfo() {
 	return info;
 }
 
-HSVToColorNode::HSVToColorNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<ColorVariable>("Out")->behaviour([this]() {
 
@@ -328,13 +364,13 @@ HSVToColorNode::HSVToColorNode(RenderInstance& rend,NodeStyles& style):RuiBaseNo
 		}
 
 
-		bool isConstant = inH.isConstant&&inS.isConstant&&inV.isConstant&&inAlpha.isConstant;
-		return ColorVariable(r,g,b,inAlpha.value,isConstant);
+		std::string name = (inH.IsConstant() && inS.IsConstant() && inV.IsConstant() && inAlpha.IsConstant()) ? "" : Variable::UniqueName();
+		return ColorVariable(r,g,b,inAlpha.value,name);
 
 	});
 }
 
-HSVToColorNode::HSVToColorNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):HSVToColorNode(rend,style){}
+HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):HSVToColorNode(rend,style){}
 
 void HSVToColorNode::draw() {
 	const FloatVariable& inRed = getInVal<FloatVariable>("Hue");

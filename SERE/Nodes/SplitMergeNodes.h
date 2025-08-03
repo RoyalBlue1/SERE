@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RuiNodeEditor.h"
+#include "RuiNodeEditor/RuiNodeEditor.h"
 
 
 class SplitFloat2Node : public RuiBaseNode
@@ -9,8 +9,8 @@ public:
 	static inline std::string name = "Split Vector2";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitFloat2Node(RenderInstance& prot,NodeStyles& styles);
-	explicit SplitFloat2Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit SplitFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -24,8 +24,8 @@ public:
 	static inline std::string name = "Merge Vector2";
 	static inline std::string category = "Split Merge";
 
-	explicit MergeFloat2Node(RenderInstance& prot,NodeStyles& styles);
-	explicit MergeFloat2Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MergeFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit MergeFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -38,8 +38,8 @@ public:
 	static inline std::string name = "Split Vector3";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitFloat3Node(RenderInstance& prot,NodeStyles& styles);
-	explicit SplitFloat3Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit SplitFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -53,8 +53,8 @@ public:
 	static inline std::string name = "Merge Vector3";
 	static inline std::string category = "Split Merge";
 
-	explicit MergeFloat3Node(RenderInstance& prot,NodeStyles& styles);
-	explicit MergeFloat3Node(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MergeFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit MergeFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -67,8 +67,8 @@ public:
 	static inline std::string name = "Split Color RGB";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitColorNode(RenderInstance& prot,NodeStyles& styles);
-	explicit SplitColorNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit SplitColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -81,8 +81,8 @@ class RGBToColorNode : public RuiBaseNode
 	static inline std::string name = "Merge Color RGB";
 	static inline std::string category = "Split Merge";
 
-	explicit RGBToColorNode(RenderInstance& prot,NodeStyles& styles);
-	explicit RGBToColorNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit RGBToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit RGBToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 
@@ -95,8 +95,8 @@ class HSVToColorNode : public RuiBaseNode
 	static inline std::string name = "Merge Color HSV";
 	static inline std::string category = "Split Merge";
 
-	explicit HSVToColorNode(RenderInstance& prot,NodeStyles& styles);
-	explicit HSVToColorNode(RenderInstance& prot,NodeStyles& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit HSVToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit HSVToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 

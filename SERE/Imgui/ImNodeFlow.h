@@ -179,6 +179,64 @@ namespace ImFlow
         static std::shared_ptr<NodeStyle> brown() { return std::make_shared<NodeStyle>(IM_COL32(191,134,90,255), ImColor(233,241,244,255), 6.5f); }
     };
 
+    /**
+    * @brief Grid's the color parameters
+    */
+    struct InfColors
+    {
+        /// @brief Background of the grid
+        ImU32 background = IM_COL32(33,41,45,255);
+        /// @brief Main lines of the grid
+        ImU32 grid = IM_COL32(200, 200, 200, 40);
+        /// @brief Secondary lines
+        ImU32 subGrid = IM_COL32(200, 200, 200, 10);
+    };
+
+    /**
+    * @brief ALl the grid's appearance parameters. Sizes + Colors
+    */
+    struct InfStyler
+    {
+        /// @brief Size of main grid
+        float grid_size = 50.f;
+        /// @brief Sub-grid divisions for Node snapping
+        float grid_subdivisions = 5.f;
+        /// @brief ImNodeFlow colors
+        InfColors colors;
+    };
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // STYLE MANAGER
+
+    class StyleManager {
+        std::map<std::string, std::shared_ptr<PinStyle>> pinStyles;
+        std::shared_ptr<PinStyle> defaultPinStyle;
+
+
+        std::map<std::string, std::shared_ptr<NodeStyle>> nodeStyles;
+        std::shared_ptr<NodeStyle> defaultNodeStyle;
+        std::shared_ptr<NodeStyle> errorNodeStyle;
+    public:
+        StyleManager();
+        InfStyler grid;
+        void SetNodeErrorStyle(std::shared_ptr<NodeStyle> style) {
+            errorNodeStyle = style;
+        }
+        std::shared_ptr<NodeStyle> GetErrorStyle() {
+            return errorNodeStyle;
+        }
+        void AddNodeStlye(std::string name, std::shared_ptr<NodeStyle> style) {
+            nodeStyles.emplace(name,style);
+        }
+
+        void AddPinStlye(std::string name, std::shared_ptr<PinStyle> style) {
+            pinStyles.emplace(name,style);
+        }
+
+        std::shared_ptr<NodeStyle> GetNodeStyle(std::string name);
+        std::shared_ptr<PinStyle> GetPinStyle(std::string name);
+    };
+
     // -----------------------------------------------------------------------------------------------------------------
     // LINK
 
@@ -242,31 +300,7 @@ namespace ImFlow
     // -----------------------------------------------------------------------------------------------------------------
     // HANDLER
 
-    /**
-     * @brief Grid's the color parameters
-     */
-    struct InfColors
-    {
-        /// @brief Background of the grid
-        ImU32 background = IM_COL32(33,41,45,255);
-        /// @brief Main lines of the grid
-        ImU32 grid = IM_COL32(200, 200, 200, 40);
-        /// @brief Secondary lines
-        ImU32 subGrid = IM_COL32(200, 200, 200, 10);
-    };
 
-    /**
-     * @brief ALl the grid's appearance parameters. Sizes + Colors
-     */
-    struct InfStyler
-    {
-        /// @brief Size of main grid
-        float grid_size = 50.f;
-        /// @brief Sub-grid divisions for Node snapping
-        float grid_subdivisions = 5.f;
-        /// @brief ImNodeFlow colors
-        InfColors colors;
-    };
 
     /**
      * @brief Main node editor
@@ -292,7 +326,7 @@ namespace ImFlow
         {
             m_instances++;
             m_context.config().extra_window_wrapper = true;
-            m_context.config().color = m_style.colors.background;
+            m_context.config().color = m_styles.grid.colors.background;
         }
 
         /**
@@ -470,7 +504,13 @@ namespace ImFlow
          * @brief <BR>Get current style
          * @return Reference to style variables
          */
-        InfStyler& getStyle() { return m_style; }
+        InfStyler& getStyle() { return m_styles.grid; }
+
+        /**
+        * @brief <BR>Get Style Manager
+        * @return Reference to style manager
+        */
+        StyleManager& getStyleManager() { return m_styles; }
 
         /**
          * @brief <BR>Set editor's size
@@ -550,7 +590,7 @@ namespace ImFlow
         Pin* m_hovering = nullptr;
         Pin* m_dragOut = nullptr;
 
-        InfStyler m_style;
+        StyleManager m_styles;
 
         ImVec2 m_lastRightClickPos;
     };
@@ -957,7 +997,7 @@ namespace ImFlow
     public:
         std::string name;
 
-        virtual void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) = 0;
+        virtual void CreatePin(BaseNode* node,StyleManager& style) = 0;
         virtual bool CanCreateLink(PinProto* other) = 0;
         virtual [[nodiscard]] const std::type_info& getDataType() const = 0;
         virtual PinType GetPinType() const = 0;
@@ -975,9 +1015,9 @@ namespace ImFlow
             typeFilter(filter),
             defaultValue(defaultVal){ }
 
-        void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) override {
+        void CreatePin(BaseNode* node,StyleManager& styles) override {
             std::string typeName = typeid(T).name();
-            node->addIN<T>(shared_from_this(),defaultValue,styles[typeName]);
+            node->addIN<T>(shared_from_this(),defaultValue,styles.GetPinStyle(typeName));
         }
         bool CanCreateLink(PinProto* other)override;
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
@@ -993,9 +1033,9 @@ namespace ImFlow
         OutPinProto(std::string name):
             PinProto(name){ }
 
-        void CreatePin(BaseNode* node,std::map<std::string,std::shared_ptr<PinStyle>>& styles) override {
+        void CreatePin(BaseNode* node,StyleManager& style) override {
             std::string typeName = typeid(T).name();
-            node->addOUT<T>(shared_from_this(),styles[typeName]);
+            node->addOUT<T>(shared_from_this(),style.GetPinStyle(typeName));
         }
         bool CanCreateLink(PinProto* other)override;
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };

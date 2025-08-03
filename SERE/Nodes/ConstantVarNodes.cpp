@@ -2,7 +2,7 @@
 #include "CustomImGuiWidgets.h"
 #include "imgui/imgui_stdlib.h"
 
-IntVarNode::IntVarNode(RenderInstance& rend, NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	value = 0;
@@ -12,7 +12,7 @@ IntVarNode::IntVarNode(RenderInstance& rend, NodeStyles& style):RuiBaseNode(name
 	});
 }
 
-IntVarNode::IntVarNode(RenderInstance& rend, NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value = 0;
 	if(obj.HasMember("Value")&&obj["Value"].IsInt())
@@ -42,7 +42,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> IntVarNode::GetPinInfo() {
 	return info;
 }
 
-BoolVarNode::BoolVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value = false;
 
@@ -52,7 +52,7 @@ BoolVarNode::BoolVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(nam
 	});
 }
 
-BoolVarNode::BoolVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value = false;
 	if(obj.HasMember("Value")&&obj["Value"].IsBool())
@@ -82,7 +82,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BoolVarNode::GetPinInfo() {
 	return info;
 }
 
-FloatVarNode::FloatVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -93,7 +93,7 @@ FloatVarNode::FloatVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 }
 
-FloatVarNode::FloatVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -137,7 +137,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> FloatVarNode::GetPinInfo() {
 	return info;
 }
 
-Float2VarNode::Float2VarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -150,7 +150,7 @@ Float2VarNode::Float2VarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 	});
 }
 
-Float2VarNode::Float2VarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -200,7 +200,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float2VarNode::GetPinInfo() {
 	return info;
 }
 
-Float3VarNode::Float3VarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	minVal = 0;
@@ -215,7 +215,7 @@ Float3VarNode::Float3VarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode
 	});
 }
 
-Float3VarNode::Float3VarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	minVal = 0;
@@ -270,7 +270,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float3VarNode::GetPinInfo() {
 	return info;
 }
 
-ColorVarNode::ColorVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value[0] = 1.f;
 	value[1] = 1.f;
@@ -283,7 +283,7 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 }
 
-ColorVarNode::ColorVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value[0] = 1.f;
 	value[1] = 1.f;
@@ -327,14 +327,14 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ColorVarNode::GetPinInfo() {
 	return info;
 }
 
-StringVarNode::StringVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<StringVariable>("Value")->behaviour([this]() {
 		return StringVariable(value);
 	});
 }
 
-StringVarNode::StringVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	if(obj.HasMember("Value")&&obj["Value"].IsString())
 		value = obj["Value"].GetString();
@@ -363,7 +363,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> StringVarNode::GetPinInfo() {
 	return info;
 }
 
-AssetVarNode::AssetVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	hash = loadAsset("white");
 	showSelectionUi = false;
@@ -373,7 +373,7 @@ AssetVarNode::AssetVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(n
 	});
 }
 
-AssetVarNode::AssetVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	hash = loadAsset("white");
 
@@ -408,7 +408,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetVarNode::GetPinInfo() {
 	return info;
 }
 
-SizeVarNode::SizeVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 128;
@@ -426,7 +426,7 @@ SizeVarNode::SizeVarNode(RenderInstance& rend,NodeStyles& style):RuiBaseNode(nam
 	});
 }
 
-SizeVarNode::SizeVarNode(RenderInstance& rend,NodeStyles& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 512;
