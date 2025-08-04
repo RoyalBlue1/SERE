@@ -20,7 +20,6 @@ add_executable (SERE
 	"CustomImGuiWidgets.cpp"
 
 	"RuiNodeEditor/RuiNodeEditor.cpp"
-	"RuiNodeEditor/RuiNodeStyle.cpp"
 	"RuiNodeEditor/Mapping.cpp"
 
 	"RuiRendering/RenderFunctions.cpp"
