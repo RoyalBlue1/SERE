@@ -1,13 +1,15 @@
 #include "ArgumentNodes.h"
 #include "imgui/imgui_stdlib.h"
 #include "Imgui/ImNodeFlow.h"
+#include "CustomImGuiWidgets.h"
 
 
 
 IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<IntVariable>("Value")->behaviour([this]() {
-		return IntVariable(render.arguments[argName].defaultVal.intVal,argName);
+		int val = std::any_cast<int>(render.arguments[argName]);
+		return IntVariable(val,argName);
 
 	});
 }
@@ -23,7 +25,9 @@ IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjs
 void IntArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputInt("Default Value",&render.arguments[argName].defaultVal.intVal);
+	int val = std::any_cast<int>(render.arguments[argName]);
+	ImGui::InputInt("Default Value",&val);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -32,6 +36,10 @@ void IntArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapi
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void IntArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::INT);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> IntArgNode::GetPinInfo() {
@@ -43,7 +51,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> IntArgNode::GetPinInfo() {
 BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<BoolVariable>("Value")->behaviour([this]() {
-		return BoolVariable(render.arguments[argName].defaultVal.intVal,argName);
+		int val = std::any_cast<int>(render.arguments[argName]);
+		return BoolVariable(val,argName);
 	});
 }
 
@@ -58,7 +67,9 @@ BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapid
 void BoolArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputInt("Default Value",&render.arguments[argName].defaultVal.intVal);
+	int val = std::any_cast<int>(render.arguments[argName]);
+	ImGui::InputInt("Default Value",&val);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -67,6 +78,10 @@ void BoolArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void BoolArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::BOOL);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> BoolArgNode::GetPinInfo() {
@@ -78,7 +93,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BoolArgNode::GetPinInfo() {
 FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("Value")->behaviour([this]() {
-		return FloatVariable(render.arguments[argName].defaultVal.floatVal[0],argName);
+		float val = std::any_cast<float>(render.arguments[argName]);
+		return FloatVariable(val,argName);
 	});
 }
 
@@ -92,7 +108,9 @@ FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 void FloatArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputFloat("Default Value",render.arguments[argName].defaultVal.floatVal);
+	float val = std::any_cast<float>(render.arguments[argName]);
+	ImGui::InputFloat("Default Value",&val);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -101,6 +119,10 @@ void FloatArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void FloatArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::FLOAT);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> FloatArgNode::GetPinInfo() {
@@ -112,9 +134,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> FloatArgNode::GetPinInfo() {
 Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float2Variable>("Value")->behaviour([this]() {
+		Vector2 val = std::any_cast<Vector2>(render.arguments[argName]);
 		return Float2Variable(
-			render.arguments[argName].defaultVal.floatVal[0],
-			render.arguments[argName].defaultVal.floatVal[1],
+			val,
 			argName);
 
 	});
@@ -130,7 +152,9 @@ Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void Float2ArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputFloat2("Default Value",render.arguments[argName].defaultVal.floatVal);
+	Vector2 val = std::any_cast<Vector2>(render.arguments[argName]);
+	ImGui::InputFloat2("Default Value",&val.x);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -139,6 +163,10 @@ void Float2ArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void Float2ArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::FLOAT2);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Float2ArgNode::GetPinInfo() {
@@ -150,10 +178,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float2ArgNode::GetPinInfo() {
 Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float3Variable>("Value")->behaviour([this]() {
+		Vector3 val = std::any_cast<Vector3>(render.arguments[argName]);
 		return Float3Variable(
-			render.arguments[argName].defaultVal.floatVal[0],
-			render.arguments[argName].defaultVal.floatVal[1],
-			render.arguments[argName].defaultVal.floatVal[2],
+			val,
 			argName);
 
 	});
@@ -169,7 +196,9 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void Float3ArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputFloat3("Default Value",render.arguments[argName].defaultVal.floatVal);
+	Vector3 val = std::any_cast<Vector3>(render.arguments[argName]);
+	ImGui::InputFloat3("Default Value",&val.x);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -178,6 +207,10 @@ void Float3ArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void Float3ArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::FLOAT3);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> Float3ArgNode::GetPinInfo() {
@@ -189,11 +222,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float3ArgNode::GetPinInfo() {
 ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<ColorVariable>("Value")->behaviour([this]() {
+		Color val = std::any_cast<Color>(render.arguments[argName]);
 		return ColorVariable(
-			render.arguments[argName].defaultVal.floatVal[0],
-			render.arguments[argName].defaultVal.floatVal[1],
-			render.arguments[argName].defaultVal.floatVal[2],
-			render.arguments[argName].defaultVal.floatVal[3],
+			val,
 			argName);
 	});
 }
@@ -208,7 +239,9 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 void ColorArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::ColorPicker4("Default Value",render.arguments[argName].defaultVal.floatVal);
+	Color val = std::any_cast<Color>(render.arguments[argName]);
+	ImGui::ColorPicker4("Default Value",&val.red);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -217,6 +250,10 @@ void ColorArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void ColorArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::COLOR_ALPHA);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> ColorArgNode::GetPinInfo() {
@@ -228,7 +265,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ColorArgNode::GetPinInfo() {
 StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<StringVariable>("Value")->behaviour([this]() {
-		return StringVariable(render.arguments[argName].defaultVal.stringVal,argName);
+		std::string val = std::any_cast<std::string>(render.arguments[argName]);
+		return StringVariable(val,argName);
 
 	});
 }
@@ -242,7 +280,9 @@ StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void StringArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputText("Default Value",&render.arguments[argName].defaultVal.stringVal);
+	std::string val = std::any_cast<std::string>(render.arguments[argName]);
+	ImGui::InputText("Default Value",&val);
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -251,6 +291,10 @@ void StringArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void StringArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::STRING);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> StringArgNode::GetPinInfo() {
@@ -262,8 +306,22 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> StringArgNode::GetPinInfo() {
 AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<AssetVariable>("Value")->behaviour([this]() {
-		return AssetVariable(render.arguments[argName].defaultVal.stringVal,argName);
+		std::string val = std::any_cast<std::string>(render.arguments[argName]);
+		return AssetVariable(val,Variable::UniqueName());
 	});
+}
+
+void AssetArgNode::Export(RuiExportPrototype& proto) {
+	proto.arguments.emplace(argName,VariableType::ASSET);
+	auto& out = getOut<AssetVariable>("Value")->val();
+	ExportElement<std::string> ele;
+	ele.dependencys = { argName };
+	ele.identifier = out.name;
+	ele.callback =[this](RuiExportPrototype& proto) {
+		auto& out = getOut<AssetVariable>("Value")->val();
+		proto.codeLines.push_back(std::format("{} = funcs->LoadAsset(data->{})",out.GetFormattedName(proto),argName));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetArgNode(rend,style){
@@ -276,7 +334,16 @@ AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 void AssetArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	ImGui::InputText("Default Value",&render.arguments[argName].defaultVal.stringVal);
+	std::string val = "white";
+	if(render.arguments.contains(argName)&&(render.arguments[argName].type() == typeid(std::string)))
+		val = std::any_cast<std::string>(render.arguments[argName]);
+	uint32_t hash = loadAsset(val.c_str());
+	if (AtlasImageButton("AssetButton", imageAssetMap[hash])) {
+		ImGui::OpenPopup("Asset Selection");
+	}
+	AssetSelectionPopup("Default Value",&hash);
+	val = imageAssetMap[hash].name;
+	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 

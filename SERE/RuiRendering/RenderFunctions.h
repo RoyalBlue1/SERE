@@ -54,9 +54,9 @@ struct AssetCircleInputData {
 	Float2Variable texMaxs;
 	FloatVariable blend;
 	FloatVariable premul;
-	FloatVariable style_1E;
-	FloatVariable style_20;
-	FloatVariable style_22;
+	FloatVariable innerSliceBlend;
+	FloatVariable sliceBegin;
+	FloatVariable sliceEnd;
 	Float2Variable ellipseSize;
 	FloatVariable innerMask;
 	FloatVariable vingette;
@@ -73,9 +73,9 @@ struct AssetCircleInputData {
 		maxs(1.f,1.f),
 		texMins(0.f,0.f),
 		texMaxs(1.f,1.f),
-		style_1E(1.f),
-		style_20(0.f),
-		style_22(1.f),
+		innerSliceBlend(1.f),
+		sliceBegin(0.f),
+		sliceEnd(1.f),
 		ellipseSize(1.f,1.f),
 		innerMask(1.f),
 		vingette(0.f),
@@ -140,6 +140,7 @@ struct TextInputData {
 	TextStyleData styles[4];
 	std::vector<InlineImage_t> inlineImages;
 	std::vector<TextLine_t> textLines;
+	std::string sizeName;
 	float float_0;
 	float lastLine;
 	TextInputData():

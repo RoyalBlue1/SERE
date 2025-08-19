@@ -161,6 +161,18 @@ void NodeEditor::Deserialize() {
 	}
 }
 
+void NodeEditor::Export() {
+	RuiExportPrototype proto(render);
+	proto.Generate(mINF.getNodes(),render);
+	NFD::Guard nfdGuard;
+	nfdfilteritem_t filter("RuiPackage","ruip");
+	NFD::UniquePath nfdPath;
+	if(NFD::SaveDialog(nfdPath,&filter,1) != NFD_OKAY) return;
+
+	fs::path path (nfdPath.get());
+	proto.WriteToFile(path);
+}
+
 void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 	if (node) {
 

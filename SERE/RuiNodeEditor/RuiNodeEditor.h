@@ -9,9 +9,10 @@
 #include "RuiRendering/RenderManager.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"
-#include "RuiNodeEditor/RuiNodeStyle.h"
-#include "RuiNodeEditor/RuiBaseNode.h"
 
+#include "RuiNodeEditor/RuiBaseNode.h"
+#include "RuiNodeEditor/RuiVariables.h"
+#include "RuiNodeEditor/RuiExportPrototype.h"
 
 namespace fs = std::filesystem;
 
