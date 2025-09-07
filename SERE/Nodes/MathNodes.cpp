@@ -40,7 +40,10 @@ void MultiplyNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-		proto.codeLines.push_back(std::format("{} = {} * {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = {} * {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = {} * {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -91,7 +94,10 @@ void AdditionNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-		proto.codeLines.push_back(std::format("{} = {} + {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = {} + {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = {} + {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -144,7 +150,10 @@ void SubtractNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-		proto.codeLines.push_back(std::format("{} = {} - {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = {} - {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = {} - {};",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -205,8 +214,10 @@ void DivideNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-		
-		proto.codeLines.push_back(std::format("if({} == 0){{funcs->setError(a3,\"Divide by zero\");\nreturn;\n}}\n{} = {} / {};",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("if({} == 0){{funcs->SetErrorWithReason(inst,\"Divide by zero\");\nreturn;\n}}\n{} = {} / {};",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("if({} == 0){{funcs->SetErrorWithReason(inst,\"Divide by zero\");\nreturn;\n}}\n float {} = {} / {};",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -268,8 +279,10 @@ void ModuloNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format("if({} == 0){{\n\tfuncs->setError(a3,\"Modulo with zero\");\n\treturn;\n}}\n{} = {} % {};",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("if({} == 0){{\n\tfuncs->SetErrorWithReason(inst,\"Modulo with zero\");\n\treturn;\n}}\n{} = std::fmodf({},{});",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("if({} == 0){{\n\tfuncs->SetErrorWithReason(inst,\"Modulo with zero\");\n\treturn;\n}}\nfloat {} = std::fmodf({},{});",b.GetFormattedName(proto),out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -317,8 +330,11 @@ void AbsoluteNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a](RuiExportPrototype& proto) {
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = abs( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = abs( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
 
-		proto.codeLines.push_back(std::format("{} = abs( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -367,8 +383,10 @@ void SineNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format("{} = sin( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = sin( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
+		else	
+			proto.codeLines.push_back(std::format("float {} = sin( {});",out.GetFormattedName(proto),a.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -418,8 +436,10 @@ void ExponentNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format("{} = std::pow({},{});",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = std::pow({},{});",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = std::pow({},{});",out.GetFormattedName(proto),a.GetFormattedName(proto), b.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -470,8 +490,10 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 	int mappingIndex = proto.mappings.size();
 	proto.mappings.push_back(map);
 	ele.callback = [mappingIndex,out,a](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format("{} = funcs->map_v1(a3,{},{});",out.GetFormattedName(proto),mappingIndex,a.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = funcs->map_v1(inst,{},{});",out.GetFormattedName(proto),mappingIndex,a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = funcs->map_v1(inst,{},{});",out.GetFormattedName(proto),mappingIndex,a.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }

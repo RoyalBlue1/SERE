@@ -57,6 +57,23 @@ private:
 	std::string argName;
 };
 
+class GametimeArgNode : public RuiBaseNode
+{	
+public:
+	static inline std::string name = "Gametime Arg";
+	static inline std::string category = "Argument";
+
+	explicit GametimeArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit GametimeArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+private:
+	std::string argName;
+};
+
 class Float2ArgNode : public RuiBaseNode
 {
 public:
@@ -133,6 +150,23 @@ public:
 
 	explicit AssetArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
 	explicit AssetArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+private:
+	std::string argName;
+};
+
+class UiHandleArgNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Ui Handle Arg";
+	static inline std::string category = "Argument";
+
+	explicit UiHandleArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit UiHandleArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;

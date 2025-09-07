@@ -162,14 +162,18 @@ void NodeEditor::Deserialize() {
 }
 
 void NodeEditor::Export() {
-	RuiExportPrototype proto(render);
-	proto.Generate(mINF.getNodes(),render);
-	NFD::Guard nfdGuard;
+
 	nfdfilteritem_t filter("RuiPackage","ruip");
 	NFD::UniquePath nfdPath;
 	if(NFD::SaveDialog(nfdPath,&filter,1) != NFD_OKAY) return;
-
 	fs::path path (nfdPath.get());
+	std::string name = path.filename().replace_extension("").string();
+	RuiExportPrototype proto(render,name);
+	proto.Generate(mINF.getNodes(),render);
+	NFD::Guard nfdGuard;
+	
+
+	
 	proto.WriteToFile(path);
 }
 

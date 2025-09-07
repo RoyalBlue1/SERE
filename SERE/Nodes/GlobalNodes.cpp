@@ -33,7 +33,10 @@ void TimeNode::Export(RuiExportPrototype& proto) {
 	ExportElement<std::string> ele;
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
-		proto.codeLines.push_back(std::format("{} = globals->currentTime;",out.GetFormattedName(proto)));
+		if(proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = globals->currentTime;",out.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = globals->currentTime;",out.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }

@@ -147,10 +147,10 @@ void Transform2Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		struct Transform2FileStruct {
@@ -248,10 +248,10 @@ void Transform3Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		struct Transform3FileStruct {
@@ -352,10 +352,10 @@ void Transform4Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		struct Transform4FileStruct {
@@ -485,10 +485,10 @@ void Transform5Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		struct Transform5FileStruct {
@@ -608,10 +608,10 @@ void Transform6Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		Transform6FileStruct trans{};
@@ -742,10 +742,10 @@ void Transform7Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		Transform7FileStruct trans{};
@@ -904,10 +904,10 @@ void Transform8Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		Transform8FileStruct trans{};
@@ -1075,10 +1075,10 @@ void Transform9Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		Transform9FileStruct trans{};
@@ -1248,10 +1248,10 @@ void Transform10Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 
@@ -1429,10 +1429,10 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
-		ele.identifier = "";
+		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("transformSize[{}] = {}",transId,size.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("transformSize[{}] = {};",transId,size.GetFormattedName(proto)));
 		};
 		proto.codeElements.push_back(ele);
 		Transform11FileStruct trans{};

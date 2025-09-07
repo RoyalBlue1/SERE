@@ -1,8 +1,7 @@
 #include "RuiNodeEditor/RuiExportPrototype.h"
 
 
-RuiExportPrototype::RuiExportPrototype(const RenderInstance& inst):size(inst.elementWidth,inst.elementHeight) {
-	name = "testRui";
+RuiExportPrototype::RuiExportPrototype(const RenderInstance& inst,const std::string& name):size(inst.elementWidth,inst.elementHeight),name(name) {
 	renderJobCount = 0;
 }
 
@@ -36,7 +35,7 @@ void RuiExportPrototype::AddDataVariable(const FloatVariable& var) {
 		AddConstant(var.value);
 	}
 	else {
-		varsInDataStruct.emplace(var.name, 4);
+		varsInDataStruct.emplace(var.name, VariableType::FLOAT);
 	}
 }
 
@@ -46,7 +45,7 @@ void RuiExportPrototype::AddDataVariable(const Float2Variable& var) {
 		AddConstant(var.value.y);
 	}
 	else {
-		varsInDataStruct.emplace(var.name, 8);
+		varsInDataStruct.emplace(var.name, VariableType::FLOAT2);
 	}
 }
 
@@ -58,12 +57,12 @@ void RuiExportPrototype::AddDataVariable(const ColorVariable& var) {
 		AddConstant(var.value.alpha);
 	}
 	else {
-		varsInDataStruct.emplace(var.name, 16);
+		varsInDataStruct.emplace(var.name, VariableType::COLOR_ALPHA);
 	}
 }
 
 void RuiExportPrototype::AddDataVariable(const AssetVariable& var) {
-	varsInDataStruct.emplace(var.name, 4);
+	varsInDataStruct.emplace(var.name, VariableType::ASSET_HANDLE);
 }
 
 void RuiExportPrototype::AddDataVariable(const StringVariable& var) {
@@ -71,7 +70,7 @@ void RuiExportPrototype::AddDataVariable(const StringVariable& var) {
 		AddConstant(var.value);
 	}
 	else {
-		varsInDataStruct.emplace(var.name, 8);
+		varsInDataStruct.emplace(var.name, VariableType::STRING);
 	}
 }
 
@@ -149,6 +148,10 @@ void RuiExportPrototype::GenerateCode() {
 	for (auto& [arg, _] : arguments) {
 		existingVariables.emplace(arg);
 	}
+
+	codeLines.push_back(std::format("extern \"C\" __declspec(dllexport) void {}(RuiFunctions_t* funcs,RuiGlobals* globals,RuiInstance* inst,{}_data* data){{",name,name));
+	codeLines.push_back("__m128* transformSize = funcs->GetTransformSize(inst);");
+	size_t codeElementsHit = 0;
 	bool addedVar = true;
 	while (addedVar) {
 		addedVar = false;
@@ -166,8 +169,16 @@ void RuiExportPrototype::GenerateCode() {
 			ele.callback(*this);
 			existingVariables.insert(ele.identifier);
 			addedVar = true;
+			codeElementsHit++;
 		}
 	}
+	if (codeElementsHit < codeElements.size()) {
+		printf("Not all code has been exported should be %llu was %llu\n",codeElements.size(),codeElementsHit);
+	}
+		
+
+	codeLines.push_back(std::format("funcs->executeTransform(inst,{});",transformData.size()));
+	codeLines.push_back("}");
 
 }
 
@@ -273,7 +284,7 @@ void RuiExportPrototype::GenerateVariables(std::map<std::string,std::any>& argVa
 		case VariableType::ASSET:
 		case VariableType::IMAGE:
 		{
-			if (((type == VariableType::ASSET) || (type == VariableType::STRING)) && (currentDataStructSize % 8)) {
+			if (currentDataStructSize % 8) {
 				currentDataStructSize += 8 - (currentDataStructSize % 8);
 			}
 			size = 8;
@@ -288,24 +299,29 @@ void RuiExportPrototype::GenerateVariables(std::map<std::string,std::any>& argVa
 		case VariableType::INT:
 		case VariableType::BOOL:
 			size = 4;
+			defaultValues.resize(currentDataStructSize + size);
 			*(int*)&defaultValues[currentDataStructSize] = std::any_cast<int>(argValues[name]);
 			break;
 		case VariableType::FLOAT:
 		case VariableType::GAMETIME:
 		case VariableType::FLOAT_UNK:
 			size = 4;
+			defaultValues.resize(currentDataStructSize + size);
 			*(float*)&defaultValues[currentDataStructSize] = std::any_cast<float>(argValues[name]);
 			break;
 		case VariableType::FLOAT2:
 			size = 8;
+			defaultValues.resize(currentDataStructSize + size);
 			*(Vector2*)&defaultValues[currentDataStructSize] = std::any_cast<Vector2>(argValues[name]);
 			break;
 		case VariableType::FLOAT3:
 			size = 12;
+			defaultValues.resize(currentDataStructSize + size);
 			*(Vector3*)&defaultValues[currentDataStructSize] = std::any_cast<Vector3>(argValues[name]);
 			break;
 		case VariableType::COLOR_ALPHA:
 			size = 16;
+			defaultValues.resize(currentDataStructSize + size);
 			*(Color*)&defaultValues[currentDataStructSize] = std::any_cast<Color>(argValues[name]);
 			break;
 		default:
@@ -318,15 +334,116 @@ void RuiExportPrototype::GenerateVariables(std::map<std::string,std::any>& argVa
 	}
 
 
-	for (auto& [name, size] : varsInDataStruct) {
-		if ((size == 8) && (currentDataStructSize % 8)) {
+	for (auto& [name, type] : varsInDataStruct) {
+		if(varOffsets.contains(name))
+			continue;
+		if ((type == VariableType::STRING) && (currentDataStructSize % 8)) {
 			currentDataStructSize += 8 - (currentDataStructSize % 8);
 		}
 		varOffsets.emplace(name, currentDataStructSize);
+		size_t size;
+		switch (type) {
+		case VariableType::INT:
+		case VariableType::BOOL:
+		case VariableType::FLOAT:
+		case VariableType::GAMETIME:
+		case VariableType::FLOAT_UNK:
+		case VariableType::ASSET_HANDLE:
+			size = 4;
+			break;
+		case VariableType::FLOAT2:
+		case VariableType::STRING:
+			size = 8;
+			break;
+		case VariableType::FLOAT3:
+			size = 12;
+			break;
+		case VariableType::COLOR_ALPHA:
+			size = 16;
+			break;
+		default:
+			size = 0;
+			break;
+		}
 		currentDataStructSize += size;
 	}
 
 
+}
+
+bool RuiExportPrototype::GenerateCodeStruct() {
+	codeLines.push_back(std::format("struct {}_data{{",name));
+	
+	if (varOffsets.size() == 0) {
+		codeLines.push_back(std::format("_BYTE constants[{}];",currentDataStructSize));
+	}
+	else {
+
+		size_t currentOffset = 0;
+		size_t addedVars = 0;
+		while (addedVars < varOffsets.size()) {
+			std::string lowestVar;
+			for (auto& [name, offset] : varOffsets) {
+				if (offset >= currentOffset) {
+					lowestVar = name;
+					break;
+				}
+			}
+			for (auto& [name, offset] : varOffsets) {
+				if (offset < varOffsets[lowestVar] && offset >= currentOffset)
+					lowestVar = name;
+			}
+			VariableType type = VariableType::NONE;
+			if(arguments.contains(lowestVar))
+				type = arguments[lowestVar];
+			else if(varsInDataStruct.contains(lowestVar))
+				type = varsInDataStruct[lowestVar];
+			if(type == VariableType::NONE)
+				return false;
+			if (currentOffset < varOffsets[lowestVar]) {
+				codeLines.push_back(std::format("_BYTE pad_{}[{}];",lowestVar,varOffsets[lowestVar]-currentOffset));
+				currentOffset = varOffsets[lowestVar];
+			}
+			switch (type) {
+			case VariableType::BOOL:
+			case VariableType::INT:
+				codeLines.push_back(std::format("int {};",lowestVar));
+				currentOffset +=4;
+				break;
+			case VariableType::FLOAT:
+			case VariableType::GAMETIME:
+			case VariableType::FLOAT_UNK:
+				codeLines.push_back(std::format("float {};",lowestVar));
+				currentOffset +=4;
+				break;
+			case VariableType::FLOAT2:
+				codeLines.push_back(std::format("Vector2 {};",lowestVar));
+				currentOffset +=8;
+				break;
+			case VariableType::FLOAT3:
+				codeLines.push_back(std::format("Vector3 {};",lowestVar));
+				currentOffset +=12;
+				break;
+			case VariableType::COLOR_ALPHA:
+				codeLines.push_back(std::format("Color {};",lowestVar));
+				currentOffset +=16;
+				break;
+			case VariableType::STRING:
+			case VariableType::ASSET:
+			case VariableType::IMAGE:
+				codeLines.push_back(std::format("const char* {};",lowestVar));
+				currentOffset +=8;
+				break;
+			case VariableType::ASSET_HANDLE:
+				codeLines.push_back(std::format("uint32_t {};",lowestVar));
+				currentOffset +=4;
+				break;
+			}
+			addedVars++;
+		}
+
+	}
+	codeLines.push_back("};");
 }
 
 void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render) {
@@ -338,6 +455,8 @@ void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::share
 	GenerateVariables(render.arguments);
 	GenerateTransformData();
 	GenerateRenderJobData();
+	GenerateArguments();
+	GenerateCodeStruct();
 	GenerateCode();
 	for (auto& line : codeLines) {
 		printf("%s\n", line.c_str());
@@ -374,27 +493,49 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 	pkgHdr.unk_A4 = 0;
 	pkgHdr.argNamesSize = 0;
 
-	pkgHdr.defaultValuesOffset = pkgHdr.nameOffset + pkgHdr.nameSize;
-	pkgHdr.defaultStringDataOffset = pkgHdr.defaultValuesOffset + pkgHdr.defaultValuesSize;
-	pkgHdr.rpakPointersInDefaultDataOffset = pkgHdr.defaultStringDataOffset + pkgHdr.defaultStringsDataSize;
-	pkgHdr.styleDescriptorOffset = pkgHdr.rpakPointersInDefaultDataOffset + pkgHdr.rpakPointersInDefaltDataCount * sizeof(uint16_t);
-	pkgHdr.renderJobOffset = pkgHdr.styleDescriptorOffset + pkgHdr.styleDescriptorCount * sizeof(StyleDescriptorOffsets);
-	pkgHdr.transformDataOffset = pkgHdr.renderJobOffset + pkgHdr.renderJobSize;
-	pkgHdr.argumentsOffset = pkgHdr.transformDataOffset + pkgHdr.transformDataSize;
-	pkgHdr.argClusterOffset = pkgHdr.argumentsOffset + pkgHdr.argCount * sizeof(Argument_t);
-	pkgHdr.argNamesOffset = pkgHdr.argClusterOffset + pkgHdr.argClusterCount * sizeof(ArgCluster_t);
-	pkgHdr.mappingOffset = pkgHdr.argNamesOffset + pkgHdr.argNamesSize;		
+	//pkgHdr.defaultValuesOffset = pkgHdr.nameOffset + pkgHdr.nameSize;
+	//pkgHdr.defaultStringDataOffset = pkgHdr.defaultValuesOffset + pkgHdr.defaultValuesSize;
+	//pkgHdr.rpakPointersInDefaultDataOffset = pkgHdr.defaultStringDataOffset + pkgHdr.defaultStringsDataSize;
+	//pkgHdr.styleDescriptorOffset = pkgHdr.rpakPointersInDefaultDataOffset + pkgHdr.rpakPointersInDefaltDataCount * sizeof(uint16_t);
+	//pkgHdr.renderJobOffset = pkgHdr.styleDescriptorOffset + pkgHdr.styleDescriptorCount * sizeof(StyleDescriptorOffsets);
+	//pkgHdr.transformDataOffset = pkgHdr.renderJobOffset + pkgHdr.renderJobSize;
+	//pkgHdr.argumentsOffset = pkgHdr.transformDataOffset + pkgHdr.transformDataSize;
+	//pkgHdr.argClusterOffset = pkgHdr.argumentsOffset + pkgHdr.argCount * sizeof(Argument_t);
+	//pkgHdr.argNamesOffset = pkgHdr.argClusterOffset + pkgHdr.argClusterCount * sizeof(ArgCluster_t);
+	//pkgHdr.mappingOffset = pkgHdr.argNamesOffset + pkgHdr.argNamesSize;		
 
 	file.write((char*)&pkgHdr,sizeof(pkgHdr));
+
+	pkgHdr.nameOffset = file.tellp();
 	file.write(name.c_str(),name.size());
 	file.put(0);
+
+	pkgHdr.defaultValuesOffset = file.tellp();
 	file.write((char*)defaultValues.data(),defaultValues.size());
+
+	pkgHdr.defaultStringDataOffset = file.tellp();
 	file.write((char*)defaultStrings.str().c_str(),defaultStrings.str().size());
+
+	pkgHdr.rpakPointersInDefaultDataOffset = file.tellp();
 	file.write((char*)rpakPointersInDefaultValues.data(),rpakPointersInDefaultValues.size()*sizeof(uint16_t));
+
+	pkgHdr.styleDescriptorOffset = file.tellp();
 	file.write((char*)styleDescriptor.data(),styleDescriptor.size()*sizeof(StyleDescriptorOffsets));
+
+	pkgHdr.renderJobOffset = file.tellp();
 	file.write((char*)renderJobData.data(),renderJobData.size());
+
+	pkgHdr.transformDataOffset = file.tellp();
 	file.write((char*)transformData.data(),transformData.size());
+
+	pkgHdr.argumentsOffset = file.tellp();
 	file.write((char*)exportArgs.data(),exportArgs.size()*sizeof(Argument_t));
+
+	pkgHdr.argClusterOffset = file.tellp();
 	file.write((char*)&cluster,sizeof(cluster));
+
+	file.seekp(0);
+	file.write((char*) &pkgHdr, sizeof(pkgHdr));
+
 	file.close();
 }

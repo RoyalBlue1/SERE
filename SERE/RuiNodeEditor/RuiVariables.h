@@ -42,8 +42,8 @@ enum class VariableType : uint8_t {
 	COLOR_ALPHA = 0x8,
 	GAMETIME = 0x9,
 	FLOAT_UNK = 0xA,
-	IMAGE = 0xB
-
+	IMAGE = 0xB,
+	ASSET_HANDLE = 0xFF
 };
 
 

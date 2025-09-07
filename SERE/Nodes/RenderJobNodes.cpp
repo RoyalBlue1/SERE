@@ -233,14 +233,14 @@ void AssetCircleRenderNode::Export(RuiExportPrototype& proto) {
 		style.color2 = proto.GetColorDataVariableOffset(input.tertColor);
 		style.blend = proto.GetFloatDataVariableOffset(input.blend);
 		style.premul = proto.GetFloatDataVariableOffset(input.premul);
-		style.val_1E = proto.GetFloatDataVariableOffset(input.innerSliceBlend);
-		style.val_20 = proto.GetFloatDataVariableOffset(input.sliceBegin);
-		style.val_22 = proto.GetFloatDataVariableOffset(input.sliceEnd);
+		style._anon_0 = proto.GetFloatDataVariableOffset(input.innerSliceBlend);
+		style._anon_1 = proto.GetFloatDataVariableOffset(input.sliceBegin);
+		style._anon_2 = proto.GetFloatDataVariableOffset(input.sliceEnd);
 		auto ellipseSizeOffset = proto.GetFloat2DataVariableOffset(input.ellipseSize);
-		style.val_24 = ellipseSizeOffset.x;
-		style.val_26 = ellipseSizeOffset.y;
-		style.val_28 = proto.GetFloatDataVariableOffset(input.vingette);
-		style.val_2A = proto.GetFloatDataVariableOffset(input.innerMask);
+		style._anon_3 = ellipseSizeOffset.x;
+		style._anon_4 = ellipseSizeOffset.y;
+		style._anon_5 = proto.GetFloatDataVariableOffset(input.innerMask);
+		style._anon_6 = proto.GetFloatDataVariableOffset(input.vingette);
 		uint16_t styleId = proto.styleDescriptor.size();
 		proto.styleDescriptor.push_back(style);
 		struct AssetCircleRenderOffsets {
@@ -501,7 +501,7 @@ void AddTextStyleToDependency(std::set<std::string>& deps,const TextStyleData& s
 }
 
 uint8_t AddTextStyleToProto(RuiExportPrototype& proto,const TextStyleData& style) {
-	proto.renderJobCount++;
+	
 	StyleDescriptorOffsets style0{};
 	style0.type = 0;
 	style0.color0 = proto.GetColorDataVariableOffset(style.mainColor);
@@ -509,19 +509,18 @@ uint8_t AddTextStyleToProto(RuiExportPrototype& proto,const TextStyleData& style
 	style0.color2 = proto.GetColorDataVariableOffset(style.tertColor);
 	style0.blend = proto.GetFloatDataVariableOffset(style.blend);
 	style0.premul = proto.GetFloatDataVariableOffset(style.premul);
-	style0.val_1E =	style.fontIndex;
+	style0._anon_0 =	style.fontIndex;
 	Float2Offsets dropShadowOffset = proto.GetFloat2DataVariableOffset(style.dropShadowOffset);
-	style0.val_20 = dropShadowOffset.x;
-	style0.val_22 = dropShadowOffset.y;
-	style0.val_24 = proto.GetFloatDataVariableOffset(style.dropShadowHardness);
-	style0.val_26 = proto.GetFloatDataVariableOffset(style.dropShadowBlur);
-	style0.val_28 = proto.GetFloatDataVariableOffset(style.size);
-	style0.val_28 = proto.GetFloatDataVariableOffset(style.size);
-	style0.val_2A = proto.GetFloatDataVariableOffset(style.stretchX);
-	style0.val_2C = proto.GetFloatDataVariableOffset(style.backgroundSize);
-	style0.val_2E = proto.GetFloatDataVariableOffset(style.boltness);
-	style0.val_30 = proto.GetFloatDataVariableOffset(style.blur);
-	style0.val_32 = proto.GetFloatDataVariableOffset(style.style_32);
+	style0._anon_1 = proto.GetFloatDataVariableOffset(style.dropShadowHardness);
+	style0._anon_2 = dropShadowOffset.x;
+	style0._anon_3 = dropShadowOffset.y;
+	style0._anon_4 = proto.GetFloatDataVariableOffset(style.dropShadowBlur);
+	style0._anon_5 = proto.GetFloatDataVariableOffset(style.size);
+	style0._anon_6 = proto.GetFloatDataVariableOffset(style.stretchX);
+	style0._anon_7 = proto.GetFloatDataVariableOffset(style.backgroundSize);
+	style0._anon_8 = proto.GetFloatDataVariableOffset(style.boltness);
+	style0._anon_9 = proto.GetFloatDataVariableOffset(style.blur);
+	style0._anon_10 = proto.GetFloatDataVariableOffset(style.style_32);
 	uint16_t res = proto.styleDescriptor.size();
 	proto.styleDescriptor.push_back(style0);
 	return res;
@@ -531,7 +530,7 @@ void TextRenderNode::Export(RuiExportPrototype& proto) {
 	const TextInputData& input = getInVal<TextInputData>("Data");
 	const TransformResult& parent = getInVal<TransformResult>("Parent");
 
-
+	proto.renderJobCount++;
 	proto.AddDataVariable(input.text);
 	proto.AddDataVariable(input.minSize);
 	proto.AddDataVariable(input.maxSize);
@@ -550,8 +549,8 @@ void TextRenderNode::Export(RuiExportPrototype& proto) {
 			uint16_t transformIndex;
 			uint8_t styleIndex[4];
 			uint16_t text;
-			Float2Offsets minSize;
 			Float2Offsets maxSize;
+			Float2Offsets minSize;
 		};
 		TextRenderOffsets rend{};
 		rend.transformIndex = proto.transformIndices[parent.hash];
@@ -573,7 +572,7 @@ void TextRenderNode::Export(RuiExportPrototype& proto) {
 		AddTextStyleToDependency(ele.dependencys,input.styles[2]);
 		AddTextStyleToDependency(ele.dependencys,input.styles[3]);
 		ele.callback = [input, jobOffset](RuiExportPrototype& proto) {
-			proto.codeLines.push_back(std::format("{} = funcs->GetTextSize(a3,{});",input.sizeName,jobOffset));
+			proto.codeLines.push_back(std::format("__m128 {} = funcs->GetTextSize(inst,{});",input.sizeName,jobOffset));
 		};
 		proto.codeElements.push_back(ele);
 

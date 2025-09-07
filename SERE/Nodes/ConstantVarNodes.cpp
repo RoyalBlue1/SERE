@@ -389,11 +389,12 @@ void AssetVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 
 void AssetVarNode::Export(RuiExportPrototype& proto) {
 	const AssetVariable& out = getOut<AssetVariable>("Value")->val();
+	proto.AddDataVariable(out);
 	ExportElement<std::string> ele;
 	ele.identifier = out.name;
 	std::string assetName = imageAssetMap[hash].name;
 	ele.callback = [out,assetName](RuiExportPrototype& proto) {
-		proto.codeLines.push_back(std::format("{} = funcs->LoadAsset(\"{}\");",out.GetFormattedName(proto),assetName));
+		proto.codeLines.push_back(std::format("{} = funcs->LoadAsset(inst,\"{}\");",out.GetFormattedName(proto),assetName));
 	};
 	proto.codeElements.push_back(ele);
 }

@@ -48,17 +48,17 @@ struct StyleDescriptorOffsets {
 	ColorOffsets color2;
 	uint16_t blend = 0;
 	uint16_t premul = 0;
-	uint16_t val_1E = 0;//fontIndex
-	uint16_t val_20 = 0;
-	uint16_t val_22 = 0;
-	uint16_t val_24 = 0;
-	uint16_t val_26 = 0;
-	uint16_t val_28 = 0;
-	uint16_t val_2A = 0;
-	uint16_t val_2C = 0;
-	uint16_t val_2E = 0;
-	uint16_t val_30 = 0;
-	uint16_t val_32 = 0;
+	uint16_t _anon_0 = 0;//fontIndex
+	uint16_t _anon_1 = 0;
+	uint16_t _anon_2 = 0;
+	uint16_t _anon_3 = 0;
+	uint16_t _anon_4 = 0;
+	uint16_t _anon_5 = 0;
+	uint16_t _anon_6 = 0;
+	uint16_t _anon_7 = 0;
+	uint16_t _anon_8 = 0;
+	uint16_t _anon_9 = 0;
+	uint16_t _anon_10 = 0;
 };
 
 #pragma push(pack)
@@ -142,8 +142,8 @@ struct RuiExportPrototype {
 
 	std::string name;
 	Vector2 size;
-	std::map<std::string,VariableType> arguments;
-	std::map<std::string, size_t> varsInDataStruct;
+	std::map<std::string, VariableType> arguments;
+	std::map<std::string, VariableType> varsInDataStruct;
 
 	std::vector<ExportElement<std::string>> codeElements;
 	std::vector<ExportElement<uint64_t>> transformCallbacks;
@@ -169,7 +169,7 @@ struct RuiExportPrototype {
 	ArgCluster_t cluster;
 	std::vector<Argument_t> exportArgs;
 
-	RuiExportPrototype(const RenderInstance& inst);
+	RuiExportPrototype(const RenderInstance& inst,const std::string& name);
 
 	void AddConstant(float f);
 	void AddConstant(std::string s);
@@ -195,11 +195,13 @@ struct RuiExportPrototype {
 	uint16_t GetFloatConstantOffset(float f);
 	uint16_t GetStringConstantOffset(std::string s);
 
+
 	void GenerateCode();
 	void GenerateTransformData();
 	void GenerateRenderJobData();
 	void GenerateVariables(std::map<std::string,std::any>& argValues);
 	void GenerateArguments();
+	bool GenerateCodeStruct();
 	void Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render);
 
 	void WriteToFile(fs::path path);
