@@ -1,38 +1,24 @@
 #pragma once
-#include "intTypes.h"
-#include "FontAtlas.h"
-#include "ImageAtlas.h"
-#include "ShaderStructs.h"
 
 #include <d3d11_1.h>
 #include <fstream>
 #include <map>
 #include <string>
+#include <any>
 #pragma comment(lib,"d3d11.lib")
 #include <d3dcompiler.h>
 #pragma comment(lib,"d3dcompiler.lib")
+
+class RenderInstance;
+
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui/imgui.h"
-
-struct Vector2 {
-    float x;
-    float y;
-    Vector2(float ix,float iy):x(ix),y(iy){}
-};
-
-struct Vector3 {
-    float x;
-    float y;
-    float z;
-    Vector3(float ix,float iy,float iz):x(ix),y(iy),z(iz){}
-};
-
-struct Color {
-    float red;
-    float green;
-    float blue;
-    float alpha;
-    Color(float r,float g,float b,float a):red(r),green(g),blue(b),alpha(a){}
-};
+#include "intTypes.h"
+#include "FontAtlas.h"
+#include "ImageAtlas.h"
+#include "ShaderStructs.h"
+#include "Util.h"
+#include "RuiNodeEditor/RuiVariables.h"
 
 struct DrawInfoUnknown3
 {
@@ -85,22 +71,23 @@ struct TriData {
 };
 
 struct TransformResult {
-    int index;
     __m128 directionVector;
     __m128 position;
     __m128 inputSize;
+    uint64_t hash;
+    
     TransformResult():
-        index(0),
         directionVector(_mm_setzero_ps()),
         position(_mm_setzero_ps()),
-        inputSize(_mm_setzero_ps())
+        inputSize(_mm_setzero_ps()),
+        hash(randomInt64())
     { }
 
-    TransformResult(int id,__m128 dir,__m128 pos,__m128 size):
-        index(id),
+    TransformResult(__m128 dir,__m128 pos,__m128 size,uint64_t hash_):
         directionVector(dir),
         position(pos),
-        inputSize(size)
+        inputSize(size),
+        hash(hash_)
     { }
     TriData GenTri(__m128 x,__m128 y) const {
         TriData res;
@@ -153,21 +140,6 @@ struct StyleDescriptorShader_t
 
 
 
-struct ArgVal {
-
-    std::string stringVal;
-    float floatVal[4];
-    int intVal;
-};
-
-struct Argument_t {
-    int type;
-    ArgVal defaultVal;
-};
-
-struct TransformSize {
-    __m128 size;
-};
 
 struct Globals {
     float currentTime = 0.f;
@@ -217,7 +189,7 @@ public:
     std::vector<uint16_t> indices;
     std::vector<IndexSegment_t> segments;
     std::vector<StyleDescriptorShader_t> styleDescriptor;
-    std::map<std::string,Argument_t> arguments;
+    std::map<std::string,std::any> arguments;
 
     float elementWidth;
     float elementHeight;

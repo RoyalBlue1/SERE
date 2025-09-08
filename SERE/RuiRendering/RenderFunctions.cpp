@@ -581,9 +581,9 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 	styleDesc.color2 = data.tertColor.value;
 	styleDesc.blend = data.blend.value;
 	styleDesc.premul = data.premul.value;
-	styleDesc._anon_0 = data.style_1E.value;
-	styleDesc._anon_1 = data.style_20.value * TAU;
-	styleDesc._anon_2 = data.style_22.value * TAU;
+	styleDesc._anon_0 = data.innerSliceBlend.value;
+	styleDesc._anon_1 = data.sliceBegin.value * TAU;
+	styleDesc._anon_2 = data.sliceEnd.value * TAU;
 	styleDesc._anon_3 = data.ellipseSize.value.x;
 	styleDesc._anon_4 = data.ellipseSize.value.y;
 	styleDesc._anon_5 = data.innerMask.value;

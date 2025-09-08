@@ -13,6 +13,7 @@ public:
 	explicit TimeNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };

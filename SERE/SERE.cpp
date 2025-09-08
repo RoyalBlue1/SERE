@@ -308,6 +308,9 @@ int main(int, char**)
                 if (ImGui::MenuItem("Load Graph")) {
                     nodeEdit.Deserialize();
                 }
+                if (ImGui::MenuItem("Export")) {
+                    nodeEdit.Export();
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();

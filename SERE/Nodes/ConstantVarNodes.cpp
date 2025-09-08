@@ -2,6 +2,8 @@
 #include "CustomImGuiWidgets.h"
 #include "imgui/imgui_stdlib.h"
 
+
+
 IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
@@ -12,15 +14,11 @@ IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style):RuiBas
 	});
 }
 
-IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):IntVarNode(rend,style) {
 
-	value = 0;
 	if(obj.HasMember("Value")&&obj["Value"].IsInt())
 		value = obj["Value"].GetInt();
 
-	getOut<IntVariable>("Value")->behaviour([this]() {
-		return IntVariable(value);
-	});
 }
 
 void IntVarNode::draw() {
@@ -35,6 +33,11 @@ void IntVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapi
 	obj.AddMember("Value",value,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
+
+void IntVarNode::Export(RuiExportPrototype& proto) {
+
+}
+
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> IntVarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
@@ -52,15 +55,12 @@ BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 	});
 }
 
-BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):BoolVarNode(rend,style) {
 
-	value = false;
+
 	if(obj.HasMember("Value")&&obj["Value"].IsBool())
 		value = obj["Value"].GetBool();
-	getOut<BoolVariable>("Value")->behaviour([this]() {
-		return BoolVariable(value);
 
-	});
 }
 
 void BoolVarNode::draw() {
@@ -74,6 +74,10 @@ void BoolVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("Value",value,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void BoolVarNode::Export(RuiExportPrototype& proto) {
+
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> BoolVarNode::GetPinInfo() {
@@ -93,11 +97,8 @@ FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 	});
 }
 
-FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):FloatVarNode(rend,style) {
 
-	minVal = 0;
-	maxVal = 1;
-	value = 0;
 
 	if(obj.HasMember("Min")&&obj["Min"].IsNumber())
 		minVal = obj["Min"].GetFloat();
@@ -106,9 +107,6 @@ FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 	if(obj.HasMember("Value")&&obj["Value"].IsNumber())
 		value = obj["Value"].GetFloat();
 
-	getOut<FloatVariable>("Value")->behaviour([this]() {
-		return FloatVariable(value);
-	});
 }
 
 void FloatVarNode::draw() {
@@ -131,6 +129,10 @@ void FloatVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void FloatVarNode::Export(RuiExportPrototype& proto) {
+
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> FloatVarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Value"));
@@ -150,12 +152,9 @@ Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float2VarNode(rend,style) {
 
-	minVal = 0;
-	maxVal = 1;
-	value[0] = 0;
-	value[1] = 0;
+
 
 	if(obj.HasMember("Value_X")&&obj["Value_X"].IsNumber())
 		value[0] = obj["Value_X"].GetFloat();
@@ -167,10 +166,6 @@ Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 	if(obj.HasMember("Max")&&obj["Max"].IsNumber())
 		maxVal = obj["Max"].GetFloat();
 
-	getOut<Float2Variable>("Value")->behaviour([this]() {
-		return Float2Variable(value[0],value[1]);
-
-	});
 }
 
 void Float2VarNode::draw() {
@@ -194,6 +189,10 @@ void Float2VarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void Float2VarNode::Export(RuiExportPrototype& proto) {
+
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> Float2VarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Value"));
@@ -215,14 +214,10 @@ Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float3VarNode(rend,style) {
 
 
-	minVal = 0;
-	maxVal = 1;
-	value[0] = 0;
-	value[1] = 0;
-	value[2] = 0;
+
 
 	if(obj.HasMember("Value_X")&&obj["Value_X"].IsNumber())
 		value[0] = obj["Value_X"].GetFloat();
@@ -236,10 +231,6 @@ Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 	if(obj.HasMember("Max")&&obj["Max"].IsNumber())
 		maxVal = obj["Max"].GetFloat();
 
-	getOut<Float3Variable>("Value")->behaviour([this]() {
-		return Float3Variable(value[0],value[1],value[2]);
-
-	});
 }
 
 void Float3VarNode::draw() {
@@ -264,6 +255,8 @@ void Float3VarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void Float3VarNode::Export(RuiExportPrototype& proto){}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> Float3VarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Value"));
@@ -283,12 +276,7 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 	});
 }
 
-ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-
-	value[0] = 1.f;
-	value[1] = 1.f;
-	value[2] = 1.f;
-	value[3] = 1.f;
+ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ColorVarNode(rend,style) {
 
 	if(obj.HasMember("Value_Red")&&obj["Value_Red"].IsNumber())
 		value[0] = obj["Value_Red"].GetFloat();
@@ -299,10 +287,7 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 	if(obj.HasMember("Value_Alpha")&&obj["Value_Alpha"].IsNumber())
 		value[3] = obj["Value_Alpha"].GetFloat();
 
-	getOut<ColorVariable>("Value")->behaviour([this]() {
-		return ColorVariable(value[0],value[1],value[2],value[3]);
 
-	});
 }
 
 void ColorVarNode::draw() {
@@ -321,6 +306,10 @@ void ColorVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void ColorVarNode::Export(RuiExportPrototype& proto) {
+
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> ColorVarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Value"));
@@ -334,14 +323,11 @@ StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):StringVarNode(rend,style) {
 
 	if(obj.HasMember("Value")&&obj["Value"].IsString())
 		value = obj["Value"].GetString();
 
-	getOut<StringVariable>("Value")->behaviour([this]() {
-		return StringVariable(value);
-	});
 }
 
 void StringVarNode::draw() {
@@ -357,6 +343,10 @@ void StringVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void StringVarNode::Export(RuiExportPrototype& proto) {
+
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> StringVarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::OutPinProto<StringVariable>>("Value"));
@@ -367,24 +357,19 @@ AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 
 	hash = loadAsset("white");
 	showSelectionUi = false;
-
-	getOut<AssetVariable>("Value")->behaviour([this]() {
-		return AssetVariable(hash);
+	std::string outName = Variable::UniqueName();
+	getOut<AssetVariable>("Value")->behaviour([this,outName]() {
+		return AssetVariable(hash,outName);
 	});
 }
 
-AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetVarNode(rend,style) {
 
 	hash = loadAsset("white");
-
-	if(obj.HasMember("Hash")&&obj["Hash"].IsInt())
-		hash = obj["Hash"].GetInt();
-
-	showSelectionUi = false;
-
-	getOut<AssetVariable>("Value")->behaviour([this]() {
-		return AssetVariable(hash);
-	});
+	if (obj.HasMember("AssetName") && obj["AssetName"].IsString()) {
+		hash = loadAsset(obj["AssetName"].GetString());
+	}
+	
 }
 
 void AssetVarNode::draw() {
@@ -398,8 +383,20 @@ void AssetVarNode::draw() {
 void AssetVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
-	obj.AddMember("Hash",hash, allocator);
+	obj.AddMember("AssetName",imageAssetMap[hash].name, allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void AssetVarNode::Export(RuiExportPrototype& proto) {
+	const AssetVariable& out = getOut<AssetVariable>("Value")->val();
+	proto.AddDataVariable(out);
+	ExportElement<std::string> ele;
+	ele.identifier = out.name;
+	std::string assetName = imageAssetMap[hash].name;
+	ele.callback = [out,assetName](RuiExportPrototype& proto) {
+		proto.codeLines.push_back(std::format("{} = funcs->LoadAsset(inst,\"{}\");",out.GetFormattedName(proto),assetName));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> AssetVarNode::GetPinInfo() {
@@ -426,14 +423,8 @@ SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 	});
 }
 
-SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SizeVarNode(rend,style) {
 
-	minVal = 0;
-	maxVal = 512;
-	value[0] = 128.f;
-	value[1] = 128.f;
-	value[2] = 128.f;
-	value[3] = 128.f;
 
 	if(obj.HasMember("Min")&&obj["Min"].IsNumber())
 		minVal = obj["Min"].GetFloat();
@@ -448,15 +439,9 @@ SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapid
 	if(obj.HasMember("Value_3")&&obj["Value_3"].IsNumber())
 		value[3] = obj["Value_3"].GetFloat();
 
-
-
-	getOut<TransformSize>("Value")->behaviour([this]() {
-		TransformSize var;
-
-		var.size = _mm_load_ps(value);
-		return var;
-	});
 }
+
+
 
 void SizeVarNode::draw() {
 	ImGui::PushItemWidth(90);
@@ -480,6 +465,8 @@ void SizeVarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 	obj.AddMember("Value_3",value[3], allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
+
+void SizeVarNode::Export(RuiExportPrototype& proto){}
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> SizeVarNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;

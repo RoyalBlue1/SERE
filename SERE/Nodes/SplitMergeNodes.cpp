@@ -38,6 +38,26 @@ void SplitFloat2Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void SplitFloat2Node::Export(RuiExportPrototype& proto) {
+	const auto& in = getInVal<Float2Variable>("In");
+	const auto& x = getOut<FloatVariable>("X")->val();
+	const auto& y = getOut<FloatVariable>("Y")->val();
+	ExportElement<std::string> ele;
+	ele.dependencys = {in.name};
+	ele.identifier = x.name;
+	ele.callback = [in,x](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = y.name;
+	ele.callback = [in,y](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat2Node::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("In",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
@@ -72,6 +92,20 @@ void MergeFloat2Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void MergeFloat2Node::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& x = getInVal<FloatVariable>("X");
+	const auto& y = getInVal<FloatVariable>("Y");
+	ExportElement<std::string> ele;
+	ele.dependencys = {x.name,y.name};
+	ele.identifier = out.name;
+	ele.callback = [out,x,y](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = Float2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat2Node::GetPinInfo() {
@@ -129,6 +163,33 @@ void SplitFloat3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void SplitFloat3Node::Export(RuiExportPrototype& proto) {
+	const auto& in = getInVal<Float2Variable>("In");
+	const auto& x = getOut<FloatVariable>("X")->val();
+	const auto& y = getOut<FloatVariable>("Y")->val();
+	const auto& z = getOut<FloatVariable>("Z")->val();
+	ExportElement<std::string> ele;
+	ele.dependencys = {in.name};
+	ele.identifier = x.name;
+	ele.callback = [in,x](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = y.name;
+	ele.callback = [in,y](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = z.name;
+	ele.callback = [in,z](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.z",z.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat3Node::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float3Variable>>("In",ImFlow::ConnectionFilter::SameType(),Float3Variable(0.f,0.f,0.f)));
@@ -158,6 +219,21 @@ void MergeFloat3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void MergeFloat3Node::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& x = getInVal<FloatVariable>("X");
+	const auto& y = getInVal<FloatVariable>("Y");
+	const auto& z = getInVal<FloatVariable>("Z");
+	ExportElement<std::string> ele;
+	ele.dependencys = {x.name,y.name,z.name};
+	ele.identifier = out.name;
+	ele.callback = [out,x,y,z](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = Float3({},{},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto),z.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 void MergeFloat3Node::draw() {
@@ -235,6 +311,40 @@ void SplitColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
+void SplitColorNode::Export(RuiExportPrototype& proto) {
+	const auto& in = getInVal<Float2Variable>("In");
+	const auto& r = getOut<FloatVariable>("Red")->val();
+	const auto& g = getOut<FloatVariable>("Green")->val();
+	const auto& b = getOut<FloatVariable>("Blue")->val();
+	const auto& a = getOut<FloatVariable>("Alpha")->val();
+	ExportElement<std::string> ele;
+	ele.dependencys = {in.name};
+	ele.identifier = r.name;
+	ele.callback = [in,r](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.r",r.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = g.name;
+	ele.callback = [in,g](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.g",g.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = b.name;
+	ele.callback = [in,b](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.b",b.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+	ele.identifier = a.name;
+	ele.callback = [in,a](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format("{} = {}.a",a.GetFormattedName(proto), in.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+}
+
 std::vector<std::shared_ptr<ImFlow::PinProto>> SplitColorNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("In",ImFlow::ConnectionFilter::SameType(),ColorVariable(0.f,0.f,0.f,0.f)));
@@ -276,6 +386,28 @@ void RGBToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void RGBToColorNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& r = getInVal<FloatVariable>("Red");
+	const auto& g = getInVal<FloatVariable>("Green");
+	const auto& b = getInVal<FloatVariable>("Blue");
+	const auto& a = getInVal<FloatVariable>("Alpha");
+	ExportElement<std::string> ele;
+	ele.dependencys = {r.name,g.name,b.name,a.name};
+	ele.identifier = out.name;
+	ele.callback = [out,r,g,b,a](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format(
+			"{} = Color({},{},{},{});",
+			out.GetFormattedName(proto), 
+			r.GetFormattedName(proto), 
+			g.GetFormattedName(proto),
+			b.GetFormattedName(proto), 
+			a.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> RGBToColorNode::GetPinInfo() {
@@ -387,6 +519,28 @@ void HSVToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
+}
+
+void HSVToColorNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& h = getInVal<FloatVariable>("Hue");
+	const auto& s = getInVal<FloatVariable>("Saturation");
+	const auto& v = getInVal<FloatVariable>("Vibrance");
+	const auto& a = getInVal<FloatVariable>("Alpha");
+	ExportElement<std::string> ele;
+	ele.dependencys = {h.name,s.name,v.name,a.name};
+	ele.identifier = out.name;
+	ele.callback = [out,h,s,v,a](RuiExportPrototype& proto) {
+
+		proto.codeLines.push_back(std::format(
+			"{} = HsvColor({},{},{},{});",
+			out.GetFormattedName(proto), 
+			h.GetFormattedName(proto), 
+			s.GetFormattedName(proto),
+			v.GetFormattedName(proto), 
+			a.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> HSVToColorNode::GetPinInfo() {

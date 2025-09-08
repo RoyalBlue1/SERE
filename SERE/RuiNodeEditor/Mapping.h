@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <algorithm>
 #include "Imgui/implot.h"

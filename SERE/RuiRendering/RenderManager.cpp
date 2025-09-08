@@ -1130,8 +1130,9 @@ void RenderInstance::StartFrame(float time) {
 	verts.clear();
 	indices.clear();
 	transformResults.clear();
-	transformResults.push_back(TransformResult(0,_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth)));
-	transformResults.push_back(TransformResult(1,_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth)));
+	static uint64_t transformHashes[3] = {randomInt64(),randomInt64(),randomInt64()};
+	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[0]));
+	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[1]));
 	globals.currentTime = time;
 	float v17 = elementHeightRatio;
 	v17 = v17 * elementHeight;
@@ -1153,7 +1154,7 @@ void RenderInstance::StartFrame(float time) {
 		_mm_set1_ps(0.5),
 		_mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 0, 3, 0)), _mm_set1_ps(0.5)));
 	__m128 inputSize = _mm_mul_ps(v19, _mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 0, 0)));
-	transformResults.push_back(TransformResult(2,directionVector,position,inputSize));
+	transformResults.push_back(TransformResult(directionVector,position,inputSize,transformHashes[2]));
 	//transformSizes.clear();
 	//transformSizes.resize(0x200);
 	styleDescriptor.clear();

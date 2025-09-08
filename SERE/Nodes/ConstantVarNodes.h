@@ -14,6 +14,7 @@ public:
 	explicit IntVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -32,6 +33,7 @@ public:
 	explicit BoolVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -48,6 +50,7 @@ public:
 	explicit FloatVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -66,6 +69,7 @@ public:
 	explicit Float2VarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -84,6 +88,7 @@ public:
 	explicit Float3VarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -102,6 +107,7 @@ public:
 	explicit ColorVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -118,6 +124,7 @@ public:
 	explicit StringVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -134,6 +141,7 @@ public:
 	explicit AssetVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
@@ -151,6 +159,7 @@ public:
 	explicit SizeVarNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
