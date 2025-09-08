@@ -458,14 +458,11 @@ void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::share
 	GenerateArguments();
 	GenerateCodeStruct();
 	GenerateCode();
-	for (auto& line : codeLines) {
-		printf("%s\n", line.c_str());
-	}
 }
 
 
 void RuiExportPrototype::WriteToFile(fs::path path) {
-	std::ofstream file(path);
+	std::ofstream file(path,std::ios::binary);
 	if(!file.good())return;
 
 	RuiPackageHeader_v1_t pkgHdr;
@@ -538,4 +535,15 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 	file.write((char*) &pkgHdr, sizeof(pkgHdr));
 
 	file.close();
+	fs::path codeFilePath = path.replace_extension("cpp");
+	std::ofstream codeFile(codeFilePath);
+	if(!codeFile.good())
+		return;
+	const std::string import = "#include \"RuiHeaders.h\"";
+	codeFile.write(import.c_str(),import.size());
+	codeFile.put('\n');
+	for (auto& line : codeLines) {
+		codeFile.write(line.c_str(),line.size());
+		codeFile.put('\n');
+	}
 }
