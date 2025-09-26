@@ -554,7 +554,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> HSVToColorNode::GetPinInfo() {
 }
 
 void AddSplitMergeNodes(NodeEditor& editor) {
-	editor.AddNodeType<MergeFloat2Node>();
+	editor.AddNodeType<SplitFloat2Node>();
 	editor.AddNodeType<MergeFloat2Node>();
 	editor.AddNodeType<SplitFloat3Node>();
 	editor.AddNodeType<MergeFloat3Node>();
