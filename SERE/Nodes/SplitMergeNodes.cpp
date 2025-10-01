@@ -370,7 +370,7 @@ void RGBToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 }
 
 void RGBToColorNode::Export(RuiExportPrototype& proto) {
-	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& out = getOut<ColorVariable>("Out")->val();
 	const auto& r = getInVal<FloatVariable>("Red");
 	const auto& g = getInVal<FloatVariable>("Green");
 	const auto& b = getInVal<FloatVariable>("Blue");
