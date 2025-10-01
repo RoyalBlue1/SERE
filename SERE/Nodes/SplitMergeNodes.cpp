@@ -1,22 +1,17 @@
 #include "SplitMergeNodes.h"
 
 SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-
-	getOut<FloatVariable>("X")->behaviour([this]() {
+	std::string name = Variable::UniqueName();
+	getOut<FloatVariable>("X")->behaviour([this,name]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.x",in.name);
-		}
+
 		return FloatVariable(in.value.x,name);
 
 	});
-	getOut<FloatVariable>("Y")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Y")->behaviour([this,name]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.y",in.name);
-		}
+
 		return FloatVariable(in.value.y,name);
 
 	});
@@ -47,13 +42,13 @@ void SplitFloat2Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = y.name;
 	ele.callback = [in,y](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -103,7 +98,7 @@ void MergeFloat2Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.name;
 	ele.callback = [out,x,y](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = Float2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("vector2 {} = vector2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -118,25 +113,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat2Node::GetPinInfo() {
 
 SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
-	getOut<FloatVariable>("X")->behaviour([this]() {
+	std::string name = Variable::UniqueName();
+	getOut<FloatVariable>("X")->behaviour([this,name]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.x",in.name);
-		}
 		return FloatVariable(in.value.x,name);
 
 	});
-	getOut<FloatVariable>("Y")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Y")->behaviour([this,name]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.y",in.name);
-		}
+
 		return FloatVariable(in.value.y,name);
 
 	});
-	getOut<FloatVariable>("Z")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Z")->behaviour([this,name]() {
 		const Float3Variable& in = getInVal<Float3Variable>("In");
 		std::string name = "";
 		if (!in.IsConstant()) {
@@ -173,19 +164,19 @@ void SplitFloat3Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = y.name;
 	ele.callback = [in,y](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = z.name;
 	ele.callback = [in,z](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.z",z.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.z",z.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -231,7 +222,7 @@ void MergeFloat3Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.name;
 	ele.callback = [out,x,y,z](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = Float3({},{},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto),z.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("vector3 {} = vector3({},{},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto),z.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -255,41 +246,31 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat3Node::GetPinInfo() {
 }
 
 SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-
-	getOut<FloatVariable>("Red")->behaviour([this]() {
+	std::string name = Variable::UniqueName();
+	getOut<FloatVariable>("Red")->behaviour([this,name]() {
 
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.red",in.name);
-		}
 		return FloatVariable(in.value.red,name);
 
 	});
-	getOut<FloatVariable>("Green")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Green")->behaviour([this,name]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.green",in.name);
-		}
+
 		return FloatVariable(in.value.green,name);
 
 	});
-	getOut<FloatVariable>("Blue")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Blue")->behaviour([this,name]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.blue",in.name);
-		}
+
 		return FloatVariable(in.value.blue,name);
 
 	});
-	getOut<FloatVariable>("Alpha")->behaviour([this]() {
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Alpha")->behaviour([this,name]() {
 		const ColorVariable& in = getInVal<ColorVariable>("In");
-		std::string name = "";
-		if (!in.IsConstant()) {
-			name = std::format("{}.alpha",in.name);
-		}
+
 		return FloatVariable(in.value.alpha,name);
 
 	});
@@ -322,25 +303,25 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 	ele.identifier = r.name;
 	ele.callback = [in,r](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.r",r.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.red",r.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = g.name;
 	ele.callback = [in,g](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.g",g.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.green",g.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = b.name;
 	ele.callback = [in,b](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.b",b.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.blue",b.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = a.name;
 	ele.callback = [in,a](RuiExportPrototype& proto) {
 
-		proto.codeLines.push_back(std::format("{} = {}.a",a.GetFormattedName(proto), in.GetFormattedName(proto)));
+		proto.codeLines.push_back(std::format("float {} = {}.alpha",a.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -400,7 +381,7 @@ void RGBToColorNode::Export(RuiExportPrototype& proto) {
 	ele.callback = [out,r,g,b,a](RuiExportPrototype& proto) {
 
 		proto.codeLines.push_back(std::format(
-			"{} = Color({},{},{},{});",
+			"color {} = color({},{},{},{});",
 			out.GetFormattedName(proto), 
 			r.GetFormattedName(proto), 
 			g.GetFormattedName(proto),
@@ -533,7 +514,7 @@ void HSVToColorNode::Export(RuiExportPrototype& proto) {
 	ele.callback = [out,h,s,v,a](RuiExportPrototype& proto) {
 
 		proto.codeLines.push_back(std::format(
-			"{} = HsvColor({},{},{},{});",
+			"color {} = HsvColor({},{},{},{});",
 			out.GetFormattedName(proto), 
 			h.GetFormattedName(proto), 
 			s.GetFormattedName(proto),
