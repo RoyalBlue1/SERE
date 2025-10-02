@@ -505,6 +505,56 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 	return info;
 }
 
+TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(tan(a.value), name);
+
+		});
+
+}
+
+TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
+
+void TangentNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", tan(a.value));
+
+}
+
+void TangentNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void TangentNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = tan( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = tan( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> TangentNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
 
 void AddMathNodes(NodeEditor& editor) {
 
@@ -516,5 +566,6 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<AbsoluteNode>();
 	editor.AddNodeType<SineNode>();
 	editor.AddNodeType<ExponentNode>();
+	editor.AddNodeType<TangentNode>();
 	editor.AddNodeType<MappingNode>();
 }
