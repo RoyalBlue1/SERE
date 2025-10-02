@@ -7,7 +7,7 @@
 
 
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),maskFlag(false) {
 
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
@@ -15,6 +15,9 @@ AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& styl
 AssetRenderNode::AssetRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
 
 void AssetRenderNode::draw() {
+
+	ImGui::Checkbox("Mask mode",&maskFlag);
+	
 	AssetInputData input{};
 	input.mainColor = getInVal<ColorVariable>("Main Color");
 	input.maskColor = getInVal<ColorVariable>("Mask Color");
@@ -32,7 +35,7 @@ void AssetRenderNode::draw() {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1000;
+	input.flags = 0x1000 | maskFlag;
 	Render_Asset(render,input);
 }
 
@@ -61,7 +64,7 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1000;
+	input.flags = 0x1000 | maskFlag;
 
 	proto.AddDataVariable(input.mainColor);
 	proto.AddDataVariable(input.maskColor);
@@ -131,8 +134,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Main Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Mask Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<ColorVariable>>("Tertiary Color",ImFlow::ConnectionFilter::SameType(),ColorVariable(1.f,1.f,1.f,1.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Main Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("white")));
-	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Mask Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("")));
+	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Main Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("white",Variable::UniqueName())));
+	info.push_back(std::make_shared<ImFlow::InPinProto<AssetVariable>>("Mask Asset",ImFlow::ConnectionFilter::SameType(),AssetVariable("",Variable::UniqueName())));
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Maxs",ImFlow::ConnectionFilter::SameType(),Float2Variable(1.f,1.f)));
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Texture Mins",ImFlow::ConnectionFilter::SameType(),Float2Variable(0.f,0.f)));

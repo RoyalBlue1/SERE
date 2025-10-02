@@ -17,6 +17,8 @@ public:
 	void Export(RuiExportPrototype& proto) override;
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+
+	bool maskFlag;
 };
 
 class AssetCircleRenderNode : public RuiBaseNode {
