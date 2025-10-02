@@ -152,7 +152,7 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
 
             KerningInfo_t kern;
             kern.otherChar = kernObj["otherIndex"].GetInt();
-            kern.kerningDistance = kernObj["distance]"].GetFloat();
+            kern.kerningDistance = kernObj["distance"].GetFloat();
             font.kerningInfos.push_back(kern);
         }
         fonts.emplace(font.fontIndex,font);
