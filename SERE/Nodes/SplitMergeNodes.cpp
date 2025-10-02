@@ -41,18 +41,23 @@ void SplitFloat2Node::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {in.name};
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
+		
+		std::string typeName = proto.varsInDataStruct.contains(x.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",x.GetFormattedName(proto), in.value.x));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,x.GetFormattedName(proto), in.value.x));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.x",typeName,x.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = y.name;
 	ele.callback = [in,y](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(y.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",y.GetFormattedName(proto), in.value.y));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,y.GetFormattedName(proto), in.value.y));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.y",typeName,y.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -101,8 +106,14 @@ void MergeFloat2Node::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {x.name,y.name};
 	ele.identifier = out.name;
 	ele.callback = [out,x,y](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name)) {
+			proto.codeLines.push_back(std::format("{} = Vector2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
+		}
+		else {
+			proto.codeLines.push_back(std::format("Vector2 {} = Vector2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
+		}
 
-		proto.codeLines.push_back(std::format("Vector2 {} = Vector2({},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto)));
+		
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -164,26 +175,32 @@ void SplitFloat3Node::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {in.name};
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(x.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",x.GetFormattedName(proto), in.value.x));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,x.GetFormattedName(proto), in.value.x));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.x",x.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.x",typeName,x.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = y.name;
 	ele.callback = [in,y](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(y.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",y.GetFormattedName(proto), in.value.y));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,y.GetFormattedName(proto), in.value.y));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.y",y.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.y",typeName,y.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = z.name;
 	ele.callback = [in,z](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(z.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",z.GetFormattedName(proto), in.value.z));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,z.GetFormattedName(proto), in.value.z));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.z",z.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.z",typeName,z.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -228,8 +245,12 @@ void MergeFloat3Node::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {x.name,y.name,z.name};
 	ele.identifier = out.name;
 	ele.callback = [out,x,y,z](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format("Vector3 {} = Vector3({},{},{});",out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto),z.GetFormattedName(proto)));
+		if (proto.varsInDataStruct.contains(out.name)) {
+			proto.codeLines.push_back(std::format("{} = Vector3({},{},{});", out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto), z.GetFormattedName(proto)));
+		}
+		else {
+			proto.codeLines.push_back(std::format("Vector3 {} = Vector3({},{},{});", out.GetFormattedName(proto), x.GetFormattedName(proto), y.GetFormattedName(proto), z.GetFormattedName(proto)));
+		}
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -309,34 +330,42 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {in.name};
 	ele.identifier = r.name;
 	ele.callback = [in,r](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(r.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",r.GetFormattedName(proto), in.value.red));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,r.GetFormattedName(proto), in.value.red));
 		else
-			proto.codeLines.push_back(std::format("float {} = {}.red",r.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.red",typeName,r.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = g.name;
 	ele.callback = [in,g](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(g.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",g.GetFormattedName(proto), in.value.green));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,g.GetFormattedName(proto), in.value.green));
 		else
-		proto.codeLines.push_back(std::format("float {} = {}.green",g.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.green",typeName,g.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = b.name;
 	ele.callback = [in,b](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(b.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",b.GetFormattedName(proto), in.value.blue));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,b.GetFormattedName(proto), in.value.blue));
 		else
-		proto.codeLines.push_back(std::format("float {} = {}.blue",b.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.blue",typeName,b.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = a.name;
 	ele.callback = [in,a](RuiExportPrototype& proto) {
+		std::string typeName = proto.varsInDataStruct.contains(a.name)?"":"float";
+
 		if(in.IsConstant())
-			proto.codeLines.push_back(std::format("float {} = {};",a.GetFormattedName(proto), in.value.alpha));
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,a.GetFormattedName(proto), in.value.alpha));
 		else
-		proto.codeLines.push_back(std::format("float {} = {}.alpha",a.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.alpha",typeName,a.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -394,14 +423,25 @@ void RGBToColorNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {r.name,g.name,b.name,a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,r,g,b,a](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format(
-			"Color {} = Color({},{},{},{});",
-			out.GetFormattedName(proto), 
-			r.GetFormattedName(proto), 
-			g.GetFormattedName(proto),
-			b.GetFormattedName(proto), 
-			a.GetFormattedName(proto)));
+		if (proto.varsInDataStruct.contains(out.name)) {
+			proto.codeLines.push_back(std::format(
+				"{} = Color({},{},{},{});",
+				out.GetFormattedName(proto), 
+				r.GetFormattedName(proto), 
+				g.GetFormattedName(proto),
+				b.GetFormattedName(proto), 
+				a.GetFormattedName(proto)));
+		}
+		else {
+			proto.codeLines.push_back(std::format(
+				"Color {} = Color({},{},{},{});",
+				out.GetFormattedName(proto), 
+				r.GetFormattedName(proto), 
+				g.GetFormattedName(proto),
+				b.GetFormattedName(proto), 
+				a.GetFormattedName(proto)));
+		}
+		
 	};
 	proto.codeElements.push_back(ele);
 }
@@ -527,14 +567,25 @@ void HSVToColorNode::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {h.name,s.name,v.name,a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,h,s,v,a](RuiExportPrototype& proto) {
-
-		proto.codeLines.push_back(std::format(
-			"Color {} = HsvColor({},{},{},{});",
-			out.GetFormattedName(proto), 
-			h.GetFormattedName(proto), 
-			s.GetFormattedName(proto),
-			v.GetFormattedName(proto), 
-			a.GetFormattedName(proto)));
+		if (proto.varsInDataStruct.contains(out.name)) {
+			proto.codeLines.push_back(std::format(
+				"{} = HsvColor({},{},{},{});",
+				out.GetFormattedName(proto), 
+				h.GetFormattedName(proto), 
+				s.GetFormattedName(proto),
+				v.GetFormattedName(proto), 
+				a.GetFormattedName(proto)));
+		}
+		else {
+			proto.codeLines.push_back(std::format(
+				"Color {} = HsvColor({},{},{},{});",
+				out.GetFormattedName(proto), 
+				h.GetFormattedName(proto), 
+				s.GetFormattedName(proto),
+				v.GetFormattedName(proto), 
+				a.GetFormattedName(proto)));
+		}
+		
 	};
 	proto.codeElements.push_back(ele);
 }
