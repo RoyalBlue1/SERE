@@ -164,3 +164,21 @@ public:
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
+
+class TangentNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Tangent";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
