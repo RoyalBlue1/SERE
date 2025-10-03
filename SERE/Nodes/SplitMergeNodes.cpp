@@ -558,7 +558,7 @@ void HSVToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 }
 
 void HSVToColorNode::Export(RuiExportPrototype& proto) {
-	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& out = getOut<ColorVariable>("Out")->val();
 	const auto& h = getInVal<FloatVariable>("Hue");
 	const auto& s = getInVal<FloatVariable>("Saturation");
 	const auto& v = getInVal<FloatVariable>("Vibrance");
