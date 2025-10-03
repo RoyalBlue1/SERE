@@ -135,6 +135,14 @@ void NodeEditor::Deserialize() {
 
 		std::string name = node["Name"].GetString();
 		std::string category = node["Category"].GetString();
+		if (!nodeTypes.contains(category)){
+			printf("Unknown Category %s",category.c_str());
+			continue;
+		}
+		if (!nodeTypes[category].contains(name)) {
+			printf("Unknown Node %s",name.c_str());
+			continue;
+		}
 		nodeTypes[category][name].RecreateNode(mINF,render,mINF.getStyleManager(), node);
 		
 	}
