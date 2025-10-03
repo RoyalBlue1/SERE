@@ -185,7 +185,7 @@ void Float2VarNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Min",minVal, allocator);
 	obj.AddMember("Max",maxVal, allocator);
 	obj.AddMember("Value_X",value[0], allocator);
-	obj.AddMember("Value_Y",value[0], allocator);
+	obj.AddMember("Value_Y",value[1], allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
