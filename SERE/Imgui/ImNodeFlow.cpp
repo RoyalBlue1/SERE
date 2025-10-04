@@ -48,12 +48,17 @@ namespace ImFlow {
     void BaseNode::update() {
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         ImGui::PushID(this);
+
+        ImDrawListSplitter splitter;
+        splitter.Split(draw_list, 2);
+
+
         bool mouseClickState = m_inf->getSingleUseClick();
         ImVec2 offset = m_inf->grid2screen({0.f, 0.f});
         ImVec2 paddingTL = {m_style->padding.x, m_style->padding.y};
         ImVec2 paddingBR = {m_style->padding.z, m_style->padding.w};
 
-        draw_list->ChannelsSetCurrent(1); // Foreground
+        splitter.SetCurrentChannel(draw_list, 1); // Foreground
         ImGui::SetCursorScreenPos(offset + m_pos);
 
         ImGui::BeginGroup();
@@ -135,7 +140,8 @@ namespace ImFlow {
         ImVec2 headerSize = ImVec2(m_size.x + paddingBR.x, headerH);
 
         // Background
-        draw_list->ChannelsSetCurrent(0);
+        splitter.SetCurrentChannel(draw_list, 0); // Background
+
         draw_list->AddRectFilled(offset + m_pos - paddingTL, offset + m_pos + m_size + paddingBR, m_style->bg,
                                  m_style->radius);
         draw_list->AddRectFilled(offset + m_pos - paddingTL, offset + m_pos + headerSize, m_style->header_bg,
@@ -193,6 +199,9 @@ namespace ImFlow {
                 m_posTarget = m_pos;
             }
         }
+
+        splitter.Merge(draw_list);
+
         ImGui::PopID();
 
         // Deleting dead pins
@@ -268,10 +277,22 @@ namespace ImFlow {
 
         //set zoom to true so nodes might disable it if they need zoom priority
         m_context.config().zoom_enabled = true;
+
+        const int nodeCount = m_nodes.size();
+        ImDrawListSplitter splitter;
+        splitter.Split(draw_list, 1 + nodeCount);
+
         // Update and draw nodes
-        // TODO: I don't like this
-        draw_list->ChannelsSplit(2);
-        for (auto &node: m_nodes) { node.second->update(); }
+        int i = nodeCount - 1;
+        for (auto& node : m_nodes)
+        {
+            // invert the order of the nodes for their channels so that the first node renders last and is displayed on top
+            splitter.SetCurrentChannel(draw_list, i);
+            node.second->update();
+            --i;
+        }
+        splitter.Merge(draw_list);
+
         // Remove "toDelete" nodes
         for (auto iter = m_nodes.begin(); iter != m_nodes.end();) {
             if (iter->second->toDestroy())
@@ -279,7 +300,6 @@ namespace ImFlow {
             else
                 ++iter;
         }
-        draw_list->ChannelsMerge();
         for (auto &node: m_nodes) { node.second->updatePublicStatus(); }
 
         // Update and draw links
