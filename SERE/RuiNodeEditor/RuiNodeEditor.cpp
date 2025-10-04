@@ -257,7 +257,7 @@ void NodeEditor::LinkDroppedPopup(ImFlow::Pin* pin) {
 
 				if (!hasCategoryHeader)
 				{
-					ImGui::MenuItem(catName.c_str(), nullptr, nullptr, false);
+					ImGui::SeparatorText(catName.c_str());
 					hasCategoryHeader = true;
 				}
 
