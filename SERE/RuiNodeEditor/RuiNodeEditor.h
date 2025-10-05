@@ -22,6 +22,7 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
+	fs::path editedGraph;
 	
 
 	std::map<std::string,NodeCategory> nodeTypes;
@@ -35,6 +36,14 @@ public:
 	void Deserialize();
 	void Export();
 	void Clear();
+
+	/**
+	 * Saves the current graph.
+	 * 
+	 * If no path has been previously selected, prompts the user to pick one;
+	 * else, exports the graph using this path.
+	 **/
+	void Save();
 
 	template<class T> void AddNodeType() {
 		

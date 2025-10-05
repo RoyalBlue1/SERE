@@ -45,6 +45,18 @@ void NodeEditor::Clear() {
 	for (auto& [uid,node] : mINF.getNodes()) {
 		node->destroy();
 	}
+	editedGraph.clear();
+}
+
+void NodeEditor::Save() {
+	if (editedGraph.empty()) {
+		printf("No selected path, going for the \"save as\" option.");
+		Serialize();
+	}
+	else {
+		printf("Saving graph to:");
+		printf(editedGraph.generic_string().c_str());
+	}
 }
 
 void NodeEditor::Serialize() {
@@ -122,6 +134,8 @@ void NodeEditor::Deserialize() {
 	rapidjson::GenericObject root = doc.GetObject();
 	if(!(root.HasMember("Nodes")&&root["Nodes"].IsArray()))return;
 	if(!(root.HasMember("Links")&&root["Links"].IsArray()))return;
+	editedGraph = path;
+
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
 		if (!itr->IsObject()) {

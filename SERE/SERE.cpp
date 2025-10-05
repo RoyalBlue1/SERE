@@ -306,6 +306,9 @@ int main(int, char**)
                 if (ImGui::MenuItem("Load graph")) {
                     nodeEdit.Deserialize();
                 }
+                if (ImGui::MenuItem("Save")) {
+                    nodeEdit.Save();
+                }
                 if (ImGui::MenuItem("Save graph as")) {
                     nodeEdit.Serialize();
                 }
