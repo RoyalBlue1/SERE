@@ -32,7 +32,7 @@ public:
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
 	void Draw();
-	void Serialize();
+	void Serialize(fs::path outPath = fs::path());
 	void Deserialize();
 	void Export();
 	void Clear();

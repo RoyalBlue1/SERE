@@ -50,27 +50,34 @@ void NodeEditor::Clear() {
 
 void NodeEditor::Save() {
 	if (editedGraph.empty()) {
-		printf("No selected path, going for the \"save as\" option.");
+		printf("No selected path, going for the \"save as\" option.\n");
 		Serialize();
 	}
 	else {
-		printf("Saving graph to:");
+		printf("Saving graph to: ");
 		printf(editedGraph.generic_string().c_str());
+		printf("\n");
+		Serialize(editedGraph);
 	}
 }
 
-void NodeEditor::Serialize() {
-
+void NodeEditor::Serialize(fs::path outPath) {
 	if(!mINF.getNodesCount())return;
 
-	NFD::Guard nfdGuard;
-	nfdfilteritem_t filter("Graph", "json");
-	NFD::UniquePath nfdPath;
-	if(NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
-	
-	fs::path path(nfdPath.get());
+	fs::path path;
 
-
+	// Display file selection only with no outPath
+	if (outPath.empty()) {
+		NFD::Guard nfdGuard;
+		nfdfilteritem_t filter("Graph", "json");
+		NFD::UniquePath nfdPath;
+		if (NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
+		path = nfdPath.get();
+	}
+	else
+	{
+		path = outPath;
+	}
 
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -105,6 +112,10 @@ void NodeEditor::Serialize() {
 	outFile.write(buffer.GetString(),buffer.GetSize());
 	outFile.close();
 
+	// Set current file using new path
+	if (outPath.empty()) {
+		editedGraph = path;
+	}
 }
 
 void NodeEditor::Deserialize() {
