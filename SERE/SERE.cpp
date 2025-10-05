@@ -302,12 +302,14 @@ int main(int, char**)
                 if (ImGui::MenuItem("New")) {
                    nodeEdit.Clear();
                 }
-                if (ImGui::MenuItem("Save Graph")) {
-                    nodeEdit.Serialize();
-                }
+                ImGui::Separator();
                 if (ImGui::MenuItem("Load Graph")) {
                     nodeEdit.Deserialize();
                 }
+                if (ImGui::MenuItem("Save Graph")) {
+                    nodeEdit.Serialize();
+                }
+                ImGui::Separator();
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
                 }
