@@ -303,10 +303,10 @@ int main(int, char**)
                    nodeEdit.Clear();
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Load Graph")) {
+                if (ImGui::MenuItem("Load graph")) {
                     nodeEdit.Deserialize();
                 }
-                if (ImGui::MenuItem("Save Graph")) {
+                if (ImGui::MenuItem("Save graph as")) {
                     nodeEdit.Serialize();
                 }
                 ImGui::Separator();
