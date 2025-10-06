@@ -54,13 +54,10 @@ void NodeEditor::UpdateEditedPath(fs::path path) {
 
 void NodeEditor::Save() {
 	if (editedGraph.empty()) {
-		printf("No selected path, going for the \"save as\" option.\n");
+		// No selected path, going for the "save as" option
 		Serialize();
 	}
 	else {
-		printf("Saving graph to: ");
-		printf(editedGraph.generic_string().c_str());
-		printf("\n");
 		Serialize(editedGraph);
 	}
 }
@@ -82,6 +79,9 @@ void NodeEditor::Serialize(fs::path outPath) {
 	{
 		path = outPath;
 	}
+	printf("Saving graph to: ");
+	printf(path.generic_string().c_str());
+	printf("\n");
 
 	rapidjson::Document doc;
 	doc.SetObject();
