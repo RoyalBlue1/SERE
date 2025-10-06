@@ -239,8 +239,6 @@ int main(int, char**)
     // Main loop
     bool done = false;
 
-
-
     //TextEditor textEdit;
     //setupTextEditor(textEdit);
 

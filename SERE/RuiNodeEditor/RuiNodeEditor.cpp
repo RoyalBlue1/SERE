@@ -36,6 +36,10 @@ void NodeEditor::Draw() {
 	ImGui::Begin("Node Editor");
 	
 	mINF.update();
+	if (mINF.getNodesCount() != m_iSavedNodesCount) {
+		m_bIsUnsaved = true;
+		UpdateEditedPath(editedGraph);
+	}
 
 	ImGui::End();
 }
@@ -47,9 +51,10 @@ void NodeEditor::Clear() {
 	editedGraph.clear();
 }
 
-void NodeEditor::UpdateEditedPath(fs::path path) {
+void NodeEditor::UpdateEditedPath(fs::path path, bool isUnsaved) {
 	editedGraph = path;
-	SetWindowText(windowHandle, std::format("{} - SERE", path.generic_string().c_str()).c_str());
+	const std::string title = std::format("{}{} - SERE", isUnsaved ? "*" : "", editedGraph.generic_string().c_str());
+	SetWindowText(windowHandle, title.c_str());
 }
 
 void NodeEditor::Save() {
@@ -115,7 +120,10 @@ void NodeEditor::Serialize(fs::path outPath) {
 	std::ofstream outFile{path};
 	outFile.write(buffer.GetString(),buffer.GetSize());
 	outFile.close();
-	UpdateEditedPath(path);
+
+	UpdateEditedPath(path, false);
+	m_bIsUnsaved = false;
+	m_iSavedNodesCount = mINF.getNodesCount();
 }
 
 void NodeEditor::Deserialize() {
@@ -145,7 +153,7 @@ void NodeEditor::Deserialize() {
 	rapidjson::GenericObject root = doc.GetObject();
 	if(!(root.HasMember("Nodes")&&root["Nodes"].IsArray()))return;
 	if(!(root.HasMember("Links")&&root["Links"].IsArray()))return;
-	UpdateEditedPath(path);
+	UpdateEditedPath(path, false);
 
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
@@ -190,8 +198,9 @@ void NodeEditor::Deserialize() {
 		auto right = mINF.getNodes()[rightId];
 
 		left->outPin(leftPinName)->createLink(right->inPin(rightPinName));
-
 	}
+
+	m_iSavedNodesCount = mINF.getNodesCount();
 }
 
 void NodeEditor::Export() {

@@ -24,6 +24,8 @@ private:
 	RenderInstance& render;
 	HWND& windowHandle;
 	fs::path editedGraph;
+	int m_iSavedNodesCount = 0;
+	bool m_bIsUnsaved = true;
 	
 
 	std::map<std::string,NodeCategory> nodeTypes;
@@ -37,7 +39,7 @@ public:
 	void Deserialize();
 	void Export();
 	void Clear();
-	void UpdateEditedPath(fs::path path);
+	void UpdateEditedPath(fs::path path, bool isUnsaved = true);
 
 	/**
 	 * Saves the current graph.
