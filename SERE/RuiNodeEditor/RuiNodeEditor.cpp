@@ -19,7 +19,7 @@
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
-NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
+NodeEditor::NodeEditor(RenderInstance& rend, HWND& hwnd): windowHandle(hwnd), render(rend) {
 	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 		RightClickPopup(node);
 	});
@@ -28,7 +28,6 @@ NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
 	});
 	ImFlow::StyleManager& styles = mINF.getStyleManager();;
 	SetStyles(styles);
-
 }
 
 
@@ -46,6 +45,11 @@ void NodeEditor::Clear() {
 		node->destroy();
 	}
 	editedGraph.clear();
+}
+
+void NodeEditor::UpdateEditedPath(fs::path path) {
+	editedGraph = path;
+	SetWindowText(windowHandle, std::format("{} - SERE", path.generic_string().c_str()).c_str());
 }
 
 void NodeEditor::Save() {
@@ -111,11 +115,7 @@ void NodeEditor::Serialize(fs::path outPath) {
 	std::ofstream outFile{path};
 	outFile.write(buffer.GetString(),buffer.GetSize());
 	outFile.close();
-
-	// Set current file using new path
-	if (outPath.empty()) {
-		editedGraph = path;
-	}
+	UpdateEditedPath(path);
 }
 
 void NodeEditor::Deserialize() {
@@ -145,7 +145,7 @@ void NodeEditor::Deserialize() {
 	rapidjson::GenericObject root = doc.GetObject();
 	if(!(root.HasMember("Nodes")&&root["Nodes"].IsArray()))return;
 	if(!(root.HasMember("Links")&&root["Links"].IsArray()))return;
-	editedGraph = path;
+	UpdateEditedPath(path);
 
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {

@@ -22,12 +22,13 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
+	HWND& windowHandle;
 	fs::path editedGraph;
 	
 
 	std::map<std::string,NodeCategory> nodeTypes;
 public:
-	NodeEditor(RenderInstance& rend);
+	NodeEditor(RenderInstance& rend, HWND& hwnd);
 	void SetStyles(ImFlow::StyleManager& styles);
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
@@ -36,6 +37,7 @@ public:
 	void Deserialize();
 	void Export();
 	void Clear();
+	void UpdateEditedPath(fs::path path);
 
 	/**
 	 * Saves the current graph.

@@ -248,7 +248,7 @@ int main(int, char**)
     loadImageAtlases(g_pd3dDevice);
 
     RenderInstance render{g_pd3dDevice,g_pd3dDeviceContext,1920,1080};
-    NodeEditor nodeEdit{render};
+    NodeEditor nodeEdit{render, hwnd};
     AddArgumentNodes(nodeEdit);
     AddConstantVarNodes(nodeEdit);
     AddMathNodes(nodeEdit);
