@@ -343,6 +343,14 @@ int main(int, char**)
         HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
         //HRESULT hr = g_pSwapChain->Present(0, 0); // Present without vsync
         g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
+
+        // Graph save keyboard shortcut
+        // https://github.com/ocornut/imgui/issues/456#issuecomment-2290384494
+        ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
+        bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+        if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+            nodeEdit.Save();
+        }
     }
 
     // Cleanup
