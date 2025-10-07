@@ -49,16 +49,13 @@ namespace ImFlow {
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         ImGui::PushID(this);
 
-        ImDrawListSplitter splitter;
-        splitter.Split(draw_list, 2);
-
-
         bool mouseClickState = m_inf->getSingleUseClick();
         ImVec2 offset = m_inf->grid2screen({0.f, 0.f});
         ImVec2 paddingTL = {m_style->padding.x, m_style->padding.y};
         ImVec2 paddingBR = {m_style->padding.z, m_style->padding.w};
 
-        splitter.SetCurrentChannel(draw_list, 1); // Foreground
+        m_splitter.Split(draw_list, 2);
+        m_splitter.SetCurrentChannel(draw_list, 1); // Foreground
         ImGui::SetCursorScreenPos(offset + m_pos);
 
         ImGui::BeginGroup();
@@ -140,7 +137,7 @@ namespace ImFlow {
         ImVec2 headerSize = ImVec2(m_size.x + paddingBR.x, headerH);
 
         // Background
-        splitter.SetCurrentChannel(draw_list, 0); // Background
+        m_splitter.SetCurrentChannel(draw_list, 0); // Background
 
         draw_list->AddRectFilled(offset + m_pos - paddingTL, offset + m_pos + m_size + paddingBR, m_style->bg,
                                  m_style->radius);
@@ -164,6 +161,11 @@ namespace ImFlow {
         }
         draw_list->AddRect(offset + m_pos - ptl, offset + m_pos + m_size + pbr, col, m_style->radius, 0, thickness);
 
+        // set cursor position back to the start of the node, accounting for the hover border
+        ImGui::SetCursorScreenPos(offset + m_pos - ptl);
+        // create an invisible button to act as our main mouse click test
+        // TODO: replace the existing click detection with just using this?
+        const bool isClicked = ImGui::InvisibleButton("##NodeBackgroundButton", ptl + m_size + pbr);
 
         if (ImGui::IsWindowHovered() && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) &&
             ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !m_inf->on_selected_node())
@@ -200,7 +202,7 @@ namespace ImFlow {
             }
         }
 
-        splitter.Merge(draw_list);
+        m_splitter.Merge(draw_list);
 
         ImGui::PopID();
 
@@ -278,11 +280,10 @@ namespace ImFlow {
         //set zoom to true so nodes might disable it if they need zoom priority
         m_context.config().zoom_enabled = true;
 
-        const int nodeCount = m_nodes.size();
-        ImDrawListSplitter splitter;
-        splitter.Split(draw_list, 1 + nodeCount);
-
         // Update and draw nodes
+        const int nodeCount = m_nodes.size();
+        ImDrawListSplitter& splitter = m_context.getSplitter();
+        splitter.Split(draw_list, 1 + nodeCount);
         int i = nodeCount - 1;
         for (auto& node : m_nodes)
         {
