@@ -600,6 +600,156 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> HSVToColorNode::GetPinInfo() {
 	return info;
 }
 
+SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style)
+	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
+{
+	std::string name = Variable::UniqueName();
+	getOut<FloatVariable>("X")->behaviour([this, name]() {
+		const TransformSize& in = getInVal<TransformSize>("In");
+		return FloatVariable(in.size.m128_f32[0], name);
+		});
+
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Y")->behaviour([this, name]() {
+		const TransformSize& in = getInVal<TransformSize>("In");
+		return FloatVariable(in.size.m128_f32[1], name);
+		});
+
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("Z")->behaviour([this, name]() {
+		const TransformSize& in = getInVal<TransformSize>("In");
+		return FloatVariable(in.size.m128_f32[2], name);
+		});
+
+	name = Variable::UniqueName();
+	getOut<FloatVariable>("W")->behaviour([this, name]() {
+		const TransformSize& in = getInVal<TransformSize>("In");
+		return FloatVariable(in.size.m128_f32[3], name);
+		});
+}
+
+
+SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SplitTransformSizeNode(rend, style) {}
+
+void SplitTransformSizeNode::draw() {
+	const TransformSize& in = getInVal<TransformSize>("In");
+
+	ImGui::Text("X: %f", in.size.m128_f32[0]);
+	ImGui::Text("Y: %f", in.size.m128_f32[1]);
+	ImGui::Text("Z: %f", in.size.m128_f32[2]);
+	ImGui::Text("W: %f", in.size.m128_f32[3]);
+
+}
+
+void SplitTransformSizeNode::Export(RuiExportPrototype& proto) {
+	const auto& in = getInVal<TransformSize>("In");
+
+	auto pushVectorExport = [&](const auto& var, int idx) {
+		ExportElement<std::string> ele;
+		ele.dependencys = { in.name };
+		ele.identifier = var.name;
+		ele.callback = [in, var, idx](RuiExportPrototype& proto) {
+			std::string typeName = proto.varsInDataStruct.contains(var.name) ? "" : "float";
+			if (in.IsConstant())
+				proto.codeLines.push_back(std::format("{} {} = {};", typeName, var.GetFormattedName(proto), in.size.m128_f32[idx]));
+			else
+				proto.codeLines.push_back(std::format("{} {} = {}.m128_f32[{}];", typeName, var.GetFormattedName(proto), in.GetFormattedName(proto), idx));
+			};
+		proto.codeElements.push_back(ele);
+		};
+
+	pushVectorExport(getOut<FloatVariable>("X")->val(), 0);
+	pushVectorExport(getOut<FloatVariable>("Y")->val(), 1);
+	pushVectorExport(getOut<FloatVariable>("Z")->val(), 2);
+	pushVectorExport(getOut<FloatVariable>("W")->val(), 3);
+
+}
+
+void SplitTransformSizeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+std::vector<std::shared_ptr<ImFlow::PinProto>> SplitTransformSizeNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<TransformSize>>("In", ImFlow::ConnectionFilter::SameType(), TransformSize()));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("X"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Y"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Z"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("W"));
+
+	return info;
+}
+
+MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style)
+	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
+{
+	getOut<TransformSize>("Out")->behaviour([this]() {
+		const FloatVariable& inX = getInVal<FloatVariable>("X");
+		const FloatVariable& inY = getInVal<FloatVariable>("Y");
+		const FloatVariable& inZ = getInVal<FloatVariable>("Z");
+		const FloatVariable& inW = getInVal<FloatVariable>("W");
+
+		std::string name = (inX.IsConstant() && inY.IsConstant() && inZ.IsConstant() && inW.IsConstant()) ? "" : Variable::UniqueName();
+
+		__m128 vec = _mm_set_ps(inW.value, inZ.value, inY.value, inX.value); // highest first
+		return TransformSize(vec, name);
+		});
+}
+
+MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj)
+	: MergeTransformSizeNode(rend, style) {
+}
+
+void MergeTransformSizeNode::draw() {
+	const FloatVariable& inX = getInVal<FloatVariable>("X");
+	const FloatVariable& inY = getInVal<FloatVariable>("Y");
+	const FloatVariable& inZ = getInVal<FloatVariable>("Z");
+	const FloatVariable& inW = getInVal<FloatVariable>("W");
+
+	ImGui::Text("%f", inX.value);
+	ImGui::Text("%f", inY.value);
+	ImGui::Text("%f", inZ.value);
+	ImGui::Text("%f", inW.value);
+}
+
+void MergeTransformSizeNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<TransformSize>("Out")->val();
+	const auto& x = getInVal<FloatVariable>("X");
+	const auto& y = getInVal<FloatVariable>("Y");
+	const auto& z = getInVal<FloatVariable>("Z");
+	const auto& w = getInVal<FloatVariable>("W");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { x.name, y.name, z.name, w.name };
+	ele.identifier = out.name;
+	ele.callback = [out, x, y, z, w](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name)) {
+			proto.codeLines.push_back(std::format("{} = _mm_set_ps({},{},{},{});", out.GetFormattedName(proto), w.GetFormattedName(proto), z.GetFormattedName(proto), y.GetFormattedName(proto), x.GetFormattedName(proto)));
+		}
+		else {
+			proto.codeLines.push_back(std::format("__m128 {} = _mm_set_ps({},{},{},{});", out.GetFormattedName(proto), w.GetFormattedName(proto), z.GetFormattedName(proto), y.GetFormattedName(proto), x.GetFormattedName(proto)));
+		}
+		};
+	proto.codeElements.push_back(ele);
+}
+
+void MergeTransformSizeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> MergeTransformSizeNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("X", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Y", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Z", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("W", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Out"));
+	return info;
+}
+
 void AddSplitMergeNodes(NodeEditor& editor) {
 	editor.AddNodeType<SplitFloat2Node>();
 	editor.AddNodeType<MergeFloat2Node>();
@@ -608,4 +758,6 @@ void AddSplitMergeNodes(NodeEditor& editor) {
 	editor.AddNodeType<SplitColorNode>();
 	editor.AddNodeType<RGBToColorNode>();
 	editor.AddNodeType<HSVToColorNode>();
+	editor.AddNodeType<SplitTransformSizeNode>();
+	editor.AddNodeType<MergeTransformSizeNode>();
 }
