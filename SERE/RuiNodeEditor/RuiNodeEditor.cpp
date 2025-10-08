@@ -350,3 +350,15 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	styles.SetNodeErrorStyle(errorNodeStyle);
 }
 
+void NodeEditor::CopyNodes() {
+	m_lSelectedNodes.clear();
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		if (nodePtr->isSelected()) {
+			m_lSelectedNodes.push_back(nodePtr);
+		}
+	}
+
+	int size = m_lSelectedNodes.size();
+	printf(std::format("Copied {} node{}.\n", size, size >= 2 ? "s" : "").c_str());
+}
+
