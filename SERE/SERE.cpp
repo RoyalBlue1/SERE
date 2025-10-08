@@ -346,12 +346,12 @@ int main(int, char**)
         ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_C;
         bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
         if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
-            nodeEdit.CopyNode();
+            nodeEdit.CopyNodes();
         }
         chord = ImGuiMod_Ctrl | ImGuiKey_V;
         isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
         if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
-            nodeEdit.PasteNode();
+            nodeEdit.PasteNodes();
         }
     }
 

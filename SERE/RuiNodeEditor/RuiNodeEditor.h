@@ -35,8 +35,8 @@ public:
 	void Export();
 	void Clear();
 
-	void CopyNode();
-	void PasteNode();
+	void CopyNodes();
+	void PasteNodes();
 
 	template<class T> void AddNodeType() {
 		
