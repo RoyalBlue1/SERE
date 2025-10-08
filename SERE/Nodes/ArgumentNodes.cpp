@@ -83,7 +83,7 @@ void BoolArgNode::draw() {
 	else
 		val = 0;
 	bool bval = val;
-	ImGui::Selectable("Default Value",&bval);
+	ImGui::Checkbox("Default Value",&bval);
 	val = bval;
 	render.arguments[argName] = val;
 	ImGui::PopItemWidth();

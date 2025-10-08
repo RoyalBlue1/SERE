@@ -47,7 +47,7 @@ add_executable (SERE
 	"Nodes/GlobalNodes.cpp"
 	
 	"ThirdParty/DDSTextureLoader11.cpp"
-	 "RuiNodeEditor/RuiBaseNode.cpp" "RuiNodeEditor/RuiExportPrototype.h" "RuiNodeEditor/RuiVariables.h" "RuiNodeEditor/RuiExportPrototype.cpp")
+	 "RuiNodeEditor/RuiBaseNode.cpp" "RuiNodeEditor/RuiExportPrototype.h" "RuiNodeEditor/RuiVariables.h" "RuiNodeEditor/RuiExportPrototype.cpp" "Nodes/ConditionalNodes.h" "Nodes/ConditionalNodes.cpp")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
 target_link_libraries(SERE PUBLIC nfd)
