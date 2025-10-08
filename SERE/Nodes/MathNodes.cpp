@@ -505,6 +505,362 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 	return info;
 }
 
+TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(tan(a.value), name);
+
+		});
+
+}
+
+TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
+
+void TangentNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", tan(a.value));
+
+}
+
+void TangentNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void TangentNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = tan( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = tan( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> TangentNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(cos(a.value), name);
+
+		});
+
+}
+
+CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CosineNode(rend, style) {}
+
+void CosineNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", cos(a.value));
+
+}
+
+void CosineNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void CosineNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = cos( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = cos( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> CosineNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(cos(a.value), name);
+
+		});
+
+}
+
+SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SquareRootNode(rend, style) {}
+
+void SquareRootNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", sqrt(a.value));
+
+}
+
+void SquareRootNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void SquareRootNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = sqrt( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = sqrt( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> SquareRootNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(round(a.value), name);
+
+		});
+
+}
+
+RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :RoundNode(rend, style) {}
+
+void RoundNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", round(a.value));
+
+}
+
+void RoundNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void RoundNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = round( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = round( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> RoundNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(floor(a.value), name);
+
+		});
+
+}
+
+FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :FloorNode(rend, style) {}
+
+void FloorNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", floor(a.value));
+
+}
+
+void FloorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void FloorNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = floor( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = floor( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> FloorNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(ceil(a.value), name);
+
+		});
+
+}
+
+CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CeilNode(rend, style) {}
+
+void CeilNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", ceil(a.value));
+
+}
+
+void CeilNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void CeilNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = ceil( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = ceil( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> CeilNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& a = getInVal<FloatVariable>("A");
+		std::string name = a.IsConstant() ? "" : outName;
+		return FloatVariable(trunc(a.value), name);
+
+		});
+
+}
+
+TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TruncNode(rend, style) {}
+
+void TruncNode::draw() {
+	const FloatVariable& a = getInVal<FloatVariable>("A");
+
+	ImGui::Text("A %f", a.value);
+	ImGui::Text("Res %f", trunc(a.value));
+
+}
+
+void TruncNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void TruncNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<FloatVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = trunc( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = trunc( {});", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> TruncNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
 
 void AddMathNodes(NodeEditor& editor) {
 
@@ -517,4 +873,11 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<SineNode>();
 	editor.AddNodeType<ExponentNode>();
 	editor.AddNodeType<MappingNode>();
+	editor.AddNodeType<TangentNode>();
+	editor.AddNodeType<CosineNode>();
+	editor.AddNodeType<SquareRootNode>();
+	editor.AddNodeType<RoundNode>();
+	editor.AddNodeType<FloorNode>();
+	editor.AddNodeType<CeilNode>();
+	editor.AddNodeType<TruncNode>();
 }

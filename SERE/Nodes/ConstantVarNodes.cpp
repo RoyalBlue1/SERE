@@ -65,7 +65,7 @@ BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapid
 
 void BoolVarNode::draw() {
 	ImGui::PushItemWidth(90);
-	ImGui::Selectable("Value",&value);
+	ImGui::Checkbox("Value",&value);
 	ImGui::PopItemWidth();
 }
 

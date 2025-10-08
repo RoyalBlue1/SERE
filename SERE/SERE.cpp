@@ -23,6 +23,7 @@
 #include "Nodes/RenderJobNodes.h"
 #include "Nodes/SplitMergeNodes.h"
 #include "Nodes/TransformNodes.h"
+#include "Nodes/ConditionalNodes.h"
 
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 
@@ -254,6 +255,7 @@ int main(int, char**)
     AddRenderNodes(nodeEdit);
     AddSplitMergeNodes(nodeEdit);
     AddTransformNodes(nodeEdit);
+    AddConditionalNodes(nodeEdit);
 
     while (!done)
     {
