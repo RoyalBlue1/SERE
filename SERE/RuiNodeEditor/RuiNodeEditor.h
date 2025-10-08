@@ -22,7 +22,6 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
-	HWND& windowHandle;
 	fs::path editedGraph;
 	int m_iSavedNodesCount = 0;
 	bool m_bIsUnsaved = true;

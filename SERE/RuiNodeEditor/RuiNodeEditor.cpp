@@ -20,7 +20,7 @@
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
-NodeEditor::NodeEditor(RenderInstance& rend, HWND& hwnd): windowHandle(hwnd), render(rend) {
+NodeEditor::NodeEditor(RenderInstance& rend, HWND& hwnd): render(rend) {
 	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 		RightClickPopup(node);
 	});
@@ -55,7 +55,7 @@ void NodeEditor::Clear() {
 void NodeEditor::UpdateEditedPath(fs::path path, bool isUnsaved) {
 	editedGraph = path;
 	const std::string title = std::format("{}{} - SERE", isUnsaved ? "*" : "", editedGraph.generic_string().c_str());
-	SetWindowText(windowHandle, title.c_str());
+	// todo: set window title
 }
 
 void NodeEditor::Save() {
