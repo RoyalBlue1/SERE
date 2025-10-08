@@ -22,19 +22,31 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
+	fs::path editedGraph;
+	int m_iSavedNodesCount = 0;
+	bool m_bIsUnsaved = true;
 	
 
 	std::map<std::string,NodeCategory> nodeTypes;
 public:
-	NodeEditor(RenderInstance& rend);
+	NodeEditor(RenderInstance& rend, HWND& hwnd);
 	void SetStyles(ImFlow::StyleManager& styles);
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);
 	void Draw();
-	void Serialize();
+	void Serialize(fs::path outPath = fs::path());
 	void Deserialize();
 	void Export();
 	void Clear();
+	void UpdateEditedPath(fs::path path, bool isUnsaved = true);
+
+	/**
+	 * Saves the current graph.
+	 * 
+	 * If no path has been previously selected, prompts the user to pick one;
+	 * else, exports the graph using this path.
+	 **/
+	void Save();
 
 	template<class T> void AddNodeType() {
 		

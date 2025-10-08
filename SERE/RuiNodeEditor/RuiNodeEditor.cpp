@@ -20,7 +20,7 @@
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
-NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
+NodeEditor::NodeEditor(RenderInstance& rend, HWND& hwnd): render(rend) {
 	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 		RightClickPopup(node);
 	});
@@ -29,7 +29,6 @@ NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
 	});
 	ImFlow::StyleManager& styles = mINF.getStyleManager();;
 	SetStyles(styles);
-
 }
 
 
@@ -38,6 +37,10 @@ void NodeEditor::Draw() {
 	ImGui::Begin("Node Editor");
 	
 	mINF.update();
+	if (mINF.getNodesCount() != m_iSavedNodesCount) {
+		m_bIsUnsaved = true;
+		UpdateEditedPath(editedGraph);
+	}
 
 	ImGui::End();
 }
@@ -46,20 +49,45 @@ void NodeEditor::Clear() {
 	for (auto& [uid,node] : mINF.getNodes()) {
 		node->destroy();
 	}
+	editedGraph.clear();
 }
 
-void NodeEditor::Serialize() {
+void NodeEditor::UpdateEditedPath(fs::path path, bool isUnsaved) {
+	editedGraph = path;
+	const std::string title = std::format("{}{} - SERE", isUnsaved ? "*" : "", editedGraph.generic_string().c_str());
+	// todo: set window title
+}
 
+void NodeEditor::Save() {
+	if (editedGraph.empty()) {
+		// No selected path, going for the "save as" option
+		Serialize();
+	}
+	else {
+		Serialize(editedGraph);
+	}
+}
+
+void NodeEditor::Serialize(fs::path outPath) {
 	if(!mINF.getNodesCount())return;
 
-	NFD::Guard nfdGuard;
-	nfdfilteritem_t filter("Graph", "json");
-	NFD::UniquePath nfdPath;
-	if(NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
-	
-	fs::path path(nfdPath.get());
+	fs::path path;
 
-
+	// Display file selection only with no outPath
+	if (outPath.empty()) {
+		NFD::Guard nfdGuard;
+		nfdfilteritem_t filter("Graph", "json");
+		NFD::UniquePath nfdPath;
+		if (NFD::SaveDialog(nfdPath, &filter, 1) != NFD_OKAY) return;
+		path = nfdPath.get();
+	}
+	else
+	{
+		path = outPath;
+	}
+	printf("Saving graph to: ");
+	printf(path.generic_string().c_str());
+	printf("\n");
 
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -94,6 +122,9 @@ void NodeEditor::Serialize() {
 	outFile.write(buffer.GetString(),buffer.GetSize());
 	outFile.close();
 
+	UpdateEditedPath(path, false);
+	m_bIsUnsaved = false;
+	m_iSavedNodesCount = mINF.getNodesCount();
 }
 
 void NodeEditor::Deserialize() {
@@ -123,6 +154,8 @@ void NodeEditor::Deserialize() {
 	rapidjson::GenericObject root = doc.GetObject();
 	if(!(root.HasMember("Nodes")&&root["Nodes"].IsArray()))return;
 	if(!(root.HasMember("Links")&&root["Links"].IsArray()))return;
+	UpdateEditedPath(path, false);
+
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
 		if (!itr->IsObject()) {
@@ -166,8 +199,9 @@ void NodeEditor::Deserialize() {
 		auto right = mINF.getNodes()[rightId];
 
 		left->outPin(leftPinName)->createLink(right->inPin(rightPinName));
-
 	}
+
+	m_iSavedNodesCount = mINF.getNodesCount();
 }
 
 void NodeEditor::Export() {

@@ -240,8 +240,6 @@ int main(int, char**)
     // Main loop
     bool done = false;
 
-
-
     //TextEditor textEdit;
     //setupTextEditor(textEdit);
 
@@ -249,7 +247,7 @@ int main(int, char**)
     loadImageAtlases(g_pd3dDevice);
 
     RenderInstance render{g_pd3dDevice,g_pd3dDeviceContext,1920,1080};
-    NodeEditor nodeEdit{render};
+    NodeEditor nodeEdit{render, hwnd};
     AddArgumentNodes(nodeEdit);
     AddConstantVarNodes(nodeEdit);
     AddMathNodes(nodeEdit);
@@ -304,12 +302,17 @@ int main(int, char**)
                 if (ImGui::MenuItem("New")) {
                    nodeEdit.Clear();
                 }
-                if (ImGui::MenuItem("Save Graph")) {
-                    nodeEdit.Serialize();
-                }
-                if (ImGui::MenuItem("Load Graph")) {
+                ImGui::Separator();
+                if (ImGui::MenuItem("Load graph")) {
                     nodeEdit.Deserialize();
                 }
+                if (ImGui::MenuItem("Save")) {
+                    nodeEdit.Save();
+                }
+                if (ImGui::MenuItem("Save graph as")) {
+                    nodeEdit.Serialize();
+                }
+                ImGui::Separator();
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
                 }
@@ -340,6 +343,14 @@ int main(int, char**)
         HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
         //HRESULT hr = g_pSwapChain->Present(0, 0); // Present without vsync
         g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
+
+        // Graph save keyboard shortcut
+        // https://github.com/ocornut/imgui/issues/456#issuecomment-2290384494
+        ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
+        bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+        if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+            nodeEdit.Save();
+        }
     }
 
     // Cleanup
