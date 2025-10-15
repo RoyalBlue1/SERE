@@ -61,7 +61,7 @@ struct StyleDescriptorOffsets {
 	uint16_t _anon_10 = 0;
 };
 
-#pragma push(pack)
+
 struct RuiPackageHeader_v1_t {
 	uint32_t magic;
 	uint16_t packageVersion;
@@ -99,7 +99,7 @@ struct RuiPackageHeader_v1_t {
 	uint64_t rpakPointersInDefaultDataOffset;
 	uint64_t defaultStringsDataSize;
 };
-#pragma pop(pack)
+
 
 struct Argument_t
 {

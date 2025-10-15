@@ -1,13 +1,11 @@
 #pragma once
 
-#include <d3d11_1.h>
+
 #include <fstream>
 #include <map>
 #include <string>
 #include <any>
-#pragma comment(lib,"d3d11.lib")
-#include <d3dcompiler.h>
-#pragma comment(lib,"d3dcompiler.lib")
+
 
 class RenderInstance;
 
@@ -19,6 +17,7 @@ class RenderInstance;
 #include "ShaderStructs.h"
 #include "Util.h"
 #include "RuiNodeEditor/RuiVariables.h"
+#include "RenderFrameworks/RenderFramework.h"
 
 struct DrawInfoUnknown3
 {
@@ -46,18 +45,7 @@ struct DrawInfo
     DrawInfoUnknown3 ruiUnk3[2];
 };
 
-struct Vertex_t
-{
-    float position[3];
-    float float_C[3];
-    float float_18[4];
 
-    float float_28[2];
-    WORD assetIndex;
-    WORD assetIndex2;
-    WORD word_34;
-    WORD word_36;
-};
 
 struct IndexSegment_t {
     FontAtlas_t* fontAtlas;
@@ -113,32 +101,12 @@ struct RenderQuad
     __m128 m128_30;
     __m128 m128_40;
     __m128 m128_50;
-    WORD assetIndex;
-    WORD assetIndex2;
-    WORD styleDescriptorIndex;
-    WORD flags;
+    short assetIndex;
+    short assetIndex2;
+    short styleDescriptorIndex;
+    short flags;
     float vert[4][2];
 };
-
-struct StyleDescriptorShader_t
-{
-    Color color0 = Color(1.f,1.f,1.f,1.f);
-    Color color1 = Color(0.f,0.f,0.f,0.f);
-    Color color2 = Color(0.f,0.f,0.f,0.f);
-    float blend = 1.f;
-    float premul = 0.f;
-    float _anon_0 = 0.f;
-    float _anon_1 = 0.f;
-    float _anon_2 = 0.f;
-    float _anon_3 = 0.f;
-    float _anon_4 = 0.f;
-    float _anon_5 = 0.f;
-    float _anon_6 = 0.f;
-    BYTE gap_54[12];
-    
-};
-
-
 
 
 struct Globals {
@@ -149,37 +117,8 @@ class RenderInstance
 {
 
 
-private:
-    ID3D11Device* device;
-    ID3D11DeviceContext *deviceContext;
-    ID3D11SamplerState* samplerState;
-
-    ID3D11BlendState* blendState;
-    ID3D11Texture2D* targetTexture;
-    ID3D11RenderTargetView* targetView;
-    
-    ID3D11Texture2D* depthTexture;
-    ID3D11DepthStencilView* depthStencil;
-    ID3D11DepthStencilState* depthStencilState;
-    ID3D11RasterizerState* rasterState;
-    D3D11_VIEWPORT viewport;
-
-    ID3D11Buffer* commonPerCameraBuffer;
-    ID3D11Buffer* modelInstanceBuffer;
-
-    ID3D11Buffer* indexBuffer;
-    ID3D11Buffer* vertexBuffer;
-    ID3D11Buffer* styleDescBuffer;
-    ID3D11ShaderResourceView* styleDescriptorResourceView;
-
-    ID3D11VertexShader* vertexShader;
-    ID3D11InputLayout *shaderLayout;
-    ID3D11PixelShader* pixelShader;
-
-
-
 public:
-    ID3D11ShaderResourceView* targetResourceView;
+
     std::vector<__m128> transformSizes;
     std::vector<TransformResult> transformResults;
     DrawInfo drawInfo;
@@ -196,6 +135,7 @@ public:
     float elementWidthRatio;
     float elementHeightRatio;
 
+    std::shared_ptr<RenderFramework> render;
 
     void AddImageAtlasSegment(ImageAtlas* atlas) {
         if (segments.size() == 0) {
@@ -259,11 +199,7 @@ public:
     void sub_FFAE0(__m128 a1,__m128 a2, __m128* a3);
 
 
-    void initBuffers_v30();
-    void setD11Device(ID3D11Device* dev, ID3D11DeviceContext* cont) {
-        device = dev;
-        deviceContext = cont;
-    }
+
     void StartFrame(float time);
     void EndFrame();
 
@@ -291,17 +227,14 @@ public:
         drawInfo.ruiUnk3[0].float_2C = 1.f;
     }
 
-    RenderInstance(ID3D11Device* dev, ID3D11DeviceContext* context, float width, float height) {
+    RenderInstance(float width, float height,std::shared_ptr<RenderFramework> rend):render(rend) {
         SetSize(width,height);
-        device = dev;
-        deviceContext = context;
-        initBuffers_v30();
     }
 
     void DrawImage() {
         ImGui::Begin("Render Image");
         float width = ImGui::GetWindowWidth();
-        ImGui::Image(targetResourceView,ImVec2(width,elementHeight/elementWidth*width),ImVec2(0,0),ImVec2(1,1));
+        ImGui::Image(render->GetRuiView(), ImVec2(width, elementHeight / elementWidth * width), ImVec2(0, 0), ImVec2(1, 1));
         ImGui::End();
     }
 };

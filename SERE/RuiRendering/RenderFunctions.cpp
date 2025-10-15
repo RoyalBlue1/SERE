@@ -267,8 +267,8 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 struct fontRenderingStruct
 {
 	float float_0;
-	WORD word_4;
-	WORD word_6;
+	short word_4;
+	short word_6;
 	Glyph_t *glyph;
 };
 
@@ -367,7 +367,7 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 	const char* v5; // rsi
 	const char* v10; // rax
 	const char* v11; // rdi
-	const CHAR* result; // rax
+	const char* result; // rax
 	char v13; // cl
 	const char* v14; // rdx
 	size_t v15; // rdi
@@ -397,9 +397,9 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 		{
 			if (v10 == v5 + 1)
 			{
-				*(DWORD*)a4 = 0x8080B2F3;
-				result = (const CHAR*)a4;
-				*(BYTE*)(a4 + 4) = 0;
+				*(int*)a4 = 0x8080B2F3;
+				result = (const char*)a4;
+				*(char*)(a4 + 4) = 0;
 				return result;
 			}
 			return 0LL;
@@ -408,9 +408,9 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 		{
 			if (v10 == v5 + 1)
 			{
-				*(DWORD*)a4 = -2122272013;
-				result = (const CHAR*)a4;
-				*(BYTE*)(a4 + 4) = 0;
+				*(int*)a4 = -2122272013;
+				result = (const char*)a4;
+				*(char*)(a4 + 4) = 0;
 				return result;
 			}
 			return 0LL;
@@ -478,15 +478,15 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 		return "";
 	//curAsset = Asset;
 	//Asset = 0;
-	*(BYTE*)a4 = ((unsigned int)(0xF0000) >> 18) | 0xF0;
-	*(BYTE*)(a4 + 1) = ((unsigned int)(0xF0000) >> 12) & 0x3F | 0x80;
+	*(char*)a4 = ((unsigned int)(0xF0000) >> 18) | 0xF0;
+	*(char*)(a4 + 1) = ((unsigned int)(0xF0000) >> 12) & 0x3F | 0x80;
 	v17 = 0xF0000;
-	*(BYTE*)(a4 + 2) = (v17 >> 6) & 0x3F | 0x80;
-	*(BYTE*)(a4 + 3) = v17 & 0x3F | 0x80;
+	*(char*)(a4 + 2) = (v17 >> 6) & 0x3F | 0x80;
+	*(char*)(a4 + 3) = v17 & 0x3F | 0x80;
 	*(uint32_t*)(a4 + 4) = Asset;
 
 
-	return (const CHAR*)a4;
+	return (const char*)a4;
 }
 
 bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) {
@@ -769,7 +769,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	unsigned int v115; // r15d
 	uint64_t currentUnicodeChar; // eax
 	char nextChar; // dl
-	const CHAR* v119; // rax
+	const char* v119; // rax
 	__int64 v120; // rdx
 	bool v121; // r12
 	float v122; // xmm11_4
@@ -1707,7 +1707,7 @@ __m128 GetTextSize(TextInputData& data) {
 				{
 					v93 = fVar23;
 					for (i = fVar23;
-						_BitScanForward((DWORD*)&v96, v130);
+						_BitScanForward((unsigned long*)&v96, v130);
 						i = fmaxf(i, v97 + sizeY[v96]))
 					{
 						v130 = (v130 - 1) & v130;

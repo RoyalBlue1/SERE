@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <d3d11_1.h>
+#include "RenderFrameworks/RenderFramework.h"
 
 #define INVALID_ASSET 0xFFFFFFFF
 
@@ -26,12 +26,6 @@ struct uiImageAtlasUnk_
 	__m128 m128_10;
 };
 
-struct ShaderData_t {
-	float minX;
-	float minY;
-	float sizeX;
-	float sizeY;
-};
 
 struct Asset_t {
 	std::string name;
@@ -48,17 +42,18 @@ struct ImageAtlas {
 	std::vector<uiImageAtlasUnk_> renderOffsets;
 	std::vector<uint32_t> hashes;
 	std::vector<std::string> names;
-	ID3D11Resource* imageResource;
-	ID3D11ShaderResourceView* imageResourceView;
-	ID3D11Buffer *boundsBuffer;
-	ID3D11ShaderResourceView *boundsResourceView;
-	std::vector<ShaderData_t> shaderData;
-
+	size_t textureId;
+	size_t shaderDataId;
+	std::vector<ShaderSizeData_t> shaderData;
+	std::shared_ptr<RenderFramework> render;
+	void* GetImageView() const {
+		return render->GetTextureView(textureId);
+	};
 };
 
 
 uint32_t loadAsset(const char* a2);
-void loadImageAtlases(ID3D11Device* d11Device);
+void loadImageAtlases(std::shared_ptr<RenderFramework> render);
 
 extern std::map<uint32_t,Asset_t> imageAssetMap;
 extern std::vector<ImageAtlas> imageAtlases;

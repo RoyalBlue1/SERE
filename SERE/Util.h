@@ -3,6 +3,26 @@
 #include <random>
 
 
+struct Vector2 {
+	float x;
+	float y;
+	Vector2(float ix,float iy):x(ix),y(iy){}
+};
+
+struct Vector3 {
+	float x;
+	float y;
+	float z;
+	Vector3(float ix,float iy,float iz):x(ix),y(iy),z(iz){}
+};
+
+struct Color {
+	float red;
+	float green;
+	float blue;
+	float alpha;
+	Color(float r,float g,float b,float a):red(r),green(g),blue(b),alpha(a){}
+};
 
 
 inline __m128 NRReciprocal(__m128 x) {

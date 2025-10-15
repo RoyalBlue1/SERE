@@ -1,8 +1,9 @@
 #pragma once
 
-#include <d3d11_1.h>
+
 #include <map>
 #include <filesystem>
+#include "RenderFrameworks/RenderFramework.h"
 
 namespace fs = std::filesystem;
 
@@ -72,17 +73,15 @@ struct FontAtlas_t {
     std::map<uint16_t,Font_t> fonts;
     std::vector<uint8_t> unk_18;
 
-    ID3D11Resource* imageResource;
-    ID3D11ShaderResourceView* imageResourceView;
-    ID3D11Buffer *boundsBuffer;
-    ID3D11ShaderResourceView *boundsResourceView;
-
-    FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,ID3D11Device* d11Device);
-    void loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device);
+    size_t textureId;
+    size_t shaderDataId;
+    std::shared_ptr<RenderFramework> render;
+    FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,std::shared_ptr<RenderFramework> rend);
+    void loadFromFile(fs::path& jsonPath);
 };
 
 extern std::vector<FontAtlas_t> fonts;
 
-void loadFonts(ID3D11Device* d11Device);
+void loadFonts(std::shared_ptr<RenderFramework> render);
 Font_t* getFontByIndex(uint16_t id);
 FontAtlas_t* getFontAtlasByIndex(uint16_t id);

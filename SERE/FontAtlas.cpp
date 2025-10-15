@@ -18,14 +18,8 @@ struct ProportionData {
     float y;
 };
 
-struct FontShaderData_t {
-    float minX;
-    float minY;
-    float maxX;
-    float maxY;
-};
 
-void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
+void FontAtlas_t::loadFromFile(fs::path& jsonPath) {
     std::ifstream jsonFile{jsonPath};
     if(jsonFile.fail())return;
     std::stringstream jsonStringStream;
@@ -166,8 +160,8 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
 
     fs::path ddsName = jsonPath.replace_extension("dds");
 
-    DirectX::CreateDDSTextureFromFile(d11Device,ddsName.wstring().c_str(), &imageResource, &imageResourceView);
-    std::vector<FontShaderData_t> shaderData;
+    textureId = render->LoadTexture(ddsName);
+    std::vector<ShaderSizeData_t> shaderData;
 
     for (auto& font : fonts)
     {
@@ -192,14 +186,14 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
         for (auto& glyph : font.second.glyphs)
         {
 
-            FontShaderData_t shdDat;
+            ShaderSizeData_t shdDat;
 
             if ((glyph.posMinX == glyph.posMaxX) || (glyph.proportionIndex >= font.second.proportions.size()))
             {
                 shdDat.minX = 1.f;
                 shdDat.minY = 1.f;
-                shdDat.maxX = 0.f;
-                shdDat.maxY = 0.f;
+                shdDat.sizeX = 0.f;
+                shdDat.sizeY = 0.f;
             }
             else
             {
@@ -208,63 +202,38 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
                 shdDat.minX = glyph.posMinX * propA[propIndex].x + glyph.posBaseX - propB[propIndex].x;
                 shdDat.minY = glyph.posMinY * propA[propIndex].y + glyph.posBaseY - propB[propIndex].y;
 
-                shdDat.maxX = glyph.posMaxX * propA[propIndex].x + glyph.posBaseX + propB[propIndex].x;
-                shdDat.maxY = glyph.posMaxY * propA[propIndex].y + glyph.posBaseY + propB[propIndex].y;
+                shdDat.sizeX = glyph.posMaxX * propA[propIndex].x + glyph.posBaseX + propB[propIndex].x;
+                shdDat.sizeY = glyph.posMaxY * propA[propIndex].y + glyph.posBaseY + propB[propIndex].y;
             }
             shaderData.push_back(shdDat);
         }
     }
 
     if (shaderData.size()) {
-        D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
-        D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
-        D3D11_BUFFER_DESC boundsBufferDesc;
-
-        boundsBufferDesc.ByteWidth = 16 * shaderData.size();
-        boundsBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        boundsBufferDesc.MiscFlags = 64;
-        boundsBufferDesc.StructureByteStride = 16;
-        boundsBufferDesc.BindFlags = 8;
-        boundsBufferDesc.CPUAccessFlags = 0;
-
-        boundSubresoureDesc.pSysMem = shaderData.data();
-        boundSubresoureDesc.SysMemPitch = 0;
-        boundSubresoureDesc.SysMemSlicePitch = 0;
-
-        if (HRESULT res = d11Device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &boundsBuffer); res || (boundsBuffer == NULL)) {
-            printf("D3D11Decive::CreateBuffer returned 0x%x", (uint32_t)res);
-        };
-        boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
-        boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
-        boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
-        boundsShaderResourceViewDesc.Buffer.NumElements = shaderData.size();
-        if (HRESULT res = d11Device->CreateShaderResourceView(boundsBuffer, &boundsShaderResourceViewDesc, &boundsResourceView); res) {
-            printf("D3D11Decive::CreateShaderResourceView returned 0x%x", (uint32_t)res);
-        }
+        shaderDataId = render->CreateShaderDataBuffer(shaderData);
     }
     else {
-        boundsBuffer = 0;
-        boundsResourceView = 0;
+        shaderDataId = ~0ull;
     }
 }
 
 
-FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,ID3D11Device* d11Device) { 
-    loadFromFile(jsonPath,d11Device); 
+FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,std::shared_ptr<RenderFramework> rend):render(rend) { 
+    loadFromFile(jsonPath); 
     for (auto& fnt : fonts) {
         fontAtlasIndices.emplace(fnt.first,atlasIndex);
     }
 };
 
 
-void loadFonts(ID3D11Device* d11Device) {
+void loadFonts(std::shared_ptr<RenderFramework> render) {
     fs::path folderPath = ".\\Assets\\Fonts";
 
     for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
         if(!dirEntry.is_regular_file())continue;
         fs::path jsonName = dirEntry;
         if(jsonName.extension()!=".json")continue;
-        fonts.emplace_back(jsonName,fonts.size(),d11Device);
+        fonts.emplace_back(jsonName,fonts.size(),render);
 
     }
 }
