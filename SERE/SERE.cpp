@@ -315,6 +315,17 @@ int main(int, char**)
                 }
                 ImGui::EndMenu();
             }
+
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Copy")) {
+                    nodeEdit.CopyNodes();
+                }
+                if (ImGui::MenuItem("Paste")) {
+                    nodeEdit.PasteNodes();
+                }
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMainMenuBar();
         }
 
