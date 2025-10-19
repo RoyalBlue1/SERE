@@ -350,3 +350,45 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	styles.SetNodeErrorStyle(errorNodeStyle);
 }
 
+void NodeEditor::CopyNodes() {
+	std::random_device rd;
+	std::mt19937_64 gen(rd());
+	std::uniform_int_distribution<int> dis;
+
+	// Reset copied nodes list
+	rapidjson::Document doc;
+	doc.SetObject();
+	m_lCopiedNodes.SetArray();
+
+	// Serialize currently selected nodes
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		if (!nodePtr->isSelected()) {
+			continue;
+		}
+
+		// Convert node to JSON to preserve its internal state
+		rapidjson::GenericValue<rapidjson::UTF8<>> val;
+		val.SetObject();
+		std::dynamic_pointer_cast<RuiBaseNode>(nodePtr)->Serialize(val, doc.GetAllocator());
+
+		// Assign new id to node copy (stolen from ImNodeFlow::addNode)
+		auto uid = dis(gen);
+		while (mINF.getNodes().contains(uid))uid = dis(gen);
+		val["Id"].SetInt(uid);
+		m_lCopiedNodes.PushBack(val, doc.GetAllocator());
+	}
+}
+
+void NodeEditor::PasteNodes() {
+	for (auto itr = m_lCopiedNodes.Begin(); itr != m_lCopiedNodes.End(); itr++) {
+		rapidjson::GenericObject node = itr->GetObject();
+		std::string name = node["Name"].GetString();
+		std::string category = node["Category"].GetString();
+		auto newnode = nodeTypes[category][name].RecreateNode(mINF, render, mINF.getStyleManager(), node);
+
+		ImVec2 pos;
+		pos.x = node["PosX"].GetFloat() + 10;
+		pos.y = node["PosY"].GetFloat() + 10;
+		newnode->setPos(pos);
+	}
+}
