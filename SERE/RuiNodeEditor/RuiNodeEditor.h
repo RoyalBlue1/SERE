@@ -22,7 +22,7 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
-	rapidjson::GenericValue<rapidjson::UTF8<>> m_lSelectedNodes;
+	rapidjson::GenericValue<rapidjson::UTF8<>> m_lCopiedNodes;
 	std::map<std::string,NodeCategory> nodeTypes;
 public:
 	NodeEditor(RenderInstance& rend);

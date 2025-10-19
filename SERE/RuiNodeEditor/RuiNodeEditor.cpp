@@ -358,7 +358,7 @@ void NodeEditor::CopyNodes() {
 	// Reset copied nodes list
 	rapidjson::Document doc;
 	doc.SetObject();
-	m_lSelectedNodes.SetArray();
+	m_lCopiedNodes.SetArray();
 
 	// Serialize currently selected nodes
 	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
@@ -375,12 +375,12 @@ void NodeEditor::CopyNodes() {
 		auto uid = dis(gen);
 		while (mINF.getNodes().contains(uid))uid = dis(gen);
 		val["Id"].SetInt(uid);
-		m_lSelectedNodes.PushBack(val, doc.GetAllocator());
+		m_lCopiedNodes.PushBack(val, doc.GetAllocator());
 	}
 }
 
 void NodeEditor::PasteNodes() {
-	for (auto itr = m_lSelectedNodes.Begin(); itr != m_lSelectedNodes.End(); itr++) {
+	for (auto itr = m_lCopiedNodes.Begin(); itr != m_lCopiedNodes.End(); itr++) {
 		rapidjson::GenericObject node = itr->GetObject();
 		std::string name = node["Name"].GetString();
 		std::string category = node["Category"].GetString();
