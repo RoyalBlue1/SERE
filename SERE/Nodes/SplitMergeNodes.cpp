@@ -47,7 +47,7 @@ void SplitFloat2Node::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,x.GetFormattedName(proto), in.value.x));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.x",typeName,x.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.x;",typeName,x.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = y.name;
@@ -57,7 +57,7 @@ void SplitFloat2Node::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,y.GetFormattedName(proto), in.value.y));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.y",typeName,y.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.y;",typeName,y.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
