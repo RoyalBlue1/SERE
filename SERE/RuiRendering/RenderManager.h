@@ -143,6 +143,10 @@ struct StyleDescriptorShader_t
 
 struct Globals {
     float currentTime = 0.f;
+    float adsFracValue = 0.f;
+    float localPlayerPos[3];
+    float screenWidth = 0.f;
+    float screenHeight = 0.f;
 };
 
 class RenderInstance
