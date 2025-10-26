@@ -380,6 +380,8 @@ void NodeEditor::CopyNodes() {
 }
 
 void NodeEditor::PasteNodes() {
+	std::set<int> newNodeIds = {};
+
 	for (auto itr = m_lCopiedNodes.Begin(); itr != m_lCopiedNodes.End(); itr++) {
 		rapidjson::GenericObject node = itr->GetObject();
 		std::string name = node["Name"].GetString();
@@ -390,5 +392,22 @@ void NodeEditor::PasteNodes() {
 		pos.x = node["PosX"].GetFloat() + 10;
 		pos.y = node["PosY"].GetFloat() + 10;
 		newnode->setPos(pos);
+
+		newNodeIds.insert(node["Id"].GetInt());
+	}
+
+	// Select only pasted nodes
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		// Unselect nodes
+		if (nodePtr->isSelected()) {
+			nodePtr->selected(false);
+			continue;
+		}
+
+		// Select new nodes
+		if (newNodeIds.contains(nodePtr->getUID()))
+		{
+			nodePtr->selected(true);
+		}
 	}
 }
