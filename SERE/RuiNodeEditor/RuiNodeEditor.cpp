@@ -385,6 +385,10 @@ void NodeEditor::CopyNodes() {
 }
 
 void NodeEditor::PasteNodes() {
+	if (m_lCopiedNodes.GetArray().Empty()) {
+		return;
+	}
+
 	std::set<int> newNodeIds = {};
 
 	for (auto itr = m_lCopiedNodes.Begin(); itr != m_lCopiedNodes.End(); itr++) {
@@ -415,4 +419,7 @@ void NodeEditor::PasteNodes() {
 			nodePtr->selected(true);
 		}
 	}
+
+	// Only allow one paste action
+	m_lCopiedNodes.SetArray();
 }
