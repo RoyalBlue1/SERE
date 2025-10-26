@@ -371,6 +371,11 @@ void NodeEditor::CopyNodes() {
 		val.SetObject();
 		std::dynamic_pointer_cast<RuiBaseNode>(nodePtr)->Serialize(val, doc.GetAllocator());
 
+		// Eventually rename arguments
+		if (val.HasMember("ArgName") && val["ArgName"].IsString()) {
+			val["ArgName"].SetString(std::format("{}(copy)", val["ArgName"].GetString()), doc.GetAllocator());
+		}
+
 		// Assign new id to node copy (stolen from ImNodeFlow::addNode)
 		auto uid = dis(gen);
 		while (mINF.getNodes().contains(uid))uid = dis(gen);
