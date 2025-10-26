@@ -315,6 +315,17 @@ int main(int, char**)
                 }
                 ImGui::EndMenu();
             }
+
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Copy")) {
+                    nodeEdit.CopyNodes();
+                }
+                if (ImGui::MenuItem("Paste")) {
+                    nodeEdit.PasteNodes();
+                }
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMainMenuBar();
         }
 
@@ -340,6 +351,19 @@ int main(int, char**)
         HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
         //HRESULT hr = g_pSwapChain->Present(0, 0); // Present without vsync
         g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
+
+        // Copy/paste shortcuts
+        // https://github.com/ocornut/imgui/issues/456#issuecomment-2290384494
+        ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_C;
+        bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+        if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+            nodeEdit.CopyNodes();
+        }
+        chord = ImGuiMod_Ctrl | ImGuiKey_V;
+        isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+        if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+            nodeEdit.PasteNodes();
+        }
     }
 
     // Cleanup

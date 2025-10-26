@@ -22,8 +22,7 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
-	
-
+	rapidjson::GenericValue<rapidjson::UTF8<>> m_lCopiedNodes;
 	std::map<std::string,NodeCategory> nodeTypes;
 public:
 	NodeEditor(RenderInstance& rend);
@@ -35,6 +34,9 @@ public:
 	void Deserialize();
 	void Export();
 	void Clear();
+
+	void CopyNodes();
+	void PasteNodes();
 
 	template<class T> void AddNodeType() {
 		
