@@ -862,6 +862,61 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TruncNode::GetPinInfo() {
 	return info;
 }
 
+IntToFloatNode::IntToFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const IntVariable& a_int = getInVal<IntVariable>("A");
+		FloatVariable a(static_cast<float>(a_int.value), a_int.name);
+		std::string name = a.IsConstant() ? "" : outName;
+
+
+		return FloatVariable(a.value, name);
+
+		});
+
+}
+
+IntToFloatNode::IntToFloatNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :IntToFloatNode(rend, style) {}
+
+void IntToFloatNode::draw() {
+
+	const IntVariable& a_int = getInVal<IntVariable>("A");
+	FloatVariable a(static_cast<float>(a_int.value), a_int.name);
+
+	ImGui::Text("%f", a.value);
+
+}
+
+void IntToFloatNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void IntToFloatNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const auto& a = getInVal<IntVariable>("A");
+
+	ExportElement<std::string> ele;
+	ele.dependencys = { a.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = {};", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = {};", out.GetFormattedName(proto), a.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> IntToFloatNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<IntVariable>>("A", ImFlow::ConnectionFilter::SameType(), IntVariable(1.0)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
 void AddMathNodes(NodeEditor& editor) {
 
 	editor.AddNodeType<AdditionNode>();
@@ -880,4 +935,6 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<FloorNode>();
 	editor.AddNodeType<CeilNode>();
 	editor.AddNodeType<TruncNode>();
+	editor.AddNodeType<IntToFloatNode>();
+
 }
