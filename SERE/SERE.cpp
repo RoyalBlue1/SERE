@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <streambuf>
+#include <execution>
 
 #include "SERE.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -26,6 +27,10 @@
 #include "Nodes/ConditionalNodes.h"
 
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
+
+#include "PakLoading/cpakfile.h"
+
+#include "Settings.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;
@@ -134,44 +139,47 @@ void ShowExampleAppDockSpace(bool* p_open)
         ShowDockingDisabledMessage();
     }
 
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("Options"))
-        {
-            // Disabling fullscreen would allow the window to be moved to the front of other windows,
-            // which we can't undo at the moment without finer window depth/z control.
-            ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-            ImGui::MenuItem("Padding", NULL, &opt_padding);
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("Flag: NoSplit",                "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))                 { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-            if (ImGui::MenuItem("Flag: NoResize",               "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))                { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-            if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))  { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-            if (ImGui::MenuItem("Flag: AutoHideTabBar",         "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))          { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-            if (ImGui::MenuItem("Flag: PassthruCentralNode",    "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("Close", NULL, false, p_open != NULL))
-                *p_open = false;
-            ImGui::EndMenu();
-        }
-        HelpMarker(
-            "When docking is enabled, you can ALWAYS dock MOST window into another! Try it now!" "\n"
-            "- Drag from window title bar or their tab to dock/undock." "\n"
-            "- Drag from window menu button (upper-left button) to undock an entire node (all windows)." "\n"
-            "- Hold SHIFT to disable docking (if io.ConfigDockingWithShift == false, default)" "\n"
-            "- Hold SHIFT to enable docking (if io.ConfigDockingWithShift == true)" "\n"
-            "This demo app has nothing to do with enabling docking!" "\n\n"
-            "This demo app only demonstrate the use of ImGui::DockSpace() which allows you to manually create a docking node _within_ another window." "\n\n"
-            "Read comments in ShowExampleAppDockSpace() for more details.");
-
-        ImGui::EndMenuBar();
-    }
-
     ImGui::End();
 }
 
+void ReloadAssets(std::string folderPath) {
 
+    clearImageAtlases();
+
+    loadFonts(g_pd3dDevice);
+    loadImageAtlases(g_pd3dDevice);
+
+    std::vector<std::string> paksToLoad{
+        "ui(11).rpak",
+        "ui_mp(11).rpak",
+        "mp_wargames(11).rpak",
+        "mp_thaw(11).rpak",
+        "mp_relic02(11).rpak",
+        "mp_lf_uma(11).rpak",
+        "mp_lf_traffic(11).rpak",
+        "mp_lf_township(11).rpak",
+        "mp_lf_stacks(11).rpak",
+        "mp_lf_deck(11).rpak",
+        "mp_homestead(11).rpak",
+        "mp_colony02(11).rpak",
+        "mp_grave(11).rpak",
+        "mp_glitch(11).rpak",
+        "mp_forwardbase_kodai(11).rpak",
+        "mp_eden(11).rpak",
+        "mp_drydock(11).rpak",
+        "mp_crashsite3(11).rpak",
+        "mp_complex3(11).rpak",
+        "mp_coliseum_column(11).rpak",
+        "mp_coliseum(11).rpak",
+        "mp_black_water_canal(11).rpak",
+        "mp_angel_city(11).rpak"
+    };
+
+    fs::path pakFolder = "E:\\Titanfall2";
+    std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakFolder](std::string& pak) {
+        LoadRpak(pakFolder/"r2/paks/Win64"/pak,g_pd3dDevice);
+    });
+}
 
 // Main code
 int main(int, char**)
@@ -231,8 +239,7 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
-    // Our state
-    bool show_demo_window = true;
+
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -242,11 +249,7 @@ int main(int, char**)
 
 
 
-    //TextEditor textEdit;
-    //setupTextEditor(textEdit);
 
-    loadFonts(g_pd3dDevice);
-    loadImageAtlases(g_pd3dDevice);
 
     RenderInstance render{g_pd3dDevice,g_pd3dDeviceContext,1920,1080};
     NodeEditor nodeEdit{render};
@@ -258,6 +261,8 @@ int main(int, char**)
     AddSplitMergeNodes(nodeEdit);
     AddTransformNodes(nodeEdit);
     AddConditionalNodes(nodeEdit);
+
+    Settings settings;
 
     while (!done)
     {
@@ -315,8 +320,17 @@ int main(int, char**)
                 }
                 ImGui::EndMenu();
             }
+            if(ImGui::MenuItem("Settings")) {
+                settings.Open();
+            }
+            
             ImGui::EndMainMenuBar();
         }
+        settings.ShowSettingsWindow();
+        if (settings.HasChanged()) {
+            ReloadAssets(settings.GetTitanfall2Path());
+        }
+        
 
         render.StartFrame(ImGui::GetCurrentContext()->Time);
         nodeEdit.Draw();

@@ -254,7 +254,7 @@ void RenderInstance::sub_F9B80_rev(
 	__m128 v32; // xmm5
 	__m128 v33; // xmm0
 
-	uiImageAtlasUnk_ *v35; // rcx
+	uiImageAtlasUnk *v35; // rcx
 	__m128 v37; // xmm0
 	__m128 v38; // xmm1
 	__m128 v39; // xmm5
@@ -1155,8 +1155,6 @@ void RenderInstance::StartFrame(float time) {
 		_mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 0, 3, 0)), _mm_set1_ps(0.5)));
 	__m128 inputSize = _mm_mul_ps(v19, _mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 0, 0)));
 	transformResults.push_back(TransformResult(directionVector,position,inputSize,transformHashes[2]));
-	//transformSizes.clear();
-	//transformSizes.resize(0x200);
 	styleDescriptor.clear();
 }
 

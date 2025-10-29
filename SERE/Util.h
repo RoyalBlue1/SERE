@@ -2,7 +2,29 @@
 #include <intrin.h>
 #include <random>
 
+struct Vector2 {
+	float x;
+	float y;
+	Vector2(float ix,float iy):x(ix),y(iy){}
+	Vector2():x(0.f),y(0.f){}
+};
 
+struct Vector3 {
+	float x;
+	float y;
+	float z;
+	Vector3(float ix,float iy,float iz):x(ix),y(iy),z(iz){}
+	Vector3():x(0.f),y(0.f),z(0.f){}
+};
+
+struct Color {
+	float red;
+	float green;
+	float blue;
+	float alpha;
+	Color(float r,float g,float b,float a):red(r),green(g),blue(b),alpha(a){}
+	Color():red(1.f),green(1.f),blue(1.f),alpha(1.f){}
+};
 
 
 inline __m128 NRReciprocal(__m128 x) {

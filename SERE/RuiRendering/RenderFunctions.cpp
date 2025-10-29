@@ -108,7 +108,7 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 		if (atlasIndex != imageAssetMap[v20].atlasIndex)//g_AssetIndexData[v20].atlasIndex)
 			return 0;
 		assetIndex2 = imageAssetMap[v20].imageIndex;//g_AssetIndexData[v20].assetIndex;
-		flags |= 4 * imageAssetMap[v20].flags;//g_AssetIndexData[v20].byte7;
+		flags |= 4 * (uint8_t)imageAssetMap[v20].flags;//g_AssetIndexData[v20].byte7;
 	}
 
 
@@ -519,7 +519,7 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 	float v34; // xmm5_4
 	__m128 v35; // xmm4
 	__m128 v36; // xmm3
-	textureOffset_* v37; // rcx
+	textureOffset* v37; // rcx
 	__m128 v38; // xmm0
 	__m128 v39; // xmm4
 	__m128 v40; // xmm1
@@ -710,7 +710,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	__m128 v54; // xmm2
 	__m128 v55; // xmm4
 	__m128 v56; // xmm1
-	textureOffset_* v57; // r8
+	textureOffset* v57; // r8
 	__int64 uint16_2; // rax
 	__m128 v59; // xmm8
 	__m128 v60; // xmm0
@@ -1476,7 +1476,7 @@ __m128 GetTextSize(TextInputData& data) {
 	uint32_t v85; // eax
 	__int64 v86; // r14
 	__int64 assetIndex; // r9
-	ImageAtlasTextureDimention_* v88; // rdx
+	ImageAtlasTextureDimention* v88; // rdx
 	float* v89; // rcx
 	float v90; // xmm1_4
 	float v91; // xmm0_4

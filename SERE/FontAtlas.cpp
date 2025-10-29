@@ -3,14 +3,16 @@
 #include "FontAtlas.h"
 
 #include <fstream>
+#include <mutex>
 #include "ThirdParty/DDSTextureLoader11.h"
 #include "ThirdParty/rapidjson/document.h"
 
 
 #undef GetObject
 
-std::vector<FontAtlas_t> fonts;
-std::map<uint16_t,size_t> fontAtlasIndices;
+std::vector<FontAtlas_t> fonts{};
+std::map<uint16_t, size_t> fontAtlasIndices{};
+std::mutex fontMutex{};
 
 
 struct ProportionData {
@@ -18,12 +20,7 @@ struct ProportionData {
     float y;
 };
 
-struct FontShaderData_t {
-    float minX;
-    float minY;
-    float maxX;
-    float maxY;
-};
+
 
 void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
     std::ifstream jsonFile{jsonPath};
@@ -167,8 +164,69 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
     fs::path ddsName = jsonPath.replace_extension("dds");
 
     DirectX::CreateDDSTextureFromFile(d11Device,ddsName.wstring().c_str(), &imageResource, &imageResourceView);
-    std::vector<FontShaderData_t> shaderData;
+    CreateShaderDataBuffer(d11Device);
 
+}
+
+
+FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,ID3D11Device* d11Device) { 
+    loadFromFile(jsonPath,d11Device); 
+    for (auto& fnt : fonts) {
+        fontAtlasIndices.emplace(fnt.first,atlasIndex);
+    }
+};
+#undef max
+FontAtlas_t::FontAtlas_t(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr, ID3D11Device* device,ID3D11Texture2D* texture,ID3D11ShaderResourceView* textureView):
+    imageResource(texture),
+    imageResourceView(textureView)
+
+{
+    uint8_t highest_unk_6 = 0;
+    for (uint16_t i = 0; i < fontAtlasHdr->fontCount; i++) {
+        Font_t font;
+        UIFontHeader_v7_t* fontHdr = &fontAtlasHdr->fonts[i];
+        if(fontHdr->name)
+            font.name = fontHdr->name;
+        else
+            font.name = std::format("Font_{}",i);
+        font.fontIndex = fontHdr->fontIndex;
+        font.unicodeIndex = fontHdr->unicodeIndex;
+        font.proportionScaleX = fontHdr->proportionScaleX;
+        font.proportionScaleY = fontHdr->proportionScaleY;
+        font.float_24 = fontHdr->unk_24;
+        font.float_28 = fontHdr->unk_28;
+
+        font.proportions.resize(fontHdr->numProportions);
+        memcpy(font.proportions.data(),fontHdr->proportions,sizeof(Proportion_t)*fontHdr->numProportions);
+        
+        uint16_t highestUnicodeIndex = 0;
+        for (uint16_t j = 0; j < fontHdr->numUnicodeChunks; j++) {
+            font.unicodeChunk.push_back(fontHdr->unicodeChunks[j]);
+            highestUnicodeIndex = std::max(highestUnicodeIndex,fontHdr->unicodeChunks[j]);
+        }
+        for (uint16_t j = 0; j <= highestUnicodeIndex; j++) {
+            font.glyphChunks.emplace_back(fontHdr->unicodeChunksIndex[j],fontHdr->unicodeChunksMask[j]);
+        }
+        for (uint16_t j = 0; j < fontHdr->numTextures; j++) {
+            font.glyphs.push_back(fontHdr->glyphs[j]);
+            highest_unk_6 = std::max(highest_unk_6,fontHdr->glyphs[j].byte_6);
+        }
+
+        font.kerningInfos.resize(fontHdr->numKernings);
+        memcpy(font.kerningInfos.data(),fontHdr->kerningInfo,sizeof(KerningInfo_t)*fontHdr->numKernings);
+        fonts.insert({ font.fontIndex,font });
+    }
+    uint16_t numUnk18 = ((fontAtlasHdr->unk_2 + 1) * highest_unk_6 * 2 + 1) >> 3;
+    for (uint16_t i = 0; i < numUnk18; i++) {
+        unk_18.push_back(fontAtlasHdr->unk_18[i]);
+    }
+    CreateShaderDataBuffer(device);
+    
+}
+
+void FontAtlas_t::CreateShaderDataBuffer(ID3D11Device* device) {
+
+    std::vector<FontShaderData_t> shaderData;
     for (auto& font : fonts)
     {
 
@@ -231,14 +289,14 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
         boundSubresoureDesc.SysMemPitch = 0;
         boundSubresoureDesc.SysMemSlicePitch = 0;
 
-        if (HRESULT res = d11Device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &boundsBuffer); res || (boundsBuffer == NULL)) {
+        if (HRESULT res = device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &boundsBuffer); res || (boundsBuffer == NULL)) {
             printf("D3D11Decive::CreateBuffer returned 0x%x", (uint32_t)res);
         };
         boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
         boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
         boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
         boundsShaderResourceViewDesc.Buffer.NumElements = shaderData.size();
-        if (HRESULT res = d11Device->CreateShaderResourceView(boundsBuffer, &boundsShaderResourceViewDesc, &boundsResourceView); res) {
+        if (HRESULT res = device->CreateShaderResourceView(boundsBuffer, &boundsShaderResourceViewDesc, &boundsResourceView); res) {
             printf("D3D11Decive::CreateShaderResourceView returned 0x%x", (uint32_t)res);
         }
     }
@@ -248,15 +306,6 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath,ID3D11Device* d11Device) {
     }
 }
 
-
-FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,ID3D11Device* d11Device) { 
-    loadFromFile(jsonPath,d11Device); 
-    for (auto& fnt : fonts) {
-        fontAtlasIndices.emplace(fnt.first,atlasIndex);
-    }
-};
-
-
 void loadFonts(ID3D11Device* d11Device) {
     fs::path folderPath = ".\\Assets\\Fonts";
 
@@ -264,15 +313,32 @@ void loadFonts(ID3D11Device* d11Device) {
         if(!dirEntry.is_regular_file())continue;
         fs::path jsonName = dirEntry;
         if(jsonName.extension()!=".json")continue;
+        fontMutex.lock();
         fonts.emplace_back(jsonName,fonts.size(),d11Device);
-
+        fontMutex.unlock();
     }
 }
 
+
+
+
+#undef max
+void loadRpakFont(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr, ID3D11Device* device,ID3D11Texture2D* texture,ID3D11ShaderResourceView* textureView) {
+   fontMutex.lock();
+   fonts.emplace_back(fontAtlasHdr,device,texture,textureView);
+   fontMutex.unlock();
+}
 
 Font_t* getFontByIndex(uint16_t id) {
     return &fonts[fontAtlasIndices[id]].fonts[id];
 }
 FontAtlas_t* getFontAtlasByIndex(uint16_t id) {
     return &fonts[fontAtlasIndices[id]];
+}
+
+void clearFontAtlases() {
+    fontMutex.lock();
+    fontAtlasIndices.clear();
+    fonts.clear();
+    fontMutex.unlock();
 }
