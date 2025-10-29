@@ -161,12 +161,6 @@ namespace ImFlow {
         }
         draw_list->AddRect(offset + m_pos - ptl, offset + m_pos + m_size + pbr, col, m_style->radius, 0, thickness);
 
-        // set cursor position back to the start of the node, accounting for the hover border
-        ImGui::SetCursorScreenPos(offset + m_pos - ptl);
-        // create an invisible button to act as our main mouse click test
-        // TODO: replace the existing click detection with just using this?
-        const bool isClicked = ImGui::InvisibleButton("##NodeBackgroundButton", ptl + m_size + pbr);
-
         if (ImGui::IsWindowHovered() && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) &&
             ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !m_inf->on_selected_node())
             selected(false);
