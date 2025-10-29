@@ -330,7 +330,7 @@ void RuiExportPrototype::GenerateVariables(std::map<std::string,std::any>& argVa
 		}
 
 		varOffsets.emplace(name, currentDataStructSize);
-		currentDataStructSize += size;
+		currentDataStructSize += (uint16_t)size;
 	}
 
 
@@ -475,14 +475,14 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 	pkgHdr.elementHeightRcp = NRReciprocal(size.y);
 	pkgHdr.nameOffset = sizeof(pkgHdr);
 	pkgHdr.nameSize = name.size() + 1;
-	pkgHdr.defaultValuesSize = defaultValues.size();
+	pkgHdr.defaultValuesSize = (uint16_t)defaultValues.size();
 	pkgHdr.dataStructSize = currentDataStructSize;
 	pkgHdr.defaultStringsDataSize = defaultStrings.str().size();
-	pkgHdr.styleDescriptorCount = styleDescriptor.size();
-	pkgHdr.renderJobSize = renderJobData.size();
-	pkgHdr.transformDataSize = transformData.size();
-	pkgHdr.rpakPointersInDefaltDataCount = rpakPointersInDefaultValues.size();
-	pkgHdr.mappingCount = mappings.size();
+	pkgHdr.styleDescriptorCount = (uint16_t)styleDescriptor.size();
+	pkgHdr.renderJobSize = (uint16_t)renderJobData.size();
+	pkgHdr.transformDataSize = (uint16_t)transformData.size();
+	pkgHdr.rpakPointersInDefaltDataCount = (uint16_t)rpakPointersInDefaultValues.size();
+	pkgHdr.mappingCount = (uint16_t)mappings.size();
 	pkgHdr.mappingSize = 0;
 	pkgHdr.renderJobCount = renderJobCount;
 	pkgHdr.argClusterCount = 1;

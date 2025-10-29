@@ -69,8 +69,8 @@ struct UIImageAtlasAssetHeader_v10_t
 
 struct ImageAtlas {
 
-	ImageAtlas(fs::path& jsonName, uint32_t atlasIndex);
-	ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr,ShaderSizeData_t* sharderData, uint32_t atlasIndex, size_t textureID);
+	ImageAtlas(fs::path& jsonName, size_t atlasIndex);
+	ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr,ShaderSizeData_t* sharderData, size_t atlasIndex, size_t textureID);
 	std::string name;
 	std::vector<textureOffset> offsets;
 	std::vector<ImageAtlasTextureDimention> dimentions;

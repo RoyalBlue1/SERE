@@ -16,13 +16,13 @@ float Mapping::MapVar(float xVal) {
 	{
 		if ( xVal < controlPoints[controlPoints.size()-1].x)
 		{
-			float lowerDataX = controlPoints[0].x;
-			float highterDataX = controlPoints[1].x;
+			float lowerDataX = (float)controlPoints[0].x;
+			float highterDataX = (float)controlPoints[1].x;
 
 			while ( xVal > highterDataX)
 			{
 				lowerDataX = highterDataX;
-				highterDataX = controlPoints[2 + v5++].x;
+				highterDataX = (float)controlPoints[2 + v5++].x;
 			}
 
 
@@ -31,7 +31,7 @@ float Mapping::MapVar(float xVal) {
 		}
 		else
 		{
-			v5 = controlPoints.size() - 2;
+			v5 = (uint32_t)controlPoints.size() - 2;
 			percentageXDiff = 1.0;
 			dataXDifference = 1.0;
 		}
@@ -72,7 +72,7 @@ float Mapping::MapVar(float xVal) {
 		return (float)((float)((float)(float_10 * controlPoints[v5].dir) + inversePercentageXDiff * controlPoints[v5].y) + (float)(percentageXDiff * controlPoints[v5+1].y))
 		+ (float)(float_14 * controlPoints[v5 +1].dir);
 	else
-		return (float)(percentageXDiff * controlPoints[v5 +1].y) + inversePercentageXDiff * controlPoints[v5].y;
+		return (float)(percentageXDiff * controlPoints[v5 +1].y) + (float)(inversePercentageXDiff * controlPoints[v5].y);
 
 }
 void Mapping::Sort() {

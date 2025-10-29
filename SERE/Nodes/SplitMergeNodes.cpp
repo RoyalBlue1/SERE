@@ -486,9 +486,9 @@ HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 			i = (int)trunc(h);
 			f = h - i;
 
-			p = inV.value * (1.0 - inS.value);
-			q = inV.value * (1.0 - (inS.value * f));
-			t = inV.value * (1.0 - (inS.value * (1.0 - f)));
+			p = (float)(inV.value * (1.0 - inS.value));
+			q = (float)(inV.value * (1.0 - (inS.value * f)));
+			t = (float)(inV.value * (1.0 - (inS.value * (1.0 - f))));
 
 			switch (i)
 			{
