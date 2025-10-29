@@ -65,9 +65,6 @@ void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
 	__m128 v73;
 	__m128 v36;
 	__m128 v37;
-	__m128 v59;
-	__m128 v62;
-	__m128 v63;
 	__m128 v65;
 	__m128 v66;
 	__m128 v67;
@@ -235,27 +232,10 @@ void RenderInstance::sub_F9B80_rev(
 	const __m128& texMin,
 	const __m128& texSize)
 {
-	__int64 unsigned_int_8; // rax
-
-	__int64 v17; // rdx
 	ImageAtlas *imageAtlas; // r13
-	ImageAtlas *uiImageAtlas_10; // rax
-	uint32_t vertexIndicesElementCount; // eax
-	int dword_0; // eax
-	int word_66; // r14d
 	__int16 v24; // r14
 	uint16_t assetIndex; // cx
-
-	__m128 v27; // xmm2
-	__m128 v28; // xmm3
-	__m128 v29; // xmm5
-
-	__m128 v31; // xmm0
-	__m128 v32; // xmm5
-	__m128 v33; // xmm0
-
 	uiImageAtlasUnk *v35; // rcx
-	__m128 v37; // xmm0
 	__m128 v38; // xmm1
 	__m128 v39; // xmm5
 	__m128 v40; // xmm13
@@ -266,8 +246,6 @@ void RenderInstance::sub_F9B80_rev(
 	__m128 v45; // xmm1
 	__m128 v46; // xmm9
 	__m128 v47; // xmm1
-	__m128 v48; // xmm3
-	__m128 v49; // xmm2
 	__m128 v50; // xmm0
 	__m128 v51; // xmm15
 	__m128 v52; // xmm12
@@ -288,117 +266,61 @@ void RenderInstance::sub_F9B80_rev(
 	__m128 v67; // xmm1
 	__m128 v68; // xmm2
 	__m128 *v69; // r9
-	__m128 v70; // xmm4
-	__m128 v71; // xmm5
 	__m128 v72; // xmm0
-	__m128 v73; // xmm0
 	__m128 v74; // xmm4
 	__m128 v75; // xmm0
-	__int64 v76; // rax
 	DrawInfo *drawInfo; // rcx
-
 	__m128 v79; // xmm2
 	__m128 v80; // xmm3
 	__m128 *v81; // r9
-	__m128 v82; // xmm5
-	__m128 v83; // xmm6
 	__m128 v84; // xmm0
-	__m128 v85; // xmm0
 	__m128 v86; // xmm5
 	__m128 v87; // xmm0
-	__int64 v88; // rax
-	DrawInfo *v89; // rcx
-	char v90; // al
-	__m128i v91; // xmm1
 	__m128 v92; // xmm2
 	__m128 v93; // xmm3
 	__m128 *v94; // r9
-	__m128 v95; // xmm5
-	__m128 v96; // xmm6
 	__m128 v97; // xmm0
-	__m128 v98; // xmm0
 	__m128 v99; // xmm5
 	__m128 v100; // xmm0
-	__int16 word_60; // ax
-	__int16 word_62; // eax^2
-
-
-
-	__m128i v106; // xmm1
 	__m128 v107; // xmm2
 	__m128 v108; // xmm3
 	__m128 *v109; // r9
 	__m128 v110; // xmm5
-	__m128 v111; // xmm6
 	__m128 v112; // xmm0
 	__m128 v113; // xmm0
 	__m128 v114; // xmm5
 	__m128 v115; // xmm0
-
-
-	__m128i v118; // xmm2
 	__m128 v119; // xmm3
 	__m128 v120; // xmm4
-	__m128 v121; // xmm6
-	__m128 v122; // xmm1
 	__m128 v123; // xmm0
 	__m128 v124; // xmm6
-	DrawInfo *v126; // rcx
-	__m128i v127; // xmm1
 	__m128 v128; // xmm2
 	__m128 v129; // xmm3
 	__m128 *v130; // r9
-	__m128 v131; // xmm5
-	__m128 v132; // xmm6
 	__m128 v133; // xmm0
-	__m128 v134; // xmm0
 	__m128 v135; // xmm5
 	__m128 v136; // xmm0
-	__int64 v137; // rax
-
 	char v139; // al
-	__m128i v140; // xmm1
 	__m128 v141; // xmm2
 	__m128 v142; // xmm3
 	__m128 *v143; // r9
-	__m128 v144; // xmm5
-	__m128 v145; // xmm6
 	__m128 v146; // xmm0
-	__m128 v147; // xmm0
 	__m128 v148; // xmm5
 	__m128 v149; // xmm0
-
-	DrawInfo *v151; // rcx
 	__m128 v152; // xmm2
 	__m128 v153; // xmm15
-	__m128i v154; // xmm1
 	__m128 v155; // xmm2
 	__m128 v156; // xmm3
 	__m128 *v157; // r9
-	__m128 v158; // xmm5
-	__m128 v159; // xmm6
 	__m128 v160; // xmm0
-	__m128 v161; // xmm0
 	__m128 v162; // xmm5
 	__m128 v163; // xmm0
-	__int64 v164; // rax
-
-	__m128i v166; // xmm1
 	__m128 v167; // xmm2
 	__m128 v168; // xmm3
 	__m128 *v169; // r9
-	__m128 v170; // xmm5
-	__m128 v171; // xmm6
 	__m128 v172; // xmm0
-	__m128 v173; // xmm0
 	__m128 v174; // xmm5
 	__m128 v175; // xmm0
-
-
-	__m128 v178[2]; // [rsp+30h] [rbp-D0h] BYREF
-	//__m128 v179; // [rsp+40h] [rbp-C0h]
-	//ruiDrawTriangle v180; // [rsp+50h] [rbp-B0h] BYREF
-	//ruiUnknownStruct_1 v181; // [rsp+80h] [rbp-80h] BYREF
 	RenderQuad quad;
 
 	int v182; // [rsp+F0h] [rbp-10h]
@@ -756,7 +678,7 @@ void RenderInstance::sub_F9B80_rev(
 		{
 			sub_FEF30(a3a, v157, tri);
 		}
-		v161 = v158;
+
 		v162 = _mm_unpackhi_ps(tri.a, tri.b);
 		v163 = _mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
@@ -800,10 +722,7 @@ void RenderInstance::sub_F9B80_rev(
 		if ( _mm_movemask_ps(v172) )
 		{
 			sub_FEF30(a3a, v169, tri);
-			v171 = v178[1];
-			v170 = v178[0];
 		}
-		v173 = v170;
 		v174 = _mm_unpackhi_ps(tri.a, tri.b);
 		v175 = _mm_unpacklo_ps(tri.a, tri.b);
 		if ( a6 == 2 )
@@ -876,7 +795,7 @@ void RenderInstance::EndFrame() {
 	
 
 	for (size_t i = 0; i < segments.size(); i++) {
-		uint32_t endIndex;
+		size_t endIndex;
 		if ((i + 1) == segments.size()) {
 
 			endIndex = indices.size();
@@ -894,7 +813,7 @@ void RenderInstance::EndFrame() {
 			resources[1] = segments[i].imageAtlas->textureId;
 			resources[3] = segments[i].imageAtlas->shaderDataId;
 		}
-		g_renderFramework->DrawIndexed(endIndex-segments[i].indexStart,segments[i].indexStart,resources);
+		g_renderFramework->DrawIndexed((uint32_t)(endIndex-segments[i].indexStart),(uint32_t)segments[i].indexStart,resources);
 	}
 
 

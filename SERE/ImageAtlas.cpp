@@ -27,7 +27,7 @@ void loadImageAtlases() {
 		if(jsonName.extension()!=".json")continue;
 
 		atlasMutex.lock();
-		int atlasIndex = imageAtlases.size();
+		size_t atlasIndex = imageAtlases.size();
 		imageAtlases.emplace_back(jsonName,atlasIndex);
 		atlasMutex.unlock();
 	}
@@ -36,7 +36,7 @@ void loadImageAtlases() {
 
 void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* shaderData, size_t textureId) {
 	atlasMutex.lock();
-	int atlasIndex = imageAtlases.size();
+	size_t atlasIndex = imageAtlases.size();
 	imageAtlases.emplace_back(hdr,shaderData,atlasIndex,textureId);
 	atlasMutex.unlock();
 }
@@ -112,7 +112,7 @@ uint32_t loadAsset(const char* a2)
 
 
 
-ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex):
+ImageAtlas::ImageAtlas(fs::path& jsonName, size_t atlasIndex):
 	shaderDataId(~0LL),
 	textureId(~0LL)
 {
@@ -255,7 +255,7 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex):
 
 }
 
-ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* rawSharderData, uint32_t atlasIndex,size_t textureID):
+ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* rawSharderData, size_t atlasIndex,size_t textureID):
 	textureId(textureID),
 	shaderDataId(0)
 

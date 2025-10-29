@@ -166,7 +166,7 @@ struct RuiExportPrototype {
 	std::vector<uint16_t> rpakPointersInDefaultValues;
 	std::stringstream defaultStrings;
 	uint16_t renderJobCount;
-	ArgCluster_t cluster;
+	ArgCluster_t cluster{};
 	std::vector<Argument_t> exportArgs;
 
 	RuiExportPrototype(const RenderInstance& inst,const std::string& name);

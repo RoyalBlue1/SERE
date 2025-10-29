@@ -35,7 +35,7 @@ void AssetRenderNode::draw() {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1000 | maskFlag;
+	input.flags = maskFlag ? 0x1001 : 0x1000;
 	Render_Asset(render,input);
 }
 
@@ -64,7 +64,7 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 	input.maskSize = getInVal<Float2Variable>("Mask Size");
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
-	input.flags = 0x1000 | maskFlag;
+	input.flags = maskFlag ? 0x1001 : 0x1000;
 
 
 	if (!input.mainAsset.name.size()) {
@@ -121,7 +121,7 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 		style.color2 = proto.GetColorDataVariableOffset(input.tertColor);
 		style.blend = proto.GetFloatDataVariableOffset(input.blend);
 		style.premul = proto.GetFloatDataVariableOffset(input.premul);
-		uint16_t styleId = proto.styleDescriptor.size();
+		uint16_t styleId = (uint16_t)proto.styleDescriptor.size();
 		proto.styleDescriptor.push_back(style);
 		struct AssetRenderOffsets {
 			uint16_t type = 1;
@@ -275,7 +275,7 @@ void AssetCircleRenderNode::Export(RuiExportPrototype& proto) {
 		style._anon_4 = ellipseSizeOffset.y;
 		style._anon_5 = proto.GetFloatDataVariableOffset(input.innerMask);
 		style._anon_6 = proto.GetFloatDataVariableOffset(input.vingette);
-		uint16_t styleId = proto.styleDescriptor.size();
+		uint8_t styleId = (uint8_t)proto.styleDescriptor.size();
 		proto.styleDescriptor.push_back(style);
 		struct AssetCircleRenderOffsets {
 			uint16_t type = 2;
@@ -555,7 +555,7 @@ uint8_t AddTextStyleToProto(RuiExportPrototype& proto,const TextStyleData& style
 	style0._anon_8 = proto.GetFloatDataVariableOffset(style.boltness);
 	style0._anon_9 = proto.GetFloatDataVariableOffset(style.blur);
 	style0._anon_10 = proto.GetFloatDataVariableOffset(style.style_32);
-	uint16_t res = proto.styleDescriptor.size();
+	uint8_t res = (uint8_t)proto.styleDescriptor.size();
 	proto.styleDescriptor.push_back(style0);
 	return res;
 }

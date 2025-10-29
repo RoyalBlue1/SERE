@@ -4,8 +4,8 @@
 #include "Util.h"
 
 #include "Imgui/implot.h"
-#undef min;
-#undef max;
+#undef min
+#undef max
 
 
 bool AtlasImageButton(const char* id, uint32_t hash,ImVec2 maxSize) {

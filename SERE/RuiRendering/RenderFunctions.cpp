@@ -8,8 +8,6 @@
 #define TAU 6.2831855f
 
 bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
-	__int16 unknown8Index; // bp
-	//testStruct* a5; // r9
 
 	__m128 v9; // xmm2
 	__m128 v10; // xmm6
@@ -26,11 +24,7 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	__m128 mins; // xmm8
 	__m128 maxs; // xmm9
 	__m128 v26; // xmm5
-	__m128 v27; // xmm13
-	__m128 v28; // xmm4
-
 	__m128 texMins; // xmm13
-	__m128 v31; // xmm4
 	__m128 texMaxs; // xmm4
 	__m128 v33; // xmm1
 	__m128 texSize; // xmm2
@@ -59,8 +53,6 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	__m128 v59; // xmm11
 	__m128 v60; // xmm3
 	__m128 v61; // xmm1
-	__m128 v62; // xmm2
-	__m128 v63; // xmm14
 	__m128 v64; // xmm0
 
 	__m128 v68; // [rsp+80h] [rbp-188h]
@@ -336,8 +328,6 @@ uint64_t getFontGlyphIndex(Font_t* font, int a2)
 	char v6; // al
 	__int64 v7; // r8
 	__int64 v8; // r11
-	bool v9; // zf
-	unsigned __int64 v11; // rcx
 
 	v5 = (unsigned int)(a2 - font->unicodeIndex) >> 6;
 	if ((unsigned int)v5 < font->unicodeChunk.size())
@@ -374,14 +364,6 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 	int Asset; // eax
 	unsigned int v17; // eax
 	__int64 qword_8; // r13
-	const char* v19; // rax
-	const char* v20; // rbx
-	__int64 v21; // rbx
-	__int64 v22; // rax
-	unsigned int v23; // ebp
-	unsigned int v24; // r14d
-	__int64 v25; // r15
-	int v26; // eax
 	char assetName[112]; // [rsp+20h] [rbp-88h] BYREF
 
 	v5 = *a3;
@@ -501,8 +483,6 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 	__m128 v14; // xmm1
 	__m128 v15; // xmm7
 	uint32_t assetHash; // rcx
-	__int64 uint16_6; // rax
-	uint32_t v18; // rsi
 	__int16 assetIndex; // r12
 	__int16 pixelBufferElementCount; // cx
 	__int16 v22; // r15
@@ -513,10 +493,6 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 	__m128 v27; // xmm15
 	__m128 v28; // xmm14
 	float v30; // xmm9_4
-	__int64 v31; // rdx
-	__int64 v32; // r10
-
-	float v34; // xmm5_4
 	__m128 v35; // xmm4
 	__m128 v36; // xmm3
 	textureOffset* v37; // rcx
@@ -622,7 +598,7 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 		_mm_or_ps(
 			_mm_and_ps(_mm_andnot_ps(_mm_set1_ps(-0.0), v61), v40),
 			_mm_andnot_ps(v40, _mm_set1_ps(1))));
-	if ( _mm_movemask_ps(_mm_cmplt_ps(v42, _mm_set1_ps(-3.4028235e38))) )
+	if ( _mm_movemask_ps(_mm_cmplt_ps(v42, _mm_set1_ps(-std::numeric_limits<float>::max()))) )
 		return 1LL;
 	v43 = _mm_xor_ps(
 		_mm_min_ps(
@@ -678,43 +654,29 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 
 
 bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform) {
-	//struct_v1* v4; // r12 MAPDST
-	__int64 transformIndex; // r10
+
 	__m128 v11; // xmm2
-	__m128 v12; // xmm9
 	__m128 v13; // xmm0
 	__m128 v14; // xmm12
 	__m128 v15; // xmm1
 	__m128 v16; // xmm13
-	__m128 v18; // xmm6
-	__m128 v19; // xmm8
-
-	__m128 v26; // xmm3
 	__m128 v31; // xmm15
-	float v36; // xmm7_4
 	float v38; // xmm0_4
 	float v39; // xmm2_4
 	float v40; // xmm0_4
 	float v42; // xmm0_4
-	unsigned __int64 v43; // rsi
-	unsigned __int8 byte_7; // al
-	__int64 byte_6; // rbx
 	__m128 v46; // xmm0
 	__m128 v47; // xmm6
-	int v48; // edi
 	__m128 v49; // xmm7
 	uint32_t assetHash; // rax
 	__int64 assetIndex; // rdx
 	Asset_t a7; // r10
 	__m128 v53; // xmm0
 	__m128 v54; // xmm2
-	__m128 v55; // xmm4
-	__m128 v56; // xmm1
+	__m128 v55;
 	textureOffset* v57; // r8
 	__int64 uint16_2; // rax
-	__m128 v59; // xmm8
 	__m128 v60; // xmm0
-	__int16 v61; // cx
 	__m128 v62; // xmm0
 	__m128 v63; // xmm1
 	__m128 v64; // xmm2
@@ -722,12 +684,6 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	__int64 v66; // rax
 	//unknownRuiListElement* qword_0; // rdx
 	FontAtlas_t* fontAtlas; // r8
-	__int64 unsigned_int_8; // rax
-	__int64 v71; // rcx
-	FontAtlas_t* uiFontAtlas_8; // r9
-	uint32_t vertexIndicesElementCount; // r9d
-	unsigned int v74; // eax
-	int dword_0; // eax
 	unsigned int v76; // ecx
 	unsigned __int8 v77; // bl
 	const char* printString; // rdx MAPDST
@@ -750,8 +706,6 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	float v96; // xmm10_4
 	__m128 v97; // xmm8
 	__m128 v98; // xmm8
-	__m128 v99; // xmm5
-	__m128 v100; // xmm4
 	float v101; // xmm6_4
 	__m128 v102; // xmm9
 	__m128 v103; // xmm3
@@ -801,11 +755,9 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	__m128 v148; // xmm5
 	__m128 v149; // xmm6
 	__m128 v150; // xmm6
-	__m128i si128; // xmm2
 	__m128 v153; // xmm1
 	__m128 v154; // xmm2
 	//ruiDrawInfo* drawInfo; // rcx
-	int v156; // eax
 	__int64 v157; // rax
 	float v158; // xmm0_4
 	float v159; // xmm0_4
@@ -836,7 +788,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	float v186; // [rsp+108h] [rbp+8h]
 	__m128 a11; // [rsp+120h] [rbp+20h] BYREF
 	char v191[8]; // [rsp+138h] [rbp+38h] BYREF
-	__m128 v194[2]; // [rsp+170h] [rbp+70h] BYREF
+
 	//__m128 v195; // [rsp+180h] [rbp+80h]
 	Font_t* fontArray[4]; // [rsp+190h] [rbp+90h]
 	__m128 v197; // [rsp+1B0h] [rbp+B0h]
@@ -1397,58 +1349,26 @@ __m128 GetTextSize(TextInputData& data) {
 
 	//ruiStyleDescriptor* unk8Struct_1; // r10
 	//ruiStyleDescriptor* unk8Struct_0; // r9
-	__int64 fontIndex_1E; // rax
-	__int64 v9; // rdi
 	//ruiStyleDescriptor* unk8Struct_2; // r11
-	Font_t* v11; // rcx
-	Font_t* v12; // rdx
-	__int64 v13; // rax
-	Font_t* v14; // r8
-	__int64 word_28_TextSize; // rax
-	float v16; // xmm10_4
-	__int64 v17; // rax
-	float v18; // xmm14_4
-	__int64 v19; // rax
-	//float v20; // xmm12_4 MAPDST
-	__int64 word_2A_TextStretch; // rax
-	float v22; // xmm0_4
-	float v23; // xmm1_4
-	__int64 v24; // rax
-	float v25; // xmm0_4
-	__int64 v26; // rax
-	float v27; // xmm1_4
-	__int64 uint16_32; // rax
-	float v29; // xmm10_4
-	__int64 v30; // rax
-	float v31; // xmm1_4
-	__int64 v32; // rax
 	float v33; // xmm8_4
-	float v34; // xmm0_4
 	float v35; // xmm6_4
 	unsigned __int8 currentStyleId; // r15
-	float v37; // xmm9_4
 	float v38; // xmm15_4
 	float v39; // xmm10_4
 	float v40; // xmm11_4
-	__int64 v41; // rax
 	float v42; // xmm7_4
-	float v43; // xmm14_4
 	float v44; // xmm9_4
 	int v45; // r12d
 	//ruiStyleDescriptor* unk8Struct_3; // rbx
-	float v47; // xmm0_4
-	Glyph_t* fontGlyphs; // rax
 	float* v49; // r14
 	float v50; // xmm8_4
 	float v51; // xmm7_4
 	float v52; // xmm15_4
 	float fVar23; // xmm8_4
 	const char* printText; // rdx MAPDST
-	__int64 uint16_C; // rax
 	__int64 savedTextPointerIndex; // r13
 	float v57; // xmm13_4
 	float v58; // xmm12_4
-	__int64 v59; // rax
 	uint64_t currentUnicodeChar; // eax MAPDST
 	char v62; // r8
 
@@ -1458,23 +1378,12 @@ __m128 GetTextSize(TextInputData& data) {
 	Glyph_t* fontGlyph; // r10
 	int kerningIndex; // ecx
 	int kerningEnd; // r8d
-	KerningInfo_t* pointer_58; // rdx
 	float float_4; // xmm2_4
 	float v72; // xmm1_4
-	__int64 v73; // rcx
-	__int64 v74; // rcx
 	uint32_t v75; // ecx
 	int v76; // r8d
 	unsigned __int64 v77; // rdx
 	float v78; // xmm3_4
-	__int64 v79; // rcx
-	float v80; // xmm1_4
-	float v81; // xmm1_4
-	__int64 v82; // rcx
-	__int64 v83; // rcx
-	__int64 v84; // rcx
-	uint32_t v85; // eax
-	__int64 v86; // r14
 	__int64 assetIndex; // r9
 	ImageAtlasTextureDimention* v88; // rdx
 	float* v89; // rcx
@@ -1485,21 +1394,13 @@ __m128 GetTextSize(TextInputData& data) {
 	float i; // xmm6_4
 	__int64 v96; // rcx
 	float v97; // xmm2_4
-	uint32_t endVar; // eax
-	char v99; // dl
-	char v100; // r8
 	__m128 v101; // xmm1
 	float v102; // xmm5_4
-	unsigned __int64 v103; // rcx
 	__m128 v104; // xmm2_4
-	char v105; // al
 	__m128 result; // xmm0
-	int byte_6; // [rsp+30h] [rbp-D0h]
 	uint32_t v108; // [rsp+34h] [rbp-CCh]
 	const char* currentCharPointer; // [rsp+38h] [rbp-C8h] BYREF
 	int v110; // [rsp+40h] [rbp-C0h]
-	uint32_t dword_28C8; // [rsp+44h] [rbp-BCh]
-	uint32_t dword_28CC; // [rsp+48h] [rbp-B8h]
 	Font_t* a1a; // [rsp+50h] [rbp-B0h]
 	float sizeX[4]; // [rsp+60h] [rbp-A0h]
 	float v116[4]; // [rsp+70h] [rbp-90h]

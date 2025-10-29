@@ -872,7 +872,7 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<AbsoluteNode>();
 	editor.AddNodeType<SineNode>();
 	editor.AddNodeType<ExponentNode>();
-	editor.AddNodeType<MappingNode>();
+	//editor.AddNodeType<MappingNode>();
 	editor.AddNodeType<TangentNode>();
 	editor.AddNodeType<CosineNode>();
 	editor.AddNodeType<SquareRootNode>();

@@ -363,8 +363,8 @@ void AndGateNode::Export(RuiExportPrototype& proto) {
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> AndGateNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("A", ImFlow::ConnectionFilter::SameType(), BoolVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("B", ImFlow::ConnectionFilter::SameType(), BoolVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("A", ImFlow::ConnectionFilter::SameType(), BoolVariable(false)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("B", ImFlow::ConnectionFilter::SameType(), BoolVariable(false)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Res"));
 	return info;
 }
@@ -422,8 +422,8 @@ void OrGateNode::Export(RuiExportPrototype& proto) {
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> OrGateNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("A", ImFlow::ConnectionFilter::SameType(), BoolVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("B", ImFlow::ConnectionFilter::SameType(), BoolVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("A", ImFlow::ConnectionFilter::SameType(), BoolVariable(false)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("B", ImFlow::ConnectionFilter::SameType(), BoolVariable(false)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Res"));
 	return info;
 }

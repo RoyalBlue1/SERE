@@ -712,7 +712,7 @@ namespace ImFlow
          */
 
         template<typename T>
-        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT(std::shared_ptr<PinProto> proto,std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<OutPin<T>> addOUT(std::shared_ptr<PinProto> proto,std::shared_ptr<PinStyle> style = nullptr);
 
         /**
          * @brief <BR>Add an Output to the node
@@ -728,7 +728,7 @@ namespace ImFlow
          */
 
         template<typename T, typename U>
-        [[nodiscard]] std::shared_ptr<OutPin<T>> addOUT_uid(const U& uid, std::shared_ptr<PinProto> proto, std::shared_ptr<PinStyle> style = nullptr);
+        std::shared_ptr<OutPin<T>> addOUT_uid(const U& uid, std::shared_ptr<PinProto> proto, std::shared_ptr<PinStyle> style = nullptr);
 
 
         /**

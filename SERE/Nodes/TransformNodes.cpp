@@ -144,7 +144,7 @@ void Transform2Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -245,7 +245,7 @@ void Transform3Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -349,7 +349,7 @@ void Transform4Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -482,7 +482,7 @@ void Transform5Node::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -605,7 +605,7 @@ void Transform6Node::Export(RuiExportPrototype& proto) {
 			Float2Offsets val0;
 			Float2Offsets val3;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -739,7 +739,7 @@ void Transform7Node::Export(RuiExportPrototype& proto) {
 			Float2Offsets translate;
 			Float2Offsets point;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -901,7 +901,7 @@ void Transform8Node::Export(RuiExportPrototype& proto) {
 			Float2Offsets translate;
 			Float2Offsets point;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -1072,7 +1072,7 @@ void Transform9Node::Export(RuiExportPrototype& proto) {
 			Float2Offsets translate;
 			Float2Offsets point;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -1245,7 +1245,7 @@ void Transform10Node::Export(RuiExportPrototype& proto) {
 			Float2Offsets point1;
 			Float2Offsets point2;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -1307,12 +1307,12 @@ Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& styl
 		const Float2Variable& center = getInVal<Float2Variable>("Rotation Origin");
 		const FloatVariable& rot = getInVal<FloatVariable>("Rotation");
 
-		__m128 v2 = _mm_set_ps(0,0,0, 2147483600.0);
+		__m128 v2 = _mm_set_ps(0.f,0.f,0.f, 2147483600.0f);
 		__m128 v3 = _mm_xor_ps(
 			_mm_mul_ps(
 				(__m128)_mm_set_ps(render.elementWidth,render.elementHeight,render.elementWidth,render.elementHeight),
 				(__m128)_mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio)),
-			_mm_set_ps(0,-0.0f,0,-0.0f));
+			_mm_set_ps(0.f,-0.0f,0.f,-0.0f));
 
 
 
@@ -1417,7 +1417,7 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 	ele.dependencys = {parent.hash,};
 	ele.callback = [parent,center,rot,out,size](RuiExportPrototype& proto) {
 		struct Transform11FileStruct {
-			uint8_t type = 2;
+			uint8_t type = 1;
 			uint8_t count = 1;
 			uint16_t parent;
 			uint8_t type_ = 11;
@@ -1426,7 +1426,7 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 			uint16_t rotation;
 			Float2Offsets center;
 		};
-		uint16_t transId = proto.transformIndices.size();
+		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
 		ele.identifier = Variable::UniqueName();
@@ -1471,7 +1471,7 @@ void AddTransformNodes(NodeEditor& editor) {
 	editor.AddNodeType<Transform8Node>();
 	editor.AddNodeType<Transform9Node>();
 	editor.AddNodeType<Transform10Node>();
-	editor.AddNodeType<Transform11Node>();
+	//editor.AddNodeType<Transform11Node>();
 	//editor.AddNodeType<Transform12Node>();
 	//editor.AddNodeType<Transform13Node>();
 }
