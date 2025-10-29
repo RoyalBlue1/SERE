@@ -49,9 +49,18 @@ add_executable (SERE
 	"ThirdParty/DDSTextureLoader11.cpp"
 	"RuiNodeEditor/RuiBaseNode.cpp"
 	"RuiNodeEditor/RuiExportPrototype.cpp"
+	"Nodes/ConditionalNodes.cpp"
 
 	"RenderFrameworks/RenderFramework_Dx11.cpp"	
- "RenderFrameworks/RenderFramework_OpenGl.h" "RenderFrameworks/RenderFramework_OpenGl.cpp")
+	"PakLoading/asset.cpp"
+	"PakLoading/cpakfile.cpp"
+	"PakLoading/patchapi.cpp"
+	"PakLoading/texture.cpp"
+	
+	
+	"PakLoading/utils.cpp"
+
+ "Settings.h" "RenderFrameworks/RenderFramework.cpp")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
 target_link_libraries(SERE PUBLIC nfd)

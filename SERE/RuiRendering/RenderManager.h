@@ -135,8 +135,6 @@ public:
     float elementWidthRatio;
     float elementHeightRatio;
 
-    std::shared_ptr<RenderFramework> render;
-
     void AddImageAtlasSegment(ImageAtlas* atlas) {
         if (segments.size() == 0) {
             IndexSegment_t segment;
@@ -227,14 +225,14 @@ public:
         drawInfo.ruiUnk3[0].float_2C = 1.f;
     }
 
-    RenderInstance(float width, float height,std::shared_ptr<RenderFramework> rend):render(rend) {
+    RenderInstance(float width, float height) {
         SetSize(width,height);
     }
 
     void DrawImage() {
         ImGui::Begin("Render Image");
         float width = ImGui::GetWindowWidth();
-        ImGui::Image(render->GetRuiView(), ImVec2(width, elementHeight / elementWidth * width), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(g_renderFramework->GetRuiView(), ImVec2(width, elementHeight / elementWidth * width), ImVec2(0, 0), ImVec2(1, 1));
         ImGui::End();
     }
 };

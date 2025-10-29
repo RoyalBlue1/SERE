@@ -3,14 +3,16 @@
 #include "FontAtlas.h"
 
 #include <fstream>
+#include <mutex>
 #include "ThirdParty/DDSTextureLoader11.h"
 #include "ThirdParty/rapidjson/document.h"
 
 
 #undef GetObject
 
-std::vector<FontAtlas_t> fonts;
-std::map<uint16_t,size_t> fontAtlasIndices;
+std::vector<FontAtlas_t> fonts{};
+std::map<uint16_t, size_t> fontAtlasIndices{};
+std::mutex fontMutex{};
 
 
 struct ProportionData {
@@ -160,9 +162,70 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath) {
 
     fs::path ddsName = jsonPath.replace_extension("dds");
 
-    textureId = render->LoadTexture(ddsName);
-    std::vector<ShaderSizeData_t> shaderData;
+    textureId = g_renderFramework->LoadTexture(ddsName);
 
+    CreateShaderDataBuffer();
+
+}
+
+
+FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex) { 
+    loadFromFile(jsonPath); 
+    for (auto& fnt : fonts) {
+        fontAtlasIndices.emplace(fnt.first,atlasIndex);
+    }
+};
+#undef max
+FontAtlas_t::FontAtlas_t(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr,size_t texture):
+    textureId(texture)
+
+{
+    uint8_t highest_unk_6 = 0;
+    for (uint16_t i = 0; i < fontAtlasHdr->fontCount; i++) {
+        Font_t font;
+        UIFontHeader_v7_t* fontHdr = &fontAtlasHdr->fonts[i];
+        if(fontHdr->name)
+            font.name = fontHdr->name;
+        else
+            font.name = std::format("Font_{}",i);
+        font.fontIndex = fontHdr->fontIndex;
+        font.unicodeIndex = fontHdr->unicodeIndex;
+        font.proportionScaleX = fontHdr->proportionScaleX;
+        font.proportionScaleY = fontHdr->proportionScaleY;
+        font.float_24 = fontHdr->unk_24;
+        font.float_28 = fontHdr->unk_28;
+
+        font.proportions.resize(fontHdr->numProportions);
+        memcpy(font.proportions.data(),fontHdr->proportions,sizeof(Proportion_t)*fontHdr->numProportions);
+        
+        uint16_t highestUnicodeIndex = 0;
+        for (uint16_t j = 0; j < fontHdr->numUnicodeChunks; j++) {
+            font.unicodeChunk.push_back(fontHdr->unicodeChunks[j]);
+            highestUnicodeIndex = std::max(highestUnicodeIndex,fontHdr->unicodeChunks[j]);
+        }
+        for (uint16_t j = 0; j <= highestUnicodeIndex; j++) {
+            font.glyphChunks.emplace_back(fontHdr->unicodeChunksIndex[j],fontHdr->unicodeChunksMask[j]);
+        }
+        for (uint16_t j = 0; j < fontHdr->numTextures; j++) {
+            font.glyphs.push_back(fontHdr->glyphs[j]);
+            highest_unk_6 = std::max(highest_unk_6,fontHdr->glyphs[j].byte_6);
+        }
+
+        font.kerningInfos.resize(fontHdr->numKernings);
+        memcpy(font.kerningInfos.data(),fontHdr->kerningInfo,sizeof(KerningInfo_t)*fontHdr->numKernings);
+        fonts.insert({ font.fontIndex,font });
+    }
+    uint16_t numUnk18 = ((fontAtlasHdr->unk_2 + 1) * highest_unk_6 * 2 + 1) >> 3;
+    for (uint16_t i = 0; i < numUnk18; i++) {
+        unk_18.push_back(fontAtlasHdr->unk_18[i]);
+    }
+    CreateShaderDataBuffer();
+    
+}
+
+void FontAtlas_t::CreateShaderDataBuffer() {
+
+    std::vector<ShaderSizeData_t> shaderData;
     for (auto& font : fonts)
     {
 
@@ -210,7 +273,7 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath) {
     }
 
     if (shaderData.size()) {
-        shaderDataId = render->CreateShaderDataBuffer(shaderData);
+        shaderDataId = g_renderFramework->CreateShaderDataBuffer(shaderData);
     }
     else {
         shaderDataId = ~0ull;
@@ -218,30 +281,40 @@ void FontAtlas_t::loadFromFile(fs::path& jsonPath) {
 }
 
 
-FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex,std::shared_ptr<RenderFramework> rend):render(rend) { 
-    loadFromFile(jsonPath); 
-    for (auto& fnt : fonts) {
-        fontAtlasIndices.emplace(fnt.first,atlasIndex);
-    }
-};
-
-
-void loadFonts(std::shared_ptr<RenderFramework> render) {
+void loadFonts() {
     fs::path folderPath = ".\\Assets\\Fonts";
 
     for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
         if(!dirEntry.is_regular_file())continue;
         fs::path jsonName = dirEntry;
         if(jsonName.extension()!=".json")continue;
-        fonts.emplace_back(jsonName,fonts.size(),render);
-
+        fontMutex.lock();
+        size_t fontId = fonts.size();
+        fonts.emplace_back(jsonName,fontId);
+        fontMutex.unlock();
     }
 }
 
+
+
+
+#undef max
+void loadRpakFont(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr, size_t textureId) {
+   fontMutex.lock();
+   fonts.emplace_back(fontAtlasHdr,textureId);
+   fontMutex.unlock();
+}
 
 Font_t* getFontByIndex(uint16_t id) {
     return &fonts[fontAtlasIndices[id]].fonts[id];
 }
 FontAtlas_t* getFontAtlasByIndex(uint16_t id) {
     return &fonts[fontAtlasIndices[id]];
+}
+
+void clearFontAtlases() {
+    fontMutex.lock();
+    fontAtlasIndices.clear();
+    fonts.clear();
+    fontMutex.unlock();
 }

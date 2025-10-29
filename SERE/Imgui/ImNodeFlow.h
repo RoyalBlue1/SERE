@@ -967,6 +967,7 @@ namespace ImFlow
         ImVec2 m_pos, m_posTarget;
         ImVec2 m_size;
         ImNodeFlow* m_inf = nullptr;
+        ImDrawListSplitter m_splitter;
         std::shared_ptr<NodeStyle> m_style;
         bool m_selected = false, m_selectedNext = false;
         bool m_dragged = false;

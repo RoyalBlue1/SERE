@@ -12,6 +12,7 @@
 #include "Nodes/SplitMergeNodes.h"
 #include "Nodes/MathNodes.h"
 #include "Nodes/GlobalNodes.h"
+#include "Nodes/ConditionalNodes.h"
 
 #include "Thirdparty/rapidjson/istreamwrapper.h"
 #include "ThirdParty/rapidjson/prettywriter.h"
@@ -340,7 +341,9 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	styles.AddNodeStlye(
 		"Global", 
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(57,17,132,255),ImColor(233,241,244,255),6.5f));
-
+	styles.AddNodeStlye(
+		"Conditionals",
+		std::make_shared<ImFlow::NodeStyle>(IM_COL32(173, 74, 17, 255), ImColor(233, 241, 244, 255), 6.5f));
 	
 	auto errorNodeStyle = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
 	errorNodeStyle->bg = IM_COL32(132,23,17,255);

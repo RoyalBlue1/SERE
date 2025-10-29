@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 #include "Util.h"
 #include "ShaderStructs.h"
 namespace fs = std::filesystem;
@@ -60,6 +61,7 @@ public:
 	virtual void ImGuiDeInit() = 0;
 
 	virtual size_t LoadTexture(fs::path& path) = 0;
+	virtual size_t CreateTextureFromData(void* data,uint32_t width,uint32_t height,uint16_t format,uint32_t pitch,uint32_t slicePitch) = 0;
 	virtual size_t CreateShaderDataBuffer(std::vector<ShaderSizeData_t> data) = 0;
 
 	virtual void RuiWriteIndexBuffer(std::vector<uint16_t>& data) = 0;
@@ -79,3 +81,5 @@ public:
 
 };
 
+void CreateRenderFramework(char** argv,int argc);
+extern std::unique_ptr<RenderFramework> g_renderFramework;

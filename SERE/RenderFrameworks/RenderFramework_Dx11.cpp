@@ -608,3 +608,45 @@ void* RenderFramework_Dx11::GetTextureView(size_t id) {
 void* RenderFramework_Dx11::GetRuiView() {
 	return targetResourceView;
 }
+
+
+size_t RenderFramework_Dx11::CreateTextureFromData(void* data,uint32_t width,uint32_t height,uint16_t format,uint32_t pitch,uint32_t slicePitch) {
+
+	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* view;
+	D3D11_TEXTURE2D_DESC texDesc{};
+	texDesc.Width = width;
+	texDesc.Height = height;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = s_PakToDxgiFormat[format];
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA resourceDesc{};
+	resourceDesc.pSysMem = data;
+	resourceDesc.SysMemPitch = pitch;
+	resourceDesc.SysMemSlicePitch = slicePitch;
+
+	if (HRESULT res = g_pd3dDevice->CreateTexture2D(&texDesc, &resourceDesc, &texture); res != S_OK) {
+		printf("CreateTexture2D failed with code 0x%X\n",res);
+		return ~0LL;
+	}
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
+	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	viewDesc.Format = s_PakToDxgiFormat[format];
+	viewDesc.Texture2D.MipLevels = -1;
+	viewDesc.Texture2D.MostDetailedMip = 0;
+
+	if (HRESULT res = g_pd3dDevice->CreateShaderResourceView(texture,&viewDesc,&view); res != S_OK) {
+		printf("CreateShaderResourceView failed with code 0x%X\n",res);
+		return ~0LL;
+	}
+	size_t ret = textures.size();
+	textures.push_back({texture,view});
+	return ret;
+
+}

@@ -79,6 +79,7 @@ public:
     [[nodiscard]] bool hovered() const { return m_hovered; }
     [[nodiscard]] const ImVec2& scroll() const { return m_scroll; }
     ImGuiContext* getRawContext() { return m_ctx; }
+    ImDrawListSplitter& getSplitter() { return m_splitter; }
     void setFontDensity();
 private:
     ContainedContextConfig m_config;
@@ -88,6 +89,7 @@ private:
     ImVec2 m_size;
     ImGuiContext* m_ctx = nullptr;
     ImGuiContext* m_original_ctx = nullptr;
+    ImDrawListSplitter m_splitter;
 
     bool m_anyWindowHovered = false;
     bool m_anyItemActive = false;

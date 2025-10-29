@@ -164,3 +164,129 @@ public:
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
+
+class TangentNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Tangent";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class CosineNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Cosine";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit CosineNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit CosineNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class SquareRootNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Square root";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit SquareRootNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit SquareRootNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class RoundNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Round";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit RoundNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit RoundNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class FloorNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Floor";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit FloorNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit FloorNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class CeilNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Ceil";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit CeilNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit CeilNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class TruncNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Truncate";
+	static inline std::string category = "Math";
+private:
+
+
+public:
+	explicit TruncNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit TruncNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
