@@ -830,301 +830,6 @@ void RenderInstance::sub_F9B80_rev(
 
 
 
-
-void RenderInstance::initBuffers_v30() {
-	D3D11_BUFFER_DESC bufferInit{};
-	bufferInit.ByteWidth = 576;
-	bufferInit.Usage = D3D11_USAGE_DEFAULT;
-	bufferInit.BindFlags = 4;
-	bufferInit.CPUAccessFlags = 0;
-	bufferInit.MiscFlags = 0;
-	bufferInit.StructureByteStride = 0;
-	device->CreateBuffer(&bufferInit, 0i64, &commonPerCameraBuffer);
-	bufferInit.ByteWidth = 208;
-	bufferInit.Usage = D3D11_USAGE_DYNAMIC;
-	bufferInit.BindFlags = 4;
-	bufferInit.CPUAccessFlags = 0x10000;
-	bufferInit.MiscFlags = 0;
-	bufferInit.StructureByteStride = 0;
-	device->CreateBuffer(&bufferInit, 0i64, &modelInstanceBuffer);
-
-
-
-	CBufCommonPerCamera cam{};
-
-	cam.c_cameraRelativeToClip.a.x = 0.0010416672f;
-	cam.c_cameraRelativeToClip.a.w = -1.0f;
-	cam.c_cameraRelativeToClip.b.y = -0.00185185182f;
-	cam.c_cameraRelativeToClip.b.w = 1.0f;
-	cam.c_cameraRelativeToClip.c.z = -0.5f;
-	cam.c_cameraRelativeToClip.c.w = 0.5f;
-	cam.c_cameraRelativeToClip.d.w = 1.0f;
-	cam.c_cameraRelativeToClipPrevFrame.a.x = 1.0f;
-	cam.c_cameraRelativeToClipPrevFrame.b.y = 1.0f;
-	cam.c_cameraRelativeToClipPrevFrame.c.z = 1.0f;
-	cam.c_cameraRelativeToClipPrevFrame.d.w = 1.0f;
-	cam.c_envMapLightScale = 1.0f;
-	cam.c_renderTargetSize.x = 1920.0f;
-	cam.c_renderTargetSize.y = 1080.0f;
-	cam.c_rcpRenderTargetSize.x = 0.000520833360f;
-	cam.c_rcpRenderTargetSize.y = 0.000925925910f;
-	cam.c_numCoverageSamples = 1.0f;
-	cam.c_rcpNumCoverageSamples = 1.0f;
-	cam.c_cloudRelConst.x = 0.5f;
-	cam.c_cloudRelConst.y = 0.5f;
-	cam.c_useRealTimeLighting = 1.0f;
-	cam.c_maxLightingValue = 5.0f;
-	cam.c_viewportMaxZ = 1.0f;
-	cam.c_viewportScale.x = 1.0f;
-	cam.c_viewportScale.y = 1.0f;
-	cam.c_rcpViewportScale.x = 1.0f;
-	cam.c_rcpViewportScale.y = 1.0f;
-	cam.c_framebufferViewportScale.x = 1.0f;
-	cam.c_framebufferViewportScale.y = 1.0f;
-	cam.c_rcpFramebufferViewportScale.x = 1.0f;
-	cam.c_rcpFramebufferViewportScale.y = 1.0f;
-	deviceContext->UpdateSubresource(commonPerCameraBuffer, 0, 0, &cam, sizeof(cam), sizeof(cam));
-	D3D11_MAPPED_SUBRESOURCE map;
-	deviceContext->Map(modelInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
-	ModelInstance* inst = (ModelInstance*)map.pData;
-	memset(inst, 0, sizeof(ModelInstance));
-	inst->objectToCameraRelative.a.x = 1.0f;
-	inst->objectToCameraRelative.b.y = 1.0f;
-	inst->objectToCameraRelative.c.z = 1.0f;
-	inst->objectToCameraRelativePrevFrame.a.x = 1.0f;
-	inst->objectToCameraRelativePrevFrame.b.y = 1.0f;
-	inst->objectToCameraRelativePrevFrame.c.z = 1.0f;
-	inst->diffuseModulation.x = 0.999999940f;
-	inst->diffuseModulation.y = 0.999999940f;
-	inst->diffuseModulation.z = 0.999999940f;
-	inst->diffuseModulation.w = 1.0f;
-	deviceContext->Unmap(modelInstanceBuffer, 0);
-
-
-	bufferInit.ByteWidth = sizeof(uint16_t) * 0x6000;
-	bufferInit.Usage = D3D11_USAGE_DYNAMIC;
-	bufferInit.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bufferInit.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferInit.MiscFlags = 0;
-	bufferInit.StructureByteStride = 0;
-	device->CreateBuffer(&bufferInit, 0, &indexBuffer);
-	bufferInit.ByteWidth = sizeof(Vertex_t) * 0x4000;
-	bufferInit.Usage = D3D11_USAGE_DYNAMIC;
-	bufferInit.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferInit.MiscFlags = 0;
-	bufferInit.StructureByteStride = 0;
-	device->CreateBuffer(&bufferInit, 0, &vertexBuffer);
-	bufferInit.ByteWidth = sizeof(StyleDescriptorShader_t) * 0x200;
-	bufferInit.Usage = D3D11_USAGE_DYNAMIC;
-	bufferInit.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	bufferInit.MiscFlags = 0x40;
-	bufferInit.StructureByteStride = sizeof(StyleDescriptorShader_t);
-	device->CreateBuffer(&bufferInit, 0, &styleDescBuffer);
-	D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewInit{};
-	resourceViewInit.Format = DXGI_FORMAT_UNKNOWN;
-	resourceViewInit.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
-	resourceViewInit.Buffer.FirstElement = 0;
-	resourceViewInit.Buffer.NumElements = 0x200;
-	device->CreateShaderResourceView(styleDescBuffer, &resourceViewInit, &styleDescriptorResourceView);
-	D3D11_SAMPLER_DESC samplerInit{};
-	samplerInit.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-	samplerInit.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerInit.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerInit.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerInit.MipLODBias = 0.0f;
-	samplerInit.MaxAnisotropy = 0;
-	samplerInit.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerInit.BorderColor[0] = 0.0f;
-	samplerInit.BorderColor[1] = 0.0f;
-	samplerInit.BorderColor[2] = 0.0f;
-	samplerInit.BorderColor[3] = 0.0f;
-	samplerInit.MinLOD = 0.0f;
-	samplerInit.MaxLOD = 3.40282347e+38f;
-	device->CreateSamplerState(&samplerInit, &samplerState);
-
-	D3D11_BLEND_DESC blendDesc;
-	memset(&blendDesc,0,sizeof(blendDesc));
-	blendDesc.AlphaToCoverageEnable = false;
-	blendDesc.IndependentBlendEnable = false;
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_ALPHA;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	device->CreateBlendState(&blendDesc,&blendState);
-
-
-	std::vector<char> vertexByteCode;
-
-	std::ifstream vertexFile{"./Assets/Shader//ui_vs.fxc",std::ios::binary};
-	vertexFile.seekg(0,std::ios::end);
-	vertexByteCode.resize(vertexFile.tellg());
-	vertexFile.seekg(0);
-	vertexFile.read(vertexByteCode.data(),vertexByteCode.size());
-	vertexFile.close();
-
-
-
-	HRESULT res = device->CreateVertexShader(vertexByteCode.data(), vertexByteCode.size(), 0, &vertexShader);
-	if (res) {
-		printf("Errror creating Vertex Shader\n");
-		return;
-	}
-	ID3DBlob *inputSignatureBlob;
-	D3DGetBlobPart(vertexByteCode.data(), vertexByteCode.size(), D3D_BLOB_INPUT_SIGNATURE_BLOB, 0, &inputSignatureBlob);
-
-	D3D11_INPUT_ELEMENT_DESC elementDescriptors[4];
-	memset(elementDescriptors,0,sizeof(elementDescriptors));
-
-	elementDescriptors[0].SemanticName = "POSITION";
-	elementDescriptors[0].SemanticIndex = 0;
-	elementDescriptors[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	elementDescriptors[0].InputSlot = 0;
-	elementDescriptors[0].AlignedByteOffset = 0;
-	elementDescriptors[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	elementDescriptors[0].InstanceDataStepRate = 0;
-
-	elementDescriptors[1].SemanticName = "TEXCOORD";
-	elementDescriptors[1].SemanticIndex = 1;
-	elementDescriptors[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	elementDescriptors[1].InputSlot = 0;
-	elementDescriptors[1].AlignedByteOffset = 0x18;
-	elementDescriptors[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	elementDescriptors[1].InstanceDataStepRate = 0;
-
-	elementDescriptors[2].SemanticName = "TEXCOORD";
-	elementDescriptors[2].SemanticIndex = 2;
-	elementDescriptors[2].Format = DXGI_FORMAT_R32G32_FLOAT;
-	elementDescriptors[2].InputSlot = 0;
-	elementDescriptors[2].AlignedByteOffset = 0x28;
-	elementDescriptors[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	elementDescriptors[2].InstanceDataStepRate = 0;
-
-	elementDescriptors[3].SemanticName = "TEXCOORD";
-	elementDescriptors[3].SemanticIndex = 3;
-	elementDescriptors[3].Format = DXGI_FORMAT_R16G16B16A16_SINT;
-	elementDescriptors[3].InputSlot = 0;
-	elementDescriptors[3].AlignedByteOffset = 0x30;
-	elementDescriptors[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	elementDescriptors[3].InstanceDataStepRate = 0;
-
-
-	device->CreateInputLayout( elementDescriptors, 4, inputSignatureBlob->GetBufferPointer(), inputSignatureBlob->GetBufferSize(), &shaderLayout);
-
-	//pixel shader
-
-	std::vector<char> pixelByteCode;
-	std::ifstream pixelFile{"./Assets/Shader/ui_ps.fxc",std::ios::binary};
-	pixelFile.seekg(0,std::ios::end);
-	pixelByteCode.resize(pixelFile.tellg());
-	pixelFile.seekg(0);
-	pixelFile.read(pixelByteCode.data(),pixelByteCode.size());
-	pixelFile.close();
-
-	res = device->CreatePixelShader(pixelByteCode.data(), pixelByteCode.size(),0,&pixelShader);
-	if (res) {
-		printf("Error creating Pixel shader\n");
-		return;
-	}
-
-	D3D11_TEXTURE2D_DESC texture_desc = {};
-	texture_desc.Width = 1920;
-	texture_desc.Height = 1080;
-	texture_desc.MipLevels = 1;
-	texture_desc.ArraySize = 1;
-	texture_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	texture_desc.SampleDesc.Count = 1;
-	texture_desc.SampleDesc.Quality = 0;
-	texture_desc.Usage = D3D11_USAGE_DEFAULT;
-	texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	texture_desc.CPUAccessFlags = 0;
-	texture_desc.MiscFlags = 0;
-
-	device->CreateTexture2D(&texture_desc, 0, &targetTexture);
-	
-	D3D11_RENDER_TARGET_VIEW_DESC target_view_desc = {};
-	target_view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	target_view_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	target_view_desc.Texture2D.MipSlice = 0;
-
-	device->CreateRenderTargetView(targetTexture, &target_view_desc, &targetView);
-
-	// Depth stencil
-	D3D11_TEXTURE2D_DESC depth_texture_desc = {};
-	depth_texture_desc.Width = 1920;
-	depth_texture_desc.Height = 1080;
-	depth_texture_desc.MipLevels = 1;
-	depth_texture_desc.ArraySize = 1;
-	depth_texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depth_texture_desc.SampleDesc.Count = 1;
-	depth_texture_desc.SampleDesc.Quality = 0;
-	depth_texture_desc.Usage = D3D11_USAGE_DEFAULT;
-	depth_texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
-
-	device->CreateTexture2D(&depth_texture_desc, nullptr, &depthTexture);
-	device->CreateDepthStencilView(depthTexture, nullptr, &depthStencil);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
-	view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	view_desc.Texture2D.MostDetailedMip = 0;
-	view_desc.Texture2D.MipLevels = 1;
-
-	device->CreateShaderResourceView(targetTexture, &view_desc, &targetResourceView);
-
-	D3D11_RASTERIZER_DESC rasterDesc;
-	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	rasterDesc.DepthBias = 0;
-	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = false;
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.MultisampleEnable = false;
-	rasterDesc.ScissorEnable = false;
-	rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-	// Create the rasterizer state from the description we just filled out.
-	device->CreateRasterizerState(&rasterDesc, &rasterState);
-
-	viewport.Width = (float)1920;
-	viewport.Height = (float)1080;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-
-	depthStencilDesc.StencilEnable = true;
-	depthStencilDesc.StencilReadMask = 0xff;
-	depthStencilDesc.StencilWriteMask = 0xff;
-
-	// stencil operations if pixel is front-facing.
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	// stencil operations if pixel is back-facing.
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
-
-
-}
-
 void RenderInstance::StartFrame(float time) {
 	segments.clear();
 	verts.clear();
@@ -1156,74 +861,40 @@ void RenderInstance::StartFrame(float time) {
 	__m128 inputSize = _mm_mul_ps(v19, _mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 0, 0)));
 	transformResults.push_back(TransformResult(directionVector,position,inputSize,transformHashes[2]));
 	styleDescriptor.clear();
+	g_renderFramework->RuiClearFrame();
 }
 
 
 
 void RenderInstance::EndFrame() {
-	float color[] = {.1f,.1f,.1f,1.f};
-	deviceContext->ClearRenderTargetView(targetView,color);
-	deviceContext->ClearDepthStencilView(depthStencil,D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	deviceContext->OMSetDepthStencilState(depthStencilState, 1);
-	deviceContext->RSSetState(rasterState);
-	deviceContext->RSSetViewports(1,&viewport);
-	if(indices.size()==0)return;
-	deviceContext->OMSetRenderTargets(1,&targetView,depthStencil);
-	deviceContext->OMSetBlendState(blendState,NULL,0xFFFFFFFF);
 
-	deviceContext->VSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
-	deviceContext->PSSetConstantBuffers(2i64, 1i64, &commonPerCameraBuffer);
+	g_renderFramework->RuiBindPipeline();
 
-	deviceContext->VSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
-	deviceContext->PSSetConstantBuffers(3i64, 1i64, &modelInstanceBuffer);
-
-
-	D3D11_MAPPED_SUBRESOURCE map;
-	deviceContext->Map(vertexBuffer,0,D3D11_MAP_WRITE_DISCARD,0,&map);
-	memcpy(map.pData,verts.data(),verts.size()*sizeof(Vertex_t));
-	deviceContext->Unmap(vertexBuffer,0);
-
-	//deviceContext->UpdateSubresource(indexBuffer,0,0,indices.data(),sizeof(uint16_t),sizeof(uint16_t)*indices.size());
-	deviceContext->Map(indexBuffer,0,D3D11_MAP_WRITE_DISCARD,0,&map);
-	memcpy(map.pData,indices.data(),indices.size()*sizeof(uint16_t));
-	deviceContext->Unmap(indexBuffer,0);
+	g_renderFramework->RuiWriteIndexBuffer(indices);
+	g_renderFramework->RuiWriteStyleBuffer(styleDescriptor);
+	g_renderFramework->RuiWriteVertexBuffer(verts);
 	
-	//deviceContext->UpdateSubresource(styleDescBuffer,0,0,styleDescriptor.data(),sizeof(StyleDescriptorShader_t),sizeof(StyleDescriptorShader_t)*styleDescriptor.size());
-	deviceContext->Map(styleDescBuffer,0,D3D11_MAP_WRITE_DISCARD,0,&map);
-	memcpy(map.pData,styleDescriptor.data(),styleDescriptor.size()*sizeof(StyleDescriptorShader_t));
-	deviceContext->Unmap(styleDescBuffer,0);
-	
-	deviceContext->IASetInputLayout(shaderLayout);
-	deviceContext->VSSetShader(vertexShader,0,0);
-	deviceContext->PSSetShader(pixelShader,0,0);
-	deviceContext->PSSetSamplers(0,1,&samplerState);
-	deviceContext->IASetIndexBuffer(indexBuffer,DXGI_FORMAT_R16_UINT,0);
-	UINT strides = 56;
-	UINT offsets = 0;
-	deviceContext->IASetVertexBuffers(0,1,&vertexBuffer,&strides,&offsets);
-	deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	for (size_t i = 0; i < segments.size(); i++) {
 		uint32_t endIndex;
 		if ((i + 1) == segments.size()) {
+
 			endIndex = indices.size();
 		}
 		else {
 			endIndex = segments[i+1].indexStart;
 		}
-		ID3D11ShaderResourceView* resources[5];
-		memset(resources,0,sizeof(resources));
+		size_t resources[5];
+		memset(resources,0xFF,sizeof(resources));
 		if (segments[i].fontAtlas) {
-			resources[0] = segments[i].fontAtlas->imageResourceView;
-			resources[2] = segments[i].fontAtlas->boundsResourceView;
+			resources[0] = segments[i].fontAtlas->textureId;
+			resources[2] = segments[i].fontAtlas->shaderDataId;
 		}
 		if (segments[i].imageAtlas) {
-			resources[1] = segments[i].imageAtlas->imageResourceView;
-			resources[3] = segments[i].imageAtlas->boundsResourceView;
+			resources[1] = segments[i].imageAtlas->textureId;
+			resources[3] = segments[i].imageAtlas->shaderDataId;
 		}
-		resources[4] = styleDescriptorResourceView;
-		deviceContext->PSSetShaderResources(0,5,resources);
-		deviceContext->DrawIndexed(endIndex - segments[i].indexStart,segments[i].indexStart,0);
+		g_renderFramework->DrawIndexed(endIndex-segments[i].indexStart,segments[i].indexStart,resources);
 	}
 
 

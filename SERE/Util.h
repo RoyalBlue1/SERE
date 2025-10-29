@@ -26,7 +26,6 @@ struct Color {
 	Color():red(1.f),green(1.f),blue(1.f),alpha(1.f){}
 };
 
-
 inline __m128 NRReciprocal(__m128 x) {
 	__m128 a = _mm_rcp_ps(x);
 	__m128 b = _mm_sub_ps(_mm_set1_ps(1.f),_mm_mul_ps(a,x));

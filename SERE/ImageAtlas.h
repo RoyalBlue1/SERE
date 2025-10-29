@@ -4,9 +4,8 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <d3d11_1.h>
+#include "RenderFrameworks/RenderFramework.h"
 #include <filesystem>
-
 
 #define INVALID_ASSET 0xFFFFFFFF
 
@@ -30,12 +29,6 @@ struct uiImageAtlasUnk
 	__m128 m128_10;
 };
 
-struct ShaderData_t {
-	float minX;
-	float minY;
-	float sizeX;
-	float sizeY;
-};
 
 struct Asset_t {
 	std::string name;
@@ -76,28 +69,27 @@ struct UIImageAtlasAssetHeader_v10_t
 
 struct ImageAtlas {
 
-	ImageAtlas(fs::path& jsonName, uint32_t atlasIndex, ID3D11Device* device);
-	ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr,ShaderData_t* sharderData, uint32_t atlasIndex, ID3D11Device* device,ID3D11Texture2D* texture,ID3D11ShaderResourceView* textureView);
+	ImageAtlas(fs::path& jsonName, uint32_t atlasIndex);
+	ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr,ShaderSizeData_t* sharderData, uint32_t atlasIndex, size_t textureID);
 	std::string name;
 	std::vector<textureOffset> offsets;
 	std::vector<ImageAtlasTextureDimention> dimentions;
 	std::vector<uiImageAtlasUnk> renderOffsets;
 	std::vector<uint32_t> hashes;
 	std::vector<std::string> names;
-	ID3D11Resource* imageResource;
-	ID3D11ShaderResourceView* imageResourceView;
-	ID3D11Buffer *boundsBuffer;
-	ID3D11ShaderResourceView *boundsResourceView;
-	std::vector<ShaderData_t> shaderData;
+	size_t textureId;
+	size_t shaderDataId;
+	std::vector<ShaderSizeData_t> shaderData;
 
-	void CreateShaderDataBuffers(ID3D11Device* device);
-
+	void* GetImageView() const {
+		return g_renderFramework->GetTextureView(textureId);
+	};
 };
 
 
 uint32_t loadAsset(const char* a2);
-void loadImageAtlases(ID3D11Device* d11Device);
-void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderData_t* shaderData, ID3D11Device* device, ID3D11Texture2D* texture,ID3D11ShaderResourceView* textureView);
+void loadImageAtlases();
+void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* shaderData, size_t textureId);
 
 void clearImageAtlases();
 

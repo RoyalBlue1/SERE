@@ -43,7 +43,7 @@ struct PakFileLoadState_t
     int pageEnd;
 };
 
-const bool CPakFile::ParseFileBuffer(const std::filesystem::path& path,ID3D11Device* device)
+const bool CPakFile::ParseFileBuffer(const std::filesystem::path& path)
 {
     if (!ParseFromFile(path, this->m_Buf))
         return false;
@@ -55,7 +55,7 @@ const bool CPakFile::ParseFileBuffer(const std::filesystem::path& path,ID3D11Dev
 
 
 
-    return this->LoadAndPatchPakFileData<PakHdr_v7_t, PakAsset_v6_t>(device);
+    return this->LoadAndPatchPakFileData<PakHdr_v7_t, PakAsset_v6_t>();
 
 }
 
@@ -84,7 +84,7 @@ const bool CPakFile::ParsePakFileHeader(const char* buf, const short version)
 
 
 template<class PakHdr, class PakAsset>
-const bool CPakFile::LoadAndPatchPakFileData(ID3D11Device* device)
+const bool CPakFile::LoadAndPatchPakFileData()
 {
     if (g_assetData.m_pakLoadStatusMap.count(header()->crc) != 0)
     {
@@ -263,7 +263,7 @@ const bool CPakFile::LoadAndPatchPakFileData(ID3D11Device* device)
         }
     }
 
-    ProcessAssets(device);
+    ProcessAssets();
     return true;
 }
 
@@ -694,52 +694,46 @@ static std::unordered_map<AssetType_t, std::string> s_ParsedPrefixes(63);
 
 #include "PakLoading/texture.h"
 
-void CPakFile::ProcessAssets(ID3D11Device* device)
+void CPakFile::ProcessAssets()
 {
 
     for (int i = 0; i < assetCount(); i++) {
         if (m_pAssetsInternal[i].type == (uint32_t)AssetType_t::UIMG) {
             CPakAsset asset{this,&m_pAssetsInternal[i],""};
             UIImageAtlasAssetHeader_v10_t* hdr = (UIImageAtlasAssetHeader_v10_t*)asset.header();
-            ID3D11Texture2D* texture = nullptr;
-            ID3D11ShaderResourceView* view = nullptr;
+            size_t textureId = ~0LL;
             for (int j = 0; j < assetCount(); j++) {
                 if (m_pAssetsInternal[j].guid == hdr->atlasGUID) {
                     CPakAsset asset{ this, &m_pAssetsInternal[j], "" };
-                    LoadTextureAsset(asset, device, &texture, &view);
+                    textureId = LoadTextureAsset(asset);
                 }
             }
-            if(texture==nullptr || view == nullptr)
+            if(textureId==~0LL)
                 continue;
-            loadImageAtlasFromRpak(hdr,(ShaderData_t*)asset.cpu(),device,texture,view);
+            loadImageAtlasFromRpak(hdr,(ShaderSizeData_t*)asset.cpu(),textureId);
         }
         else if (m_pAssetsInternal[i].type == (uint32_t)AssetType_t::FONT) {
             CPakAsset asset{this,&m_pAssetsInternal[i],""};
             UIFontAtlasAssetHeader_v6_t* hdr = (UIFontAtlasAssetHeader_v6_t*)asset.header();
-            ID3D11Texture2D* texture = nullptr;
-            ID3D11ShaderResourceView* view = nullptr;
+            size_t textureId = ~0LL;
             for (int j = 0; j < assetCount(); j++) {
                 if (m_pAssetsInternal[j].guid == hdr->atlasGUID) {
                     CPakAsset asset{ this, &m_pAssetsInternal[j], "" };
-                    LoadTextureAsset(asset, device, &texture, &view);
+
+                    textureId = LoadTextureAsset(asset);
                 }
             }
-            if(texture==nullptr || view == nullptr)
+            if(textureId==~0LL)
                 continue;
-            loadRpakFont(hdr,device,texture,view);
+            loadRpakFont(hdr,textureId);
         }
     }
-    
-
-
-
-
     
 
 }
 
 
-void LoadRpak(const std::filesystem::path& path,ID3D11Device* device) {
+void LoadRpak(const std::filesystem::path& path) {
     CPakFile file;
-    file.ParseFileBuffer(path,device);
+    file.ParseFileBuffer(path);
 }

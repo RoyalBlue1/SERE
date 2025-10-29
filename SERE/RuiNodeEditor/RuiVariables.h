@@ -10,7 +10,6 @@
 
 
 
-
 enum class VariableType : uint8_t {
 	NONE = 0x0,
 	STRING = 0x1,

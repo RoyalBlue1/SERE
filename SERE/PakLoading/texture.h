@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d11.h>
+
 #include "PakLoading/cpakfile.h"
 #include "PakLoading/utils.h"
 
@@ -87,89 +87,6 @@ static const std::pair<uint8_t, uint8_t> s_pBytesPerPixel[] =
     { U8(0u), U8(0u) },
 };
 
-static const DXGI_FORMAT s_PakToDxgiFormat[] =
-{
-    DXGI_FORMAT_BC1_UNORM,
-    DXGI_FORMAT_BC1_UNORM_SRGB,
-    DXGI_FORMAT_BC2_UNORM,
-    DXGI_FORMAT_BC2_UNORM_SRGB,
-    DXGI_FORMAT_BC3_UNORM,
-    DXGI_FORMAT_BC3_UNORM_SRGB,
-    DXGI_FORMAT_BC4_UNORM,
-    DXGI_FORMAT_BC4_SNORM,
-    DXGI_FORMAT_BC5_UNORM,
-    DXGI_FORMAT_BC5_SNORM,
-    DXGI_FORMAT_BC6H_UF16,
-    DXGI_FORMAT_BC6H_SF16,
-    DXGI_FORMAT_BC7_UNORM,
-    DXGI_FORMAT_BC7_UNORM_SRGB,
-    DXGI_FORMAT_R32G32B32A32_FLOAT,
-    DXGI_FORMAT_R32G32B32A32_UINT,
-    DXGI_FORMAT_R32G32B32A32_SINT,
-    DXGI_FORMAT_R32G32B32_FLOAT,
-    DXGI_FORMAT_R32G32B32_UINT,
-    DXGI_FORMAT_R32G32B32_SINT,
-    DXGI_FORMAT_R16G16B16A16_FLOAT,
-    DXGI_FORMAT_R16G16B16A16_UNORM,
-    DXGI_FORMAT_R16G16B16A16_UINT,
-    DXGI_FORMAT_R16G16B16A16_SNORM,
-    DXGI_FORMAT_R16G16B16A16_SINT,
-    DXGI_FORMAT_R32G32_FLOAT,
-    DXGI_FORMAT_R32G32_UINT,
-    DXGI_FORMAT_R32G32_SINT,
-    DXGI_FORMAT_R10G10B10A2_UNORM,
-    DXGI_FORMAT_R10G10B10A2_UINT,
-    DXGI_FORMAT_R11G11B10_FLOAT,
-    DXGI_FORMAT_R8G8B8A8_UNORM,
-    DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-    DXGI_FORMAT_R8G8B8A8_UINT,
-    DXGI_FORMAT_R8G8B8A8_SNORM,
-    DXGI_FORMAT_R8G8B8A8_SINT,
-    DXGI_FORMAT_R16G16_FLOAT,
-    DXGI_FORMAT_R16G16_UNORM,
-    DXGI_FORMAT_R16G16_UINT,
-    DXGI_FORMAT_R16G16_SNORM,
-    DXGI_FORMAT_R16G16_SINT,
-    DXGI_FORMAT_R32_FLOAT,
-    DXGI_FORMAT_R32_UINT,
-    DXGI_FORMAT_R32_SINT,
-    DXGI_FORMAT_R8G8_UNORM,
-    DXGI_FORMAT_R8G8_UINT,
-    DXGI_FORMAT_R8G8_SNORM,
-    DXGI_FORMAT_R8G8_SINT,
-    DXGI_FORMAT_R16_FLOAT,
-    DXGI_FORMAT_R16_UNORM,
-    DXGI_FORMAT_R16_UINT,
-    DXGI_FORMAT_R16_SNORM,
-    DXGI_FORMAT_R16_SINT,
-    DXGI_FORMAT_R8_UNORM,
-    DXGI_FORMAT_R8_UINT,
-    DXGI_FORMAT_R8_SNORM,
-    DXGI_FORMAT_R8_SINT,
-    DXGI_FORMAT_A8_UNORM,
-    DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
-    DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
-    DXGI_FORMAT_D32_FLOAT,
-    DXGI_FORMAT_D16_UNORM,
-};
-
-inline const bool IsSRGB(DXGI_FORMAT format)
-{
-    switch (format)
-    {
-    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
-    case DXGI_FORMAT_BC1_UNORM_SRGB:
-    case DXGI_FORMAT_BC2_UNORM_SRGB:
-    case DXGI_FORMAT_BC3_UNORM_SRGB:
-    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
-    case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
-    case DXGI_FORMAT_BC7_UNORM_SRGB:
-        return true;
-
-    default:
-        return false;
-    }
-}
 
 enum eTextureType : uint8_t
 {
@@ -502,7 +419,7 @@ enum eTextureExportSetting
 
 //bool ExportPngTextureAsset(CPakAsset* const asset, const TextureAsset* const txtrAsset, std::filesystem::path& exportPath, const int setting, const bool isNormal);
 //bool ExportDdsTextureAsset(CPakAsset* const asset, const TextureAsset* const txtrAsset, std::filesystem::path& exportPath, const int setting, const bool isNormal);
-std::unique_ptr<char[]> GetTextureDataForMip(CPakAsset& asset, const TextureMip_t* const mip, const DXGI_FORMAT format, const size_t arrayIndex = 0);
-void LoadTextureAsset(CPakAsset& pakAsset,ID3D11Device* device,ID3D11Texture2D** texture, ID3D11ShaderResourceView** view);
-void CreateTextureFromMip(CPakAsset& asset, const TextureMip_t* const mip, const DXGI_FORMAT format, const size_t arrayIdx,ID3D11Device* device,ID3D11Texture2D** texture,ID3D11ShaderResourceView** view);
+std::unique_ptr<char[]> GetTextureDataForMip(CPakAsset& asset, const TextureMip_t* const mip, const size_t arrayIndex = 0);
+size_t LoadTextureAsset(CPakAsset& pakAsset);
+size_t CreateTextureFromMip(CPakAsset& asset, const TextureMip_t* const mip,const uint16_t format, const size_t arrayIdx);
 

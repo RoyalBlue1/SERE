@@ -1,6 +1,6 @@
 
 #include "PakLoading/texture.h"
-
+#include "RenderFrameworks/RenderFramework.h"
 
 
 
@@ -18,7 +18,7 @@ inline std::string FormatTextureAssetName(const char* const str)
 
 
 #undef max
-void LoadTextureAsset(CPakAsset& pakAsset,ID3D11Device* device,ID3D11Texture2D** texture, ID3D11ShaderResourceView** view)
+size_t LoadTextureAsset(CPakAsset& pakAsset)
 {
 
 
@@ -47,7 +47,7 @@ void LoadTextureAsset(CPakAsset& pakAsset,ID3D11Device* device,ID3D11Texture2D**
     default:
     {
         //assertm(false, "unaccounted asset version, will cause major issues!");
-        return;
+        return ~0LL;
     }
     }
 
@@ -222,54 +222,26 @@ void LoadTextureAsset(CPakAsset& pakAsset,ID3D11Device* device,ID3D11Texture2D**
 
     std::sort(txtrAsset->mipArray.begin(), txtrAsset->mipArray.end(), [](const TextureMip_t& a, const TextureMip_t& b) { return a.level < b.level; });
 
-    CreateTextureFromMip(pakAsset,&txtrAsset->mipArray[0],s_PakToDxgiFormat[txtrAsset->imgFormat],0,device,texture,view);
+    return CreateTextureFromMip(pakAsset,&txtrAsset->mipArray[0],txtrAsset->imgFormat,0);
 }
 
 
-void CreateTextureFromMip(CPakAsset& asset, const TextureMip_t* const mip, const DXGI_FORMAT format, const size_t arrayIdx,ID3D11Device* device,ID3D11Texture2D** texture,ID3D11ShaderResourceView** view)
+size_t CreateTextureFromMip(CPakAsset& asset, const TextureMip_t* const mip, const uint16_t format, const size_t arrayIdx)
 {
     // Texture isn't multiple of 4, most textures are BC which requires the width n height to be multiple of 4 causing a crash.
     if (mip->width < 3 || mip->height < 3)
-        return;
+        return ~0LL;
 
     if (!mip->isLoaded)
-        return;
+        return ~0LL;
 
-    std::unique_ptr<char[]> txtrData = GetTextureDataForMip(asset, mip, format, arrayIdx);
-    D3D11_TEXTURE2D_DESC texDesc{};
-    texDesc.Width = mip->width;
-    texDesc.Height = mip->height;
-    texDesc.MipLevels = 1;
-    texDesc.ArraySize = 1;
-    texDesc.Format = format;
-    texDesc.SampleDesc.Count = 1;
-    texDesc.SampleDesc.Quality = 0;
-    texDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    texDesc.CPUAccessFlags = 0;
-    texDesc.MiscFlags = 0;
-    D3D11_SUBRESOURCE_DATA resourceDesc{};
-    resourceDesc.pSysMem = txtrData.get();
-    resourceDesc.SysMemPitch = mip->pitch;
-    resourceDesc.SysMemSlicePitch = mip->slicePitch;
-
-    if (HRESULT res = device->CreateTexture2D(&texDesc, &resourceDesc, texture); res != S_OK) {
-        printf("CreateTexture2D failed with code 0x%X\n",res);
-    }
-    D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
-    viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    viewDesc.Format = format;
-    viewDesc.Texture2D.MipLevels = -1;
-    viewDesc.Texture2D.MostDetailedMip = 0;
+    std::unique_ptr<char[]> txtrData = GetTextureDataForMip(asset, mip, arrayIdx);
     
-    if (HRESULT res = device->CreateShaderResourceView(*texture,&viewDesc,view); res != S_OK) {
-        printf("CreateShaderResourceView failed with code 0x%X\n",res);
-    }
-    return;//TODO std::move(g_dxHandler->CreateRenderTexture(txtrData.get(), mip->slicePitch, mip->width, mip->height, format, 1u, 1u));
+    return g_renderFramework->CreateTextureFromData(txtrData.get(),mip->width,mip->height,format,mip->pitch,mip->slicePitch);
 };
 
 
-std::unique_ptr<char[]> GetTextureDataForMip(CPakAsset& asset, const TextureMip_t* const mip, const DXGI_FORMAT format, const size_t arrayIndex)
+std::unique_ptr<char[]> GetTextureDataForMip(CPakAsset& asset, const TextureMip_t* const mip, const size_t arrayIndex)
 {
     // [rika]: I swapped back to size (from slicePitch) because it's the size of the mip on disk, and we just create a new buffer anyways if it's compressed. saves some allocation of bytes.
     std::unique_ptr<char[]> txtrData;

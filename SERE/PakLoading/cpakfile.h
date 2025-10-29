@@ -4,7 +4,6 @@
 
 #include "PakLoading/utils.h"
 #include "PakLoading/asset.h"
-#include <d3d11.h>
 #include <fstream>
 // maximum number of asset types that can be registered at a time
 #define PAK_MAX_ASSET_TYPES 64
@@ -653,7 +652,7 @@ public:
 
     const CAsset::ContainerType GetContainerType() const { return CAsset::ContainerType::PAK; };
 
-    const bool ParseFileBuffer(const std::filesystem::path& path, ID3D11Device* device);
+    const bool ParseFileBuffer(const std::filesystem::path& path);
     static const bool DecompressFileBuffer(const char* fileBuffer, std::shared_ptr<char[]>* outBuffer);
 
 
@@ -805,7 +804,7 @@ private:
 
 
     template<class PakAsset> const bool LoadAndPatchAssetData();
-    template<class PakHdr, class PakAsset> const bool LoadAndPatchPakFileData(ID3D11Device* device);
+    template<class PakHdr, class PakAsset> const bool LoadAndPatchPakFileData();
 
     void CalculateLoadedAssetTypeInfo();
     template<class PakAsset> void SortAssetsByHeaderPointer();
@@ -823,7 +822,7 @@ private:
     }
 
 
-    void ProcessAssets(ID3D11Device* device);
+    void ProcessAssets();
 
 public:
     inline PakHdr_t* header() const { return m_pHeader; };
@@ -1238,4 +1237,4 @@ private:
 // used for type init funcs
 typedef void(*PakTypeInitFunc_t)(void);
 
-void LoadRpak(const std::filesystem::path& path,ID3D11Device* device);
+void LoadRpak(const std::filesystem::path& path);

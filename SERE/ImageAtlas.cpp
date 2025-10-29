@@ -18,7 +18,7 @@ std::map<uint32_t, Asset_t> imageAssetMap{};
 std::vector<ImageAtlas> imageAtlases{};
 std::mutex atlasMutex{};
 
-void loadImageAtlases(ID3D11Device* d11Device) {
+void loadImageAtlases() {
 	fs::path folderPath = ".\\Assets\\Atlases";
 
 	for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
@@ -28,16 +28,16 @@ void loadImageAtlases(ID3D11Device* d11Device) {
 
 		atlasMutex.lock();
 		int atlasIndex = imageAtlases.size();
-		imageAtlases.emplace_back(jsonName,atlasIndex,d11Device);
+		imageAtlases.emplace_back(jsonName,atlasIndex);
 		atlasMutex.unlock();
 	}
 
 }
 
-void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderData_t* shaderData, ID3D11Device* device, ID3D11Texture2D* texture, ID3D11ShaderResourceView* textureView) {
+void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* shaderData, size_t textureId) {
 	atlasMutex.lock();
 	int atlasIndex = imageAtlases.size();
-	imageAtlases.emplace_back(hdr,shaderData,atlasIndex,device,texture,textureView);
+	imageAtlases.emplace_back(hdr,shaderData,atlasIndex,textureId);
 	atlasMutex.unlock();
 }
 
@@ -112,11 +112,9 @@ uint32_t loadAsset(const char* a2)
 
 
 
-ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex, ID3D11Device* d11device):
-	imageResource(nullptr),
-	imageResourceView(nullptr),
-	boundsBuffer(nullptr),
-	boundsResourceView(nullptr)
+ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex):
+	shaderDataId(~0LL),
+	textureId(~0LL)
 {
 
 
@@ -242,7 +240,7 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex, ID3D11Device* d1
 		if (!(shaderDat.HasMember("maxX") && shaderDat["maxX"].IsNumber()))continue;
 		if (!(shaderDat.HasMember("maxY") && shaderDat["maxY"].IsNumber()))continue;
 
-		ShaderData_t shdDat;
+		ShaderSizeData_t shdDat;
 		shdDat.minX = shaderDat["minX"].GetFloat();
 		shdDat.minY = shaderDat["minY"].GetFloat();
 		shdDat.sizeX = shaderDat["maxX"].GetFloat();
@@ -252,17 +250,15 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, uint32_t atlasIndex, ID3D11Device* d1
 
 	fs::path ddsName = jsonName.replace_extension("dds");
 
-	DirectX::CreateDDSTextureFromFile(d11device, ddsName.wstring().c_str(), &imageResource, &imageResourceView);
-
-	CreateShaderDataBuffers(d11device);
+	textureId = g_renderFramework->LoadTexture(ddsName);
+	shaderDataId = g_renderFramework->CreateShaderDataBuffer(shaderData);;
 
 }
 
-ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderData_t* rawSharderData, uint32_t atlasIndex, ID3D11Device* device, ID3D11Texture2D* texture, ID3D11ShaderResourceView* textureView):
-	imageResource(texture),
-	imageResourceView(textureView),
-	boundsBuffer(nullptr),
-	boundsResourceView(nullptr)
+ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t* rawSharderData, uint32_t atlasIndex,size_t textureID):
+	textureId(textureID),
+	shaderDataId(0)
+
 {
 
 	offsets.resize(hdr->textureCount);
@@ -270,7 +266,7 @@ ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderData_t* rawShar
 	dimentions.resize(hdr->textureCount);
 	memcpy(dimentions.data(),hdr->textureDimensions,sizeof(ImageAtlasTextureDimention)*hdr->textureCount);
 	shaderData.resize(hdr->textureCount);
-	memcpy(shaderData.data(),rawSharderData,sizeof(ShaderData_t)*hdr->textureCount);
+	memcpy(shaderData.data(),rawSharderData,sizeof(ShaderSizeData_t)*hdr->textureCount);
 
 	renderOffsets.resize(hdr->renderOffsetCount);
 	memcpy(renderOffsets.data(),hdr->renderOffsets,sizeof(textureOffset)*hdr->renderOffsetCount);
@@ -284,42 +280,11 @@ ImageAtlas::ImageAtlas(UIImageAtlasAssetHeader_v10_t* hdr, ShaderData_t* rawShar
 		imageAssetMap.insert({ img.hash, {name,atlasIndex,hashes.size(),img.flags} });
 		hashes.push_back(img.hash);
 	}
-	CreateShaderDataBuffers(device);
+	shaderDataId = g_renderFramework->CreateShaderDataBuffer(shaderData);
 
 }
 
-void ImageAtlas::CreateShaderDataBuffers(ID3D11Device* device) {
-	if (shaderData.size()) {
-		D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
-		D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
-		D3D11_BUFFER_DESC boundsBufferDesc;
 
-		boundsBufferDesc.ByteWidth = 16 * (UINT)shaderData.size();
-		boundsBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-		boundsBufferDesc.MiscFlags = 64;
-		boundsBufferDesc.StructureByteStride = 16;
-		boundsBufferDesc.BindFlags = 8;
-		boundsBufferDesc.CPUAccessFlags = 0;
-
-		boundSubresoureDesc.pSysMem = shaderData.data();
-		boundSubresoureDesc.SysMemPitch = 0;
-		boundSubresoureDesc.SysMemSlicePitch = 0;
-
-		if (HRESULT res = device->CreateBuffer(&boundsBufferDesc, &boundSubresoureDesc, &boundsBuffer); res || (boundsBuffer == NULL)) {
-			printf("D3D11Decive::CreateBuffer returned 0x%x\n", (uint32_t)res);
-		};
-		if(boundsBuffer == nullptr)
-			return;
-
-		boundsShaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
-		boundsShaderResourceViewDesc.ViewDimension = D3D_SRV_DIMENSION_BUFFER;
-		boundsShaderResourceViewDesc.Buffer.FirstElement = 0;
-		boundsShaderResourceViewDesc.Buffer.NumElements = (UINT)shaderData.size();
-		if (HRESULT res = device->CreateShaderResourceView(boundsBuffer, &boundsShaderResourceViewDesc, &boundsResourceView); res) {
-			printf("D3D11Decive::CreateShaderResourceView returned 0x%x\n", (uint32_t)res);
-		}
-	}
-}
 
 
 void clearImageAtlases() {

@@ -20,7 +20,7 @@ bool AtlasImageButton(const char* id, const Asset_t& asset,ImVec2 maxSize) {
 	const ImVec2 maxs(shd.minX + shd.sizeX, shd.minY + shd.sizeY);
 	ImVec2 displaySize(maxSize.x, maxSize.x / dim.width * dim.height);
 	if (displaySize.y > maxSize.y)displaySize.y = maxSize.y;
-	return ImGui::ImageButton(asset.name.c_str(), atlas.imageResourceView,
+	return ImGui::ImageButton(asset.name.c_str(), (ImTextureRef)atlas.GetImageView(),
 		displaySize, mins, maxs);
 		
 }

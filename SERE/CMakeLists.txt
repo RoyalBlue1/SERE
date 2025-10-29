@@ -51,6 +51,7 @@ add_executable (SERE
 	"RuiNodeEditor/RuiExportPrototype.cpp"
 	"Nodes/ConditionalNodes.cpp"
 
+	"RenderFrameworks/RenderFramework_Dx11.cpp"	
 	"PakLoading/asset.cpp"
 	"PakLoading/cpakfile.cpp"
 	"PakLoading/patchapi.cpp"
@@ -59,7 +60,7 @@ add_executable (SERE
 	
 	"PakLoading/utils.cpp"
 
- "Settings.h")
+ "Settings.h" "RenderFrameworks/RenderFramework.cpp")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
 target_link_libraries(SERE PUBLIC nfd)
