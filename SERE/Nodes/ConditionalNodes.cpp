@@ -6,8 +6,8 @@ GreaterNode::GreaterNode(RenderInstance& rend, ImFlow::StyleManager& style) :Rui
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
-		const FloatVariable& a = getInVal<FloatVariable>("A");
-		const FloatVariable& b = getInVal<FloatVariable>("B");
+		const FloatVariable& a = getInNumeric("A");
+		const FloatVariable& b = getInNumeric("B");
 		std::string name = (a.IsConstant() && b.IsConstant()) ? "" : outName;
 
 		return BoolVariable(a.value > b.value, name);
@@ -20,8 +20,8 @@ GreaterNode::GreaterNode(RenderInstance& rend, ImFlow::StyleManager& style, rapi
 
 
 void GreaterNode::draw() {
-	const FloatVariable& a = getInVal<FloatVariable>("A");
-	const FloatVariable& b = getInVal<FloatVariable>("B");
+	const FloatVariable& a = getInNumeric("A");
+	const FloatVariable& b = getInNumeric("B");
 	ImGui::Text("A %f", a.value);
 	ImGui::Text("B %f", b.value);
 	if (a.value > b.value)
@@ -38,8 +38,8 @@ void GreaterNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 
 void GreaterNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<BoolVariable>("Res")->val();
-	const auto& a = getInVal<FloatVariable>("A");
-	const auto& b = getInVal<FloatVariable>("B");
+	const auto& a = getInNumeric("A");
+	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
@@ -54,8 +54,8 @@ void GreaterNode::Export(RuiExportPrototype& proto) {
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> GreaterNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", ImFlow::ConnectionFilter::SameType(), FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(2.f)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Res"));
 	return info;
 }
@@ -64,8 +64,8 @@ LessNode::LessNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNo
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
-		const FloatVariable& a = getInVal<FloatVariable>("A");
-		const FloatVariable& b = getInVal<FloatVariable>("B");
+		const FloatVariable& a = getInNumeric("A");
+		const FloatVariable& b = getInNumeric("B");
 		std::string name = (a.IsConstant() && b.IsConstant()) ? "" : outName;
 
 		return BoolVariable(a.value < b.value, name);
@@ -78,8 +78,8 @@ LessNode::LessNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson:
 
 
 void LessNode::draw() {
-	const FloatVariable& a = getInVal<FloatVariable>("A");
-	const FloatVariable& b = getInVal<FloatVariable>("B");
+	const FloatVariable& a = getInNumeric("A");
+	const FloatVariable& b = getInNumeric("B");
 	ImGui::Text("A %f", a.value);
 	ImGui::Text("B %f", b.value);
 	if (a.value < b.value)
@@ -96,8 +96,8 @@ void LessNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidj
 
 void LessNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<BoolVariable>("Res")->val();
-	const auto& a = getInVal<FloatVariable>("A");
-	const auto& b = getInVal<FloatVariable>("B");
+	const auto& a = getInNumeric("A");
+	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
@@ -112,8 +112,8 @@ void LessNode::Export(RuiExportPrototype& proto) {
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> LessNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", ImFlow::ConnectionFilter::SameType(), FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(2.f)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Res"));
 	return info;
 }
@@ -123,8 +123,8 @@ ConditionalFloatNode::ConditionalFloatNode(RenderInstance& rend, ImFlow::StyleMa
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
 
 		const BoolVariable& a = getInVal<BoolVariable>("A");
-		const FloatVariable& b = getInVal<FloatVariable>("B");
-		const FloatVariable& c = getInVal<FloatVariable>("C");
+		const FloatVariable& b = getInNumeric("B");
+		const FloatVariable& c = getInNumeric("C");
 
 		std::string name = (a.IsConstant() && b.IsConstant() && c.IsConstant()) ? "" : outName;
 
@@ -143,8 +143,8 @@ ConditionalFloatNode::ConditionalFloatNode(RenderInstance& rend, ImFlow::StyleMa
 void ConditionalFloatNode::draw() {
 	const BoolVariable& a = getInVal<BoolVariable>("A");
 
-	const FloatVariable& b = getInVal<FloatVariable>("B");
-	const FloatVariable& c = getInVal<FloatVariable>("C");
+	const FloatVariable& b = getInNumeric("B");
+	const FloatVariable& c = getInNumeric("C");
 
 	if (a.value)
 		ImGui::Text("In True");
@@ -164,8 +164,8 @@ void ConditionalFloatNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>&
 void ConditionalFloatNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<FloatVariable>("Res")->val();
 	const auto& a = getInVal<BoolVariable>("A");
-	const auto& b = getInVal<FloatVariable>("B");
-	const auto& c = getInVal<FloatVariable>("C");
+	const auto& b = getInNumeric("B");
+	const auto& c = getInNumeric("C");
 
 	ExportElement<std::string> ele;
 	ele.dependencys = { a.name,b.name, c.name };
@@ -186,8 +186,8 @@ void ConditionalFloatNode::Export(RuiExportPrototype& proto) {
 std::vector<std::shared_ptr<ImFlow::PinProto>> ConditionalFloatNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<BoolVariable>>("A", ImFlow::ConnectionFilter::SameType(), BoolVariable(false)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", ImFlow::ConnectionFilter::SameType(), FloatVariable(1.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("C", ImFlow::ConnectionFilter::SameType(), FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("C", isPinNumeric, FloatVariable(2.f)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
 	return info;
 }
@@ -196,8 +196,8 @@ EqualFloatNode::EqualFloatNode(RenderInstance& rend, ImFlow::StyleManager& style
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
-		const FloatVariable& a = getInVal<FloatVariable>("A");
-		const FloatVariable& b = getInVal<FloatVariable>("B");
+		const FloatVariable& a = getInNumeric("A");
+		const FloatVariable& b = getInNumeric("B");
 		std::string name = (a.IsConstant() && b.IsConstant()) ? "" : outName;
 
 		return BoolVariable(a.value == b.value, name);
@@ -210,8 +210,8 @@ EqualFloatNode::EqualFloatNode(RenderInstance& rend, ImFlow::StyleManager& style
 
 
 void EqualFloatNode::draw() {
-	const FloatVariable& a = getInVal<FloatVariable>("A");
-	const FloatVariable& b = getInVal<FloatVariable>("B");
+	const FloatVariable& a = getInNumeric("A");
+	const FloatVariable& b = getInNumeric("B");
 	ImGui::Text("A %f", a.value);
 	ImGui::Text("B %f", b.value);
 	if (a.value == b.value)
@@ -228,8 +228,8 @@ void EqualFloatNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, 
 
 void EqualFloatNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<BoolVariable>("Res")->val();
-	const auto& a = getInVal<FloatVariable>("A");
-	const auto& b = getInVal<FloatVariable>("B");
+	const auto& a = getInNumeric("A");
+	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
@@ -244,8 +244,8 @@ void EqualFloatNode::Export(RuiExportPrototype& proto) {
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> EqualFloatNode::GetPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", ImFlow::ConnectionFilter::SameType(), FloatVariable(2.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(2.f)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<BoolVariable>>("Res"));
 	return info;
 }

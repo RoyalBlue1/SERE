@@ -39,6 +39,8 @@ protected:
 			pin->CreatePin(this, styles);
 		}
 	}
+	FloatVariable getInNumeric(const char* id);
+	
 };
 
 struct NodeType {
@@ -81,3 +83,4 @@ template<class T> NodeType CreateNodeType() {
 };
 
 
+bool isPinNumeric(const std::type_info& out, const std::type_info& in);
