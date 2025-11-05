@@ -159,7 +159,7 @@ void ReloadAssets(std::string folderPath) {
         "mp_angel_city(11).rpak"
     };
 
-    fs::path pakFolder = "E:\\Titanfall2";
+    fs::path pakFolder(folderPath);
     std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakFolder](std::string& pak) {
         LoadRpak(pakFolder/"r2/paks/Win64"/pak);
     });
