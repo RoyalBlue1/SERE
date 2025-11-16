@@ -7,17 +7,22 @@
 
 
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),maskFlag(false) {
+AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),maskFlag(false),layer(0) {
 
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {}
+AssetRenderNode::AssetRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {
+	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
+		layer = obj["Layer"].GetInt();
+	}
+}
 
 void AssetRenderNode::draw() {
-
+	ImGui::PushItemWidth(70.f);
 	ImGui::Checkbox("Mask mode",&maskFlag);
-	
+	ImGui::InputInt("Layer",&layer);
+	ImGui::PopItemWidth();
 	AssetInputData input{};
 	input.mainColor = getInVal<ColorVariable>("Main Color");
 	input.maskColor = getInVal<ColorVariable>("Mask Color");
@@ -36,12 +41,17 @@ void AssetRenderNode::draw() {
 	input.maskRotation = getInVal<FloatVariable>("Mask Rotation");
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = maskFlag ? 0x1001 : 0x1000;
-	Render_Asset(render,input);
+
+	render.jobs.emplace_back(layer, [input](RenderInstance& render) {
+		Render_Asset(render,input);
+	} );
+	
 }
 
 void AssetRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
+	obj.AddMember("Layer",layer,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -113,7 +123,7 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 
 	
 
-	proto.step2Callbacks.push_back([input](RuiExportPrototype& proto) {
+	proto.renderJobs.emplace_back(layer,[input](RuiExportPrototype& proto) {
 		StyleDescriptorOffsets style;
 		style.type = 1;
 		style.color0 = proto.GetColorDataVariableOffset(input.mainColor);
@@ -181,14 +191,23 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	return info;
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
 
 	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {}
+AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {
+	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
+		layer = obj["Layer"].GetInt();
+	}
+}
 
 void AssetCircleRenderNode::draw() {
+
+	ImGui::PushItemWidth(70.f);
+	ImGui::InputInt("Layer",&layer);
+	ImGui::PopItemWidth();
+
 	AssetCircleInputData input{};
 	input.mainColor = getInVal<ColorVariable>("Main Color");
 	input.scndColor = getInVal<ColorVariable>("Secondary Color");
@@ -209,12 +228,17 @@ void AssetCircleRenderNode::draw() {
 
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = 0x2000;
-	Render_AssetSmall(render,input);
+
+	render.jobs.emplace_back(layer, [input](RenderInstance& render) {
+		Render_AssetSmall(render,input);
+	});
+	
 }
 
 void AssetCircleRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
+	obj.AddMember("Layer",layer,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -259,7 +283,7 @@ void AssetCircleRenderNode::Export(RuiExportPrototype& proto) {
 
 
 
-	proto.step2Callbacks.push_back([input](RuiExportPrototype& proto) {
+	proto.renderJobs.emplace_back(layer,[input](RuiExportPrototype& proto) {
 		StyleDescriptorOffsets style;
 		style.type = 2;
 		style.color0 = proto.GetColorDataVariableOffset(input.mainColor);
@@ -481,22 +505,32 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
 }
 
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
 
 	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
 }
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){}
+TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){
+	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
+		layer = obj["Layer"].GetInt();
+	}
+}
 
 void TextRenderNode::draw() {
 	const TextInputData& data = getInVal<TextInputData>("Data");
 	const TransformResult& parent = getInVal<TransformResult>("Parent");
-	Text_Render(render,data,parent);
+	ImGui::PushItemWidth(70.f);
+	ImGui::InputInt("Layer",&layer);
+	ImGui::PopItemWidth();
+	render.jobs.emplace_back(layer, [data, parent](RenderInstance& render) {
+		Text_Render(render,data,parent);
+	});
 }
 
 void TextRenderNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
+	obj.AddMember("Layer",layer,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -576,7 +610,7 @@ void TextRenderNode::Export(RuiExportPrototype& proto) {
 
 
 
-	proto.step2Callbacks.push_back([input,parent](RuiExportPrototype& proto) {
+	proto.renderJobs.emplace_back(layer,[input,parent](RuiExportPrototype& proto) {
 
 		struct TextRenderOffsets {
 			uint16_t type = 0;

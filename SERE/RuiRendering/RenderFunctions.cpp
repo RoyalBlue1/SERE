@@ -7,7 +7,7 @@
 
 #define TAU 6.2831855f
 
-bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
+bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 
 	__m128 v9; // xmm2
 	__m128 v10; // xmm6
@@ -471,7 +471,7 @@ const char* sub_F98F0(const char** a3, __int64 a4, const char* a5)
 	return (const char*)a4;
 }
 
-bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) {
+bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 	__int16 uint8_18; // r9
 
 	__int64 result; // rax
@@ -653,7 +653,7 @@ bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data) 
 }
 
 
-bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform) {
+bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult transform) {
 
 	__m128 v11; // xmm2
 	__m128 v13; // xmm0

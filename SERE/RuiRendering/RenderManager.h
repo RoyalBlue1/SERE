@@ -116,6 +116,12 @@ struct Globals {
     float screenWidth = 0.f;
     float screenHeight = 0.f;
 };
+class RenderInstance;
+
+struct RenderJob {
+    int layer;
+    std::function<void(RenderInstance& render)> func;
+};
 
 class RenderInstance
 {
@@ -127,7 +133,9 @@ public:
     std::vector<TransformResult> transformResults;
     DrawInfo drawInfo;
     Globals globals;
+    
 
+    std::vector<RenderJob> jobs;
     std::vector<Vertex_t> verts;
     std::vector<uint16_t> indices;
     std::vector<IndexSegment_t> segments;

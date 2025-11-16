@@ -136,6 +136,11 @@ struct ArgCluster_t
 	uint16_t renderJobCount;
 };
 
+struct ExportRenderJob {
+	int layer;
+	std::function<void(RuiExportPrototype&)> func;
+};
+
 struct RuiExportPrototype {
 
 
@@ -147,7 +152,7 @@ struct RuiExportPrototype {
 
 	std::vector<ExportElement<std::string>> codeElements;
 	std::vector<ExportElement<uint64_t>> transformCallbacks;
-	std::vector<std::function<void(RuiExportPrototype&)>> step2Callbacks;
+	std::vector<ExportRenderJob> renderJobs;
 	uint16_t currentDataStructSize = 0;
 	std::map<float, uint16_t> floatConstants;
 	std::map<std::string, uint16_t> stringConstants;

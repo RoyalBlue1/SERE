@@ -153,7 +153,7 @@ struct TextInputData {
 		{}
 };
 
-bool Render_Asset(RenderInstance& proto,AssetInputData& input);
-bool Render_AssetSmall(RenderInstance& proto, const AssetCircleInputData& data);
-bool Text_Render(RenderInstance& proto,const TextInputData& data,const TransformResult& transform);
+bool Render_Asset(RenderInstance& proto,AssetInputData input);
+bool Render_AssetSmall(RenderInstance& proto,AssetCircleInputData data);
+bool Text_Render(RenderInstance& proto,TextInputData data,TransformResult transform);
 __m128 GetTextSize(TextInputData& data);
