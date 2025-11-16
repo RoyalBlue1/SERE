@@ -174,6 +174,18 @@ void RuiExportPrototype::GenerateCode() {
 	}
 	if (codeElementsHit < codeElements.size()) {
 		printf("Not all code has been exported should be %llu was %llu\n",codeElements.size(),codeElementsHit);
+		for (auto& ele : codeElements) {
+			if (existingVariables.find(ele.identifier) == existingVariables.end()) {
+				printf("could not add %s missing",ele.identifier.c_str());
+				for (auto& dep : ele.dependencys) {
+					if (existingVariables.find(dep) == existingVariables.end()) {
+						printf(" %s",dep.c_str());
+					}
+				}
+				printf("\n");
+			}
+		}
+		printf("Error done");
 	}
 		
 

@@ -37,6 +37,9 @@ void MultiplyNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -91,6 +94,9 @@ void AdditionNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -147,6 +153,9 @@ void SubtractNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -211,6 +220,9 @@ void DivideNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -276,6 +288,9 @@ void ModuloNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -327,6 +342,9 @@ void AbsoluteNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a](RuiExportPrototype& proto) {
@@ -380,6 +398,9 @@ void SineNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a](RuiExportPrototype& proto) {
@@ -433,6 +454,9 @@ void ExponentNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name,b.name};
 	ele.identifier = out.name;
 	ele.callback = [out,a,b](RuiExportPrototype& proto) {
@@ -485,6 +509,9 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<FloatVariable>("Res")->val();
 	const auto& a = getInNumeric("A");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {a.name};
 	ele.identifier = out.name;
 	int mappingIndex = proto.mappings.size();
@@ -538,6 +565,9 @@ void TangentNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -589,6 +619,9 @@ void CosineNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -640,6 +673,9 @@ void SquareRootNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -691,6 +727,9 @@ void RoundNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -742,6 +781,9 @@ void FloorNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -793,6 +835,9 @@ void CeilNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -844,6 +889,9 @@ void TruncNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {

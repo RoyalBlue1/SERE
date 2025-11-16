@@ -41,6 +41,9 @@ void GreaterNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -99,6 +102,9 @@ void LessNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -168,6 +174,9 @@ void ConditionalFloatNode::Export(RuiExportPrototype& proto) {
 	const auto& c = getInNumeric("C");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name, c.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b, c](RuiExportPrototype& proto) {
@@ -231,6 +240,9 @@ void EqualFloatNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInNumeric("A");
 	const auto& b = getInNumeric("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -292,6 +304,9 @@ void NotGateNode::Export(RuiExportPrototype& proto) {
 	const auto& out = getOut<BoolVariable>("Res")->val();
 	const auto& a = getInVal<BoolVariable>("A");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a](RuiExportPrototype& proto) {
@@ -350,6 +365,9 @@ void AndGateNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInVal<BoolVariable>("A");
 	const auto& b = getInVal<BoolVariable>("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -409,6 +427,9 @@ void OrGateNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInVal<BoolVariable>("A");
 	const auto& b = getInVal<BoolVariable>("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -467,6 +488,9 @@ void EqualStringNode::Export(RuiExportPrototype& proto) {
 	const auto& a = getInVal<StringVariable>("A");
 	const auto& b = getInVal<StringVariable>("B");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b](RuiExportPrototype& proto) {
@@ -537,6 +561,9 @@ void ConditionalStringNode::Export(RuiExportPrototype& proto) {
 	const auto& c = getInVal<StringVariable>("C");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { a.name,b.name, c.name };
 	ele.identifier = out.name;
 	ele.callback = [out, a, b, c](RuiExportPrototype& proto) {

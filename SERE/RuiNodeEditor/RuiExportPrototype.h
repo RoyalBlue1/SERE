@@ -17,6 +17,9 @@ struct RuiExportPrototype;
 
 template<typename T>
 struct ExportElement {
+#ifdef _DEBUG
+	std::string sourceNodeName;
+#endif
 	T identifier;
 	std::set<T> dependencys;
 	std::function<void(RuiExportPrototype&)> callback;

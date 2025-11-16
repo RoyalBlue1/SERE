@@ -38,6 +38,9 @@ void SplitFloat2Node::Export(RuiExportPrototype& proto) {
 	const auto& x = getOut<FloatVariable>("X")->val();
 	const auto& y = getOut<FloatVariable>("Y")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {in.name};
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
@@ -103,6 +106,9 @@ void MergeFloat2Node::Export(RuiExportPrototype& proto) {
 	const auto& x = getInNumeric("X");
 	const auto& y = getInNumeric("Y");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {x.name,y.name};
 	ele.identifier = out.name;
 	ele.callback = [out,x,y](RuiExportPrototype& proto) {
@@ -172,6 +178,9 @@ void SplitFloat3Node::Export(RuiExportPrototype& proto) {
 	const auto& y = getOut<FloatVariable>("Y")->val();
 	const auto& z = getOut<FloatVariable>("Z")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {in.name};
 	ele.identifier = x.name;
 	ele.callback = [in,x](RuiExportPrototype& proto) {
@@ -242,6 +251,9 @@ void MergeFloat3Node::Export(RuiExportPrototype& proto) {
 	const auto& y = getInNumeric("Y");
 	const auto& z = getInNumeric("Z");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {x.name,y.name,z.name};
 	ele.identifier = out.name;
 	ele.callback = [out,x,y,z](RuiExportPrototype& proto) {
@@ -327,6 +339,9 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 	const auto& b = getOut<FloatVariable>("Blue")->val();
 	const auto& a = getOut<FloatVariable>("Alpha")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {in.name};
 	ele.identifier = r.name;
 	ele.callback = [in,r](RuiExportPrototype& proto) {
@@ -420,6 +435,9 @@ void RGBToColorNode::Export(RuiExportPrototype& proto) {
 	const auto& b = getInNumeric("Blue");
 	const auto& a = getInNumeric("Alpha");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {r.name,g.name,b.name,a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,r,g,b,a](RuiExportPrototype& proto) {
@@ -564,12 +582,15 @@ void HSVToColorNode::Export(RuiExportPrototype& proto) {
 	const auto& v = getInNumeric("Vibrance");
 	const auto& a = getInNumeric("Alpha");
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = {h.name,s.name,v.name,a.name};
 	ele.identifier = out.name;
 	ele.callback = [out,h,s,v,a](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name)) {
 			proto.codeLines.push_back(std::format(
-				"{} = HsvColor({},{},{},{});",
+				"{} = hsvToColor({},{},{},{});",
 				out.GetFormattedName(proto), 
 				h.GetFormattedName(proto), 
 				s.GetFormattedName(proto),
@@ -646,6 +667,9 @@ void SplitTransformSizeNode::Export(RuiExportPrototype& proto) {
 
 	auto pushVectorExport = [&](const auto& var, int idx) {
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = typeid(*this).name();
+#endif
 		ele.dependencys = { in.name };
 		ele.identifier = var.name;
 		ele.callback = [in, var, idx](RuiExportPrototype& proto) {
@@ -721,6 +745,9 @@ void MergeTransformSizeNode::Export(RuiExportPrototype& proto) {
 	const auto& w = getInNumeric("W");
 
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { x.name, y.name, z.name, w.name };
 	ele.identifier = out.name;
 	ele.callback = [out, x, y, z, w](RuiExportPrototype& proto) {
