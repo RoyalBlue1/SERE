@@ -74,7 +74,8 @@ public:
 	virtual void DrawIndexed(uint32_t count,uint32_t start,size_t* resources) = 0;
 
 	virtual void RuiBindPipeline() = 0;
-	virtual void RuiCreatePipeline(Vector2 size) = 0;
+	virtual void RuiLoad(int width,int height) = 0;
+	virtual void RuiReCreatePipeline(int width,int height) = 0;
 
 	virtual void* GetTextureView(size_t id) = 0;
 	virtual void* GetRuiView() = 0;

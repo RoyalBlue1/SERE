@@ -128,6 +128,10 @@ void ShowExampleAppDockSpace(bool* p_open)
 
 void ReloadAssets(std::string folderPath) {
 
+    static std::string loadedPath = "";
+    if(loadedPath == folderPath)
+        return;
+    loadedPath = folderPath;
     clearImageAtlases();
 
     loadFonts();
@@ -180,12 +184,13 @@ int main(int argc, char** argv)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    
+    Settings settings;
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
     CreateRenderFramework(argv,argc);
-    g_renderFramework->RuiCreatePipeline(Vector2(1920,1080));
+    auto ruiSize = settings.GetRuiSize();
+    g_renderFramework->RuiLoad(ruiSize.width,ruiSize.height);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -209,7 +214,7 @@ int main(int argc, char** argv)
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    RenderInstance render{1920,1080};
+    RenderInstance render{(float)ruiSize.width,(float)ruiSize.height};
     NodeEditor nodeEdit{render};
     AddArgumentNodes(nodeEdit);
     AddConstantVarNodes(nodeEdit);
@@ -220,7 +225,7 @@ int main(int argc, char** argv)
     AddTransformNodes(nodeEdit);
     AddConditionalNodes(nodeEdit);
 
-    Settings settings;
+    
 
     while (g_renderFramework->ShouldMainLoopRun())
     {
@@ -262,6 +267,9 @@ int main(int argc, char** argv)
         settings.ShowSettingsWindow();
         if (settings.HasChanged()) {
             ReloadAssets(settings.GetTitanfall2Path());
+            auto size = settings.GetRuiSize();
+            render.SetSize(size.width,size.height);
+            g_renderFramework->RuiReCreatePipeline(size.width,size.height);
         }
         
 

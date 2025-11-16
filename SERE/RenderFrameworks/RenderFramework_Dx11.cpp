@@ -201,7 +201,9 @@ size_t RenderFramework_Dx11::LoadTexture(fs::path& path) {
 
 
 size_t RenderFramework_Dx11::CreateShaderDataBuffer(std::vector<ShaderSizeData_t> data){
-    D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
+    
+	
+	D3D11_SUBRESOURCE_DATA boundSubresoureDesc;
     D3D11_SHADER_RESOURCE_VIEW_DESC boundsShaderResourceViewDesc;
     D3D11_BUFFER_DESC boundsBufferDesc;
 
@@ -234,7 +236,125 @@ size_t RenderFramework_Dx11::CreateShaderDataBuffer(std::vector<ShaderSizeData_t
 
 }
 
-void RenderFramework_Dx11::RuiCreatePipeline(Vector2 size) {
+void RenderFramework_Dx11::RuiReCreatePipeline(int width, int height) {
+
+	if (rasterState) {
+		rasterState->Release();
+	}
+	if (targetView) {
+		targetView->Release();
+	}
+	if (targetResourceView) {
+		targetResourceView->Release();
+	}
+	if (targetTexture) {
+		targetTexture->Release();
+	}
+	if (depthStencilState) {
+		depthStencilState->Release();
+	}
+	if (depthStencil) {
+		depthStencil->Release();
+	}
+	if (depthTexture) {
+		depthTexture->Release();
+	}
+
+
+
+	D3D11_TEXTURE2D_DESC texture_desc = {};
+	texture_desc.Width = width;
+	texture_desc.Height = height;
+	texture_desc.MipLevels = 1;
+	texture_desc.ArraySize = 1;
+	texture_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texture_desc.SampleDesc.Count = 1;
+	texture_desc.SampleDesc.Quality = 0;
+	texture_desc.Usage = D3D11_USAGE_DEFAULT;
+	texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texture_desc.CPUAccessFlags = 0;
+	texture_desc.MiscFlags = 0;
+
+	g_pd3dDevice->CreateTexture2D(&texture_desc, 0, &targetTexture);
+
+	D3D11_RENDER_TARGET_VIEW_DESC target_view_desc = {};
+	target_view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	target_view_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	target_view_desc.Texture2D.MipSlice = 0;
+
+	g_pd3dDevice->CreateRenderTargetView(targetTexture, &target_view_desc, &targetView);
+
+	// Depth stencil
+	D3D11_TEXTURE2D_DESC depth_texture_desc = {};
+	depth_texture_desc.Width = width;
+	depth_texture_desc.Height = height;
+	depth_texture_desc.MipLevels = 1;
+	depth_texture_desc.ArraySize = 1;
+	depth_texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depth_texture_desc.SampleDesc.Count = 1;
+	depth_texture_desc.SampleDesc.Quality = 0;
+	depth_texture_desc.Usage = D3D11_USAGE_DEFAULT;
+	depth_texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+
+	g_pd3dDevice->CreateTexture2D(&depth_texture_desc, nullptr, &depthTexture);
+	g_pd3dDevice->CreateDepthStencilView(depthTexture, nullptr, &depthStencil);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
+	view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	view_desc.Texture2D.MostDetailedMip = 0;
+	view_desc.Texture2D.MipLevels = 1;
+
+	g_pd3dDevice->CreateShaderResourceView(targetTexture, &view_desc, &targetResourceView);
+
+	D3D11_RASTERIZER_DESC rasterDesc;
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = false;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	g_pd3dDevice->CreateRasterizerState(&rasterDesc, &rasterState);
+
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xff;
+	depthStencilDesc.StencilWriteMask = 0xff;
+
+	// stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+}
+
+void RenderFramework_Dx11::RuiLoad(int width,int height) {
 	D3D11_BUFFER_DESC bufferInit{};
 	bufferInit.ByteWidth = 576;
 	bufferInit.Usage = D3D11_USAGE_DEFAULT;
@@ -255,20 +375,20 @@ void RenderFramework_Dx11::RuiCreatePipeline(Vector2 size) {
 
 	CBufCommonPerCamera cam{};
 
-	cam.c_cameraRelativeToClip.a.x = 0.0010416672f;
+	cam.c_cameraRelativeToClip.a.x = 2.f;
 	cam.c_cameraRelativeToClip.a.w = -1.0f;
-	cam.c_cameraRelativeToClip.b.y = -0.00185185182f;
+	cam.c_cameraRelativeToClip.b.y = -2.f;
 	cam.c_cameraRelativeToClip.b.w = 1.0f;
-	cam.c_cameraRelativeToClip.c.z = -0.5f;
-	cam.c_cameraRelativeToClip.c.w = 0.5f;
+	cam.c_cameraRelativeToClip.c.z = 1.f;
+	//cam.c_cameraRelativeToClip.c.w = 0.5f;
 	cam.c_cameraRelativeToClip.d.w = 1.0f;
 	cam.c_cameraRelativeToClipPrevFrame.a.x = 1.0f;
 	cam.c_cameraRelativeToClipPrevFrame.b.y = 1.0f;
 	cam.c_cameraRelativeToClipPrevFrame.c.z = 1.0f;
 	cam.c_cameraRelativeToClipPrevFrame.d.w = 1.0f;
 	cam.c_envMapLightScale = 1.0f;
-	cam.c_renderTargetSize.x = 1920.0f;
-	cam.c_renderTargetSize.y = 1080.0f;
+	cam.c_renderTargetSize.x = width;
+	cam.c_renderTargetSize.y = height;
 	cam.c_rcpRenderTargetSize.x = 0.000520833360f;
 	cam.c_rcpRenderTargetSize.y = 0.000925925910f;
 	cam.c_numCoverageSamples = 1.0f;
@@ -434,97 +554,8 @@ void RenderFramework_Dx11::RuiCreatePipeline(Vector2 size) {
 		return;
 	}
 
-	D3D11_TEXTURE2D_DESC texture_desc = {};
-	texture_desc.Width = 1920;
-	texture_desc.Height = 1080;
-	texture_desc.MipLevels = 1;
-	texture_desc.ArraySize = 1;
-	texture_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	texture_desc.SampleDesc.Count = 1;
-	texture_desc.SampleDesc.Quality = 0;
-	texture_desc.Usage = D3D11_USAGE_DEFAULT;
-	texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	texture_desc.CPUAccessFlags = 0;
-	texture_desc.MiscFlags = 0;
-
-	g_pd3dDevice->CreateTexture2D(&texture_desc, 0, &targetTexture);
-
-	D3D11_RENDER_TARGET_VIEW_DESC target_view_desc = {};
-	target_view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	target_view_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	target_view_desc.Texture2D.MipSlice = 0;
-
-	g_pd3dDevice->CreateRenderTargetView(targetTexture, &target_view_desc, &targetView);
-
-	// Depth stencil
-	D3D11_TEXTURE2D_DESC depth_texture_desc = {};
-	depth_texture_desc.Width = 1920;
-	depth_texture_desc.Height = 1080;
-	depth_texture_desc.MipLevels = 1;
-	depth_texture_desc.ArraySize = 1;
-	depth_texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depth_texture_desc.SampleDesc.Count = 1;
-	depth_texture_desc.SampleDesc.Quality = 0;
-	depth_texture_desc.Usage = D3D11_USAGE_DEFAULT;
-	depth_texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
-
-	g_pd3dDevice->CreateTexture2D(&depth_texture_desc, nullptr, &depthTexture);
-	g_pd3dDevice->CreateDepthStencilView(depthTexture, nullptr, &depthStencil);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
-	view_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	view_desc.Texture2D.MostDetailedMip = 0;
-	view_desc.Texture2D.MipLevels = 1;
-
-	g_pd3dDevice->CreateShaderResourceView(targetTexture, &view_desc, &targetResourceView);
-
-	D3D11_RASTERIZER_DESC rasterDesc;
-	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	rasterDesc.DepthBias = 0;
-	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = false;
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.MultisampleEnable = false;
-	rasterDesc.ScissorEnable = false;
-	rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-	// Create the rasterizer state from the description we just filled out.
-	g_pd3dDevice->CreateRasterizerState(&rasterDesc, &rasterState);
-
-	viewport.Width = size.x;
-	viewport.Height = size.y;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-
-	depthStencilDesc.StencilEnable = true;
-	depthStencilDesc.StencilReadMask = 0xff;
-	depthStencilDesc.StencilWriteMask = 0xff;
-
-	// stencil operations if pixel is front-facing.
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	// stencil operations if pixel is back-facing.
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
-
+	
+	RuiReCreatePipeline(width,height);
 }
 
 void RenderFramework_Dx11::RuiBindPipeline() {
@@ -646,7 +677,7 @@ size_t RenderFramework_Dx11::CreateTextureFromData(void* data,uint32_t width,uin
 		return ~0LL;
 	}
 	size_t ret = textures.size();
-	textures.push_back({texture,view});
+	textures.emplace_back(texture,view);
 	return ret;
 
 }
