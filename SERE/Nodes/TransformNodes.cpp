@@ -141,12 +141,18 @@ void Transform2Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(v0);
 	proto.AddDataVariable(v3);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform2Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -242,12 +248,18 @@ void Transform3Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(v0);
 	proto.AddDataVariable(v3);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform3Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -346,12 +358,18 @@ void Transform4Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(v0);
 	proto.AddDataVariable(v3);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform4Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -479,12 +497,18 @@ void Transform5Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(v0);
 	proto.AddDataVariable(v3);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform5Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -595,6 +619,9 @@ void Transform6Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(v0);
 	proto.AddDataVariable(v3);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash};
 	ele.callback = [parent,v0,v3,out,size](RuiExportPrototype& proto) {
@@ -608,6 +635,9 @@ void Transform6Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform6Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -726,6 +756,9 @@ void Transform7Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(translate);
 	proto.AddDataVariable(point);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {p1parent.hash,p2parent.hash};
 	ele.callback = [p1parent,p1Pos,p2parent,p2Pos,translate,point,out,size](RuiExportPrototype& proto) {
@@ -742,6 +775,9 @@ void Transform7Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform7Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -888,6 +924,9 @@ void Transform8Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(translate);
 	proto.AddDataVariable(point);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {p1parent.hash,p2parent.hash};
 	ele.callback = [p1parent,p1Pos,p2parent,p2Pos,translate,point,out,size](RuiExportPrototype& proto) {
@@ -904,6 +943,9 @@ void Transform8Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform8Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -1059,6 +1101,9 @@ void Transform9Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(translate);
 	proto.AddDataVariable(point);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {p1parent.hash,p2parent.hash};
 	ele.callback = [p1parent,p1Pos,p2parent,p2Pos,translate,point,out,size](RuiExportPrototype& proto) {
@@ -1075,6 +1120,9 @@ void Transform9Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform9Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -1229,6 +1277,9 @@ void Transform10Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(point1);
 	proto.AddDataVariable(point2);
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {p1parent.hash,p2parent.hash};
 	ele.callback = [p1parent,p1Pos,p2parent,p2Pos,p3parent,p3Pos,translate,point1,point2,out,size](RuiExportPrototype& proto) {
@@ -1248,6 +1299,9 @@ void Transform10Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform10Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {
@@ -1413,6 +1467,9 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 	proto.AddDataVariable(rot);
 
 	ExportElement<uint64_t> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.hash;
 	ele.dependencys = {parent.hash,};
 	ele.callback = [parent,center,rot,out,size](RuiExportPrototype& proto) {
@@ -1429,6 +1486,9 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 		uint16_t transId = (uint16_t)proto.transformIndices.size();
 		proto.transformIndices.emplace(out.hash,transId);
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "Transform11Node";
+#endif
 		ele.identifier = Variable::UniqueName();
 		ele.dependencys = { size.name };
 		ele.callback = [transId, size](RuiExportPrototype& proto) {

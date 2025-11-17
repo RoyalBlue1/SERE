@@ -71,6 +71,9 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 		std::string mainAssetFallback = Variable::UniqueName();
 		input.mainAsset.name = mainAssetFallback;
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = typeid(*this).name();
+#endif
 		ele.dependencys = { };
 		ele.identifier = mainAssetFallback;
 		ele.callback =[mainAssetFallback](RuiExportPrototype& proto) {
@@ -85,6 +88,9 @@ void AssetRenderNode::Export(RuiExportPrototype& proto) {
 		std::string maskAssetFallback = Variable::UniqueName();
 		input.maskAsset.name = maskAssetFallback;
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = typeid(*this).name();
+#endif
 		ele.dependencys = { };
 		ele.identifier = maskAssetFallback;
 		ele.callback =[maskAssetFallback](RuiExportPrototype& proto) {
@@ -599,6 +605,9 @@ void TextRenderNode::Export(RuiExportPrototype& proto) {
 		proto.AddRenderJobData((uint8_t*)&rend, sizeof(rend));
 		
 		ExportElement<std::string> ele;
+#if _DEBUG
+		ele.sourceNodeName = "TextRenderNode";
+#endif
 		ele.identifier = input.sizeName;
 		ele.dependencys = {input.text.name,input.minSize.name,input.maxSize.name};
 		AddTextStyleToDependency(ele.dependencys,input.styles[0]);

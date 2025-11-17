@@ -31,6 +31,9 @@ void TimeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidj
 void TimeNode::Export(RuiExportPrototype& proto) {
 	auto out = getOut<FloatVariable>("Time")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
 		if(proto.varsInDataStruct.contains(out.name))
@@ -80,6 +83,9 @@ void ADSFracNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 void ADSFracNode::Export(RuiExportPrototype& proto) {
 	auto out = getOut<FloatVariable>("AdsFrac")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name))
@@ -141,6 +147,9 @@ void LocalPlayerPosNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& o
 void LocalPlayerPosNode::Export(RuiExportPrototype& proto) {
 	auto out = getOut<Float3Variable>("LocalPlayerPos")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name))
@@ -203,6 +212,9 @@ void ScreenWidthNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 void ScreenWidthNode::Export(RuiExportPrototype& proto) {
 	auto out = getOut<FloatVariable>("ScreenWidth")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name))
@@ -265,6 +277,9 @@ void ScreenHeightNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj
 void ScreenHeightNode::Export(RuiExportPrototype& proto) {
 	auto out = getOut<FloatVariable>("ScreenHeight")->val();
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	ele.callback = [out](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name))

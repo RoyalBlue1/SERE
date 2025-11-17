@@ -391,6 +391,9 @@ void AssetVarNode::Export(RuiExportPrototype& proto) {
 	const AssetVariable& out = getOut<AssetVariable>("Value")->val();
 	proto.AddDataVariable(out);
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.identifier = out.name;
 	std::string assetName = imageAssetMap[hash].name;
 	ele.callback = [out,assetName](RuiExportPrototype& proto) {

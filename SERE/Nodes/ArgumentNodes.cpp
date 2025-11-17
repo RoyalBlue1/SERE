@@ -409,6 +409,9 @@ void AssetArgNode::Export(RuiExportPrototype& proto) {
 	auto& out = getOut<AssetVariable>("Value")->val();
 	proto.AddDataVariable(out);
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { argName };
 	ele.identifier = out.name;
 	ele.callback =[this](RuiExportPrototype& proto) {
@@ -470,6 +473,9 @@ void UiHandleArgNode::Export(RuiExportPrototype& proto) {
 	auto& out = getOut<AssetVariable>("Value")->val();
 	proto.AddDataVariable(out);
 	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
 	ele.dependencys = { argName };
 	ele.identifier = out.name;
 	ele.callback =[this](RuiExportPrototype& proto) {
