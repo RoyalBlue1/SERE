@@ -255,7 +255,7 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 
 	getOut<Float3Variable>("Value")->behaviour([this]() {
 		Vector3 val(0.f,0.f,0.f);
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(int)))
+		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Vector3)))
 			val = std::any_cast<Vector3>(render.arguments[argName]);
 		return Float3Variable(
 			val,

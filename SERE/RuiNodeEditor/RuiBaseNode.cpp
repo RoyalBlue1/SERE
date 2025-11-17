@@ -24,7 +24,7 @@ FloatVariable RuiBaseNode::getInNumeric(const char* id) {
 		return FloatVariable(val.value,val.name);
 	}
 	else
-		return getInVal<FloatVariable>(id).value;
+		return getInVal<FloatVariable>(id);
 
 }
 
