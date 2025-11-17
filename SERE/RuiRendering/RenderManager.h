@@ -136,8 +136,8 @@ public:
 
     float elementWidth;
     float elementHeight;
-    float elementWidthRatio;
-    float elementHeightRatio;
+    float elementWidthRpc;
+    float elementHeightRpc;
 
     void AddImageAtlasSegment(ImageAtlas* atlas) {
         if (segments.size() == 0) {
@@ -207,9 +207,9 @@ public:
 
     void SetSize(float width, float height) {
         elementHeight = height;
-        elementHeightRatio = 1.f/height;
+        elementHeightRpc = 1.f/height;
         elementWidth = width;
-        elementWidthRatio = 1.f/width;
+        elementWidthRpc = 1.f/width;
     
         memset(&drawInfo,0,sizeof(DrawInfo));
         drawInfo.float_18 = 0.f;
@@ -236,6 +236,7 @@ public:
     void DrawImage() {
         ImGui::Begin("Render Image");
         float width = ImGui::GetWindowWidth();
+        width -= 10; //margin
         ImGui::Image(g_renderFramework->GetRuiView(), ImVec2(width, elementHeight / elementWidth * width), ImVec2(0, 0), ImVec2(1, 1));
         ImGui::End();
     }

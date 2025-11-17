@@ -95,7 +95,7 @@ Transform2Node::Transform2Node(RenderInstance& rend,ImFlow::StyleManager& style)
 		const TransformSize& size = getInVal<TransformSize>("Size");
 		const TransformResult& parent = getInVal<TransformResult>("Parent");
 
-		__m128 elementSizeRatio = _mm_set_ps(0,0,render.elementHeightRatio,render.elementWidthRatio);
+		__m128 elementSizeRatio = _mm_set_ps(0,0,render.elementHeightRpc,render.elementWidthRpc);
 		__m128 elementSizeRatio_unpacked = _mm_unpacklo_ps(elementSizeRatio, elementSizeRatio);
 		__m128 v13 = _mm_and_ps(_mm_mul_ps(size.size, elementSizeRatio_unpacked), (__m128)xmmword_12A146C0);
 		__m128 v14 = _mm_shuffle_ps(
@@ -801,7 +801,7 @@ Transform8Node::Transform8Node(RenderInstance& rend,ImFlow::StyleManager& style)
 
 		__m128 v5 = _mm_set_ps(render.elementHeight,render.elementWidth,render.elementHeight,render.elementWidth);
 
-		__m128 v8 = _mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio);
+		__m128 v8 = _mm_set_ps(render.elementHeightRpc,render.elementWidthRpc,render.elementHeightRpc,render.elementWidthRpc);
 
 
 		__m128 v14 = _mm_shuffle_ps(
@@ -963,7 +963,7 @@ Transform9Node::Transform9Node(RenderInstance& rend,ImFlow::StyleManager& style)
 
 		__m128 v5 = _mm_set_ps(render.elementHeight,render.elementWidth,render.elementHeight,render.elementWidth);
 
-		__m128 v6 = _mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio);
+		__m128 v6 = _mm_set_ps(render.elementHeightRpc,render.elementWidthRpc,render.elementHeightRpc,render.elementWidthRpc);
 
 
 		__m128 v15 = _mm_shuffle_ps(
@@ -1311,7 +1311,7 @@ Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& styl
 		__m128 v3 = _mm_xor_ps(
 			_mm_mul_ps(
 				(__m128)_mm_set_ps(render.elementWidth,render.elementHeight,render.elementWidth,render.elementHeight),
-				(__m128)_mm_set_ps(render.elementHeightRatio,render.elementWidthRatio,render.elementHeightRatio,render.elementWidthRatio)),
+				(__m128)_mm_set_ps(render.elementHeightRpc,render.elementWidthRpc,render.elementHeightRpc,render.elementWidthRpc)),
 			_mm_set_ps(0.f,-0.0f,0.f,-0.0f));
 
 

@@ -106,7 +106,8 @@ public:
 
 
 	void RuiBindPipeline();
-	void RuiCreatePipeline(Vector2 size);
+	void RuiLoad(int width,int height);
+	void RuiReCreatePipeline(int width,int height);
 
 	void* GetTextureView(size_t id);
 	void* GetRuiView();
@@ -121,33 +122,33 @@ private:
 	WNDCLASSEXW wc;
 	HWND hwnd;
 	
-	ID3D11SamplerState* samplerState;
+	ID3D11SamplerState* samplerState = nullptr;
 
-	ID3D11BlendState* blendState;
-	ID3D11Texture2D* targetTexture;
-	ID3D11RenderTargetView* targetView;
+	ID3D11BlendState* blendState = nullptr;
+	ID3D11Texture2D* targetTexture = nullptr;
+	ID3D11RenderTargetView* targetView = nullptr;
 
-	ID3D11Texture2D* depthTexture;
-	ID3D11DepthStencilView* depthStencil;
-	ID3D11DepthStencilState* depthStencilState;
-	ID3D11RasterizerState* rasterState;
+	ID3D11Texture2D* depthTexture = nullptr;
+	ID3D11DepthStencilView* depthStencil = nullptr;
+	ID3D11DepthStencilState* depthStencilState = nullptr;
+	ID3D11RasterizerState* rasterState = nullptr;
 	D3D11_VIEWPORT viewport;
 
-	ID3D11Buffer* commonPerCameraBuffer;
-	ID3D11Buffer* modelInstanceBuffer;
+	ID3D11Buffer* commonPerCameraBuffer = nullptr;
+	ID3D11Buffer* modelInstanceBuffer = nullptr;
 
-	ID3D11Buffer* indexBuffer;
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* styleDescBuffer;
-	ID3D11ShaderResourceView* styleDescriptorResourceView;
+	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11Buffer* vertexBuffer = nullptr;
+	ID3D11Buffer* styleDescBuffer = nullptr;
+	ID3D11ShaderResourceView* styleDescriptorResourceView = nullptr;
 
-	ID3D11VertexShader* vertexShader;
-	ID3D11InputLayout *shaderLayout;
-	ID3D11PixelShader* pixelShader;
+	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11InputLayout *shaderLayout = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
 
-	std::vector<Texture> textures;
-	std::vector<Buffer> buffers;
-	ID3D11ShaderResourceView* targetResourceView;
+	std::vector<Texture> textures{};
+	std::vector<Buffer> buffers{};
+	ID3D11ShaderResourceView* targetResourceView = nullptr;
 
 	
 	bool CreateDeviceD3D();

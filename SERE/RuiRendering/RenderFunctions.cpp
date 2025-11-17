@@ -248,7 +248,7 @@ bool Render_Asset(RenderInstance& proto,AssetInputData& input) {
 	quad.m128_30 = _mm_setzero_ps();
 	quad.m128_40 = _mm_setzero_ps();
 	quad.m128_50 = _mm_setzero_ps();
-	__m128 ruiSize = _mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeight,proto.elementWidth);
+	__m128 ruiSize = _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth);
 	proto.sub_F9B80_rev(ruiSize, quad, a5, a6, a7, a8, a9, texMins, texSize);
 	return 1;
 
@@ -910,7 +910,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 			quad.assetIndex2 = -1;
 			quad.styleDescriptorIndex = image.styleId + styleDescriptorBase;
 			quad.flags = 0x1F00;
-			__m128 ruiSize = _mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeight,proto.elementWidth);
+			__m128 ruiSize = _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth);
 			proto.sub_F9B80_rev( ruiSize, quad, transform, a6, a7, a8, a9, a10, a11);
 
 
@@ -959,7 +959,7 @@ bool Text_Render(RenderInstance& proto,const TextInputData& data,const Transform
 	v87 = data.float_0;
 	v172 = 0.0;
 	v186 = v87;
-	proto.sub_FFAE0(transform.directionVector, _mm_set_ps(proto.elementHeightRatio,proto.elementWidthRatio,proto.elementHeight,proto.elementWidth), v209);
+	proto.sub_FFAE0(transform.directionVector, _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth), v209);
 	v88 = 0.0;
 	a11 = _mm_setzero_ps();
 	v204 = (__m128)_mm_shuffle_ps(transform.inputSize, transform.inputSize, 216);

@@ -14,12 +14,12 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 		__m128 v18 = _mm_set1_ps(quad.vert[i][0]);
 		__m128 v19 = _mm_set1_ps(quad.vert[i][1]);
 		Vertex_t ruiVertex;
-		ruiVertex.position[0] = quad.vert[i][0] * elementWidth;
-		ruiVertex.position[1] = quad.vert[i][1] * elementHeight;
+		ruiVertex.position[0] = quad.vert[i][0];
+		ruiVertex.position[1] = quad.vert[i][1];
 		ruiVertex.position[2] = 0;
 
-		ruiVertex.float_C[0] = quad.vert[i][0] * elementWidth;
-		ruiVertex.float_C[1] = quad.vert[i][1] * elementHeight;
+		ruiVertex.float_C[0] = quad.vert[i][0];
+		ruiVertex.float_C[1] = quad.vert[i][1];
 		ruiVertex.float_C[2] = 0;
 		__m128 a = _mm_add_ps(
 			_mm_add_ps(_mm_mul_ps(quad.xUvVector, v18), _mm_mul_ps(v19, quad.yUvVector)),
@@ -758,10 +758,10 @@ void RenderInstance::StartFrame(float time) {
 	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[0]));
 	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[1]));
 	globals.currentTime = time;
-	float v17 = elementHeightRatio;
+	float v17 = elementHeightRpc;
 	v17 = v17 * elementHeight;
 	float v18 = elementWidth;
-	v18 = v18 * elementWidthRatio;
+	v18 = v18 * elementWidthRpc;
 	if (v18 <= v17)
 	{
 		v18 = v18 / v17;
