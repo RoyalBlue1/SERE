@@ -215,8 +215,11 @@ void RuiExportPrototype::GenerateTransformData() {
 }
 
 void RuiExportPrototype::GenerateRenderJobData() {
-	for (auto& callback : step2Callbacks) {
-		callback(*this);
+	std::sort(renderJobs.begin(), renderJobs.end(), [](ExportRenderJob& a, ExportRenderJob& b) {
+		return a.layer<b.layer;
+	});
+	for (auto& job : renderJobs) {
+		job.func(*this);
 	}
 }
 

@@ -787,6 +787,15 @@ void RenderInstance::StartFrame(float time) {
 
 void RenderInstance::EndFrame() {
 
+	std::sort(jobs.begin(), jobs.end(), [](RenderJob& a, RenderJob& b) {
+		return a.layer < b.layer;
+	});
+
+	for (auto& job : jobs) {
+		job.func(*this);
+	}
+	jobs.clear();
+
 	g_renderFramework->RuiBindPipeline();
 
 	g_renderFramework->RuiWriteIndexBuffer(indices);
