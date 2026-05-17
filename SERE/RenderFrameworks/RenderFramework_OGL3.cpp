@@ -148,22 +148,20 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
         resourceViews[3] = buffers[resources[3]].id;
     }
 
-	resourceViews[4] = styleDescSSBO; // Style descriptor buffer is always bound to slot 4
-
-	// bind and acivate the textures
+	// bind and acivate the textures 
     for (int i = 0; i < 2; i++) {
         if (resources[i] != ~0) {
-            //glActiveTexture(GL_TEXTURE0 + i);
+            glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, resourceViews[i]);
         }
-	}
+	} 
 
-	for (int i = 2; i < 4; i++) {
+	for (int i = 2; i < 4; i++) { 
         if (resources[i] != ~0) {
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, i, resourceViews[i]);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, i + 3, resourceViews[i]);
         }
     }
-
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, styleDescSSBO);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo); 
     glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -190,10 +188,11 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
      
     glEnableVertexAttribArray(3);
     glVertexAttribIPointer(3, 4, GL_INT,
-        sizeof(Vertex_t), (void*)0x30);
+        sizeof(Vertex_t), (void*)0x30); 
     glUseProgram(shaderProgram);
 	glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_SHORT, (void*)(start * sizeof(uint16_t)));
     glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     
 }
@@ -201,7 +200,7 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
 size_t RenderFramework_OGL3::CreateShaderDataBuffer(std::vector<ShaderSizeData_t> data)
 {
 	GLuint buffer;
-	glGenBuffers(1, &buffer);
+	glGenBuffers(1, &buffer); 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
     glBufferData(GL_SHADER_STORAGE_BUFFER, data.size() * sizeof(ShaderSizeData_t), data.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -220,6 +219,9 @@ size_t RenderFramework_OGL3::CreateTextureFromData(void* data, uint32_t width, u
     // Immutable storage — equivalent to D3D11_USAGE_IMMUTABLE with 1 mip level
     glTextureStorage2D(texture, 1, fmt.internalFormat, width, height);
 
+	// flip the image data vertically to match OpenGL's coordinate system
+    
+
     if (fmt.compressed) {
         // For BCn/DXT formats — slicePitch is the total compressed data size
         glCompressedTextureSubImage2D(
@@ -235,12 +237,12 @@ size_t RenderFramework_OGL3::CreateTextureFromData(void* data, uint32_t width, u
         // GL_UNPACK_ROW_LENGTH is in pixels, not bytes
         const uint32_t rowLengthPixels = pitch / fmt.blockSize;
 
-        //glTextureSubImage2D(
-        //    texture, 0,
-        //    0, 0, width, height,
-        //    fmt.format, fmt.type,
-        //    data
-        //);
+        glTextureSubImage2D(
+            texture, 0,
+            0, 0, width, height,
+            fmt.format, fmt.type,
+            data
+        );
 
     }
     auto error = glGetError();
@@ -249,7 +251,6 @@ size_t RenderFramework_OGL3::CreateTextureFromData(void* data, uint32_t width, u
         glDeleteTextures(1, &texture);
         return ~0ULL;
     }
-    //glTextureParameteri(texture, GL_TEXTURE_SRGB_DECODE_EXT, GL_DECODE_EXT);
 
     size_t ret = textures.size();
     textures.emplace_back(texture);
@@ -341,10 +342,10 @@ void RenderFramework_OGL3::RuiBindPipeline()
 
     // VSSetConstantBuffers(2) + PSSetConstantBuffers(2)
     // In GL, UBO bindings are shared across all shader stages
-    glBindBufferBase(GL_UNIFORM_BUFFER, 2, commonPerCameraUBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, commonPerCameraUBO);
 
     // VSSetConstantBuffers(3) + PSSetConstantBuffers(3)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 3, modelInstanceUBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, modelInstanceUBO);
 
     // IASetInputLayout + IASetVertexBuffers + IASetIndexBuffer
     // All stored in the VAO from init
@@ -355,6 +356,7 @@ void RenderFramework_OGL3::RuiBindPipeline()
 
     // PSSetSamplers(0)
     glBindSampler(0, samplerState);
+	glBindSampler(1, samplerState);
 
     
 }
@@ -362,18 +364,7 @@ void RenderFramework_OGL3::RuiBindPipeline()
 void RenderFramework_OGL3::RuiLoad(int width, int height)
 {
 
-    glGenBuffers(1, &commonPerCameraUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, commonPerCameraUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 576, nullptr, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &modelInstanceUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, modelInstanceUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 208, nullptr, GL_DYNAMIC_DRAW);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-   
-
+  
     CBufCommonPerCamera cam{};
     cam.c_cameraRelativeToClip.a.x = 2.f;
     cam.c_cameraRelativeToClip.a.w = -1.0f;
@@ -406,27 +397,27 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
     cam.c_rcpFramebufferViewportScale.x = 1.0f;
     cam.c_rcpFramebufferViewportScale.y = 1.0f;
 
-    glBindBuffer(GL_UNIFORM_BUFFER, commonPerCameraUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(cam), &cam);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glGenBuffers(1, &commonPerCameraUBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, commonPerCameraUBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 576, &cam, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, modelInstanceUBO);
-    ModelInstance* inst = (ModelInstance*)glMapBuffer(
-        GL_UNIFORM_BUFFER, GL_WRITE_ONLY
-    );
-    memset(inst, 0, sizeof(ModelInstance));
-    inst->objectToCameraRelative.a.x = 1.0f;
-    inst->objectToCameraRelative.b.y = 1.0f;
-    inst->objectToCameraRelative.c.z = 1.0f;
-    inst->objectToCameraRelativePrevFrame.a.x = 1.0f;
-    inst->objectToCameraRelativePrevFrame.b.y = 1.0f;
-    inst->objectToCameraRelativePrevFrame.c.z = 1.0f;
-    inst->diffuseModulation.x = 0.999999940f;
-    inst->diffuseModulation.y = 0.999999940f;
-    inst->diffuseModulation.z = 0.999999940f;
-    inst->diffuseModulation.w = 1.0f;
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    ModelInstance inst{};
+    //memset(inst, 0, sizeof(ModelInstance));
+    inst.objectToCameraRelative.a.x = 1.0f;
+    inst.objectToCameraRelative.b.y = 1.0f;
+    inst.objectToCameraRelative.c.z = 1.0f;
+    inst.objectToCameraRelativePrevFrame.a.x = 1.0f;
+    inst.objectToCameraRelativePrevFrame.b.y = 1.0f;
+    inst.objectToCameraRelativePrevFrame.c.z = 1.0f;
+    inst.diffuseModulation.x = 0.999999940f;
+    inst.diffuseModulation.y = 0.999999940f;
+    inst.diffuseModulation.z = 0.999999940f;
+    inst.diffuseModulation.w = 1.0f;
+
+
+    glGenBuffers(1, &modelInstanceUBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelInstanceUBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 208, &inst, GL_STATIC_DRAW);
 
     
     glGenBuffers(1, &indexBuffer);
