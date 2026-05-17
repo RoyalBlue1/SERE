@@ -1,0 +1,65 @@
+#version 450
+
+in vec4       out_texcoord0;  // TEXCOORD
+in vec2       out_texcoord1;  // TEXCOORD1
+flat in ivec4 out_texcoord2;  // TEXCOORD2 (flat = no interp)
+
+
+out vec4 out_color;
+
+struct g_fontBounds_t
+{
+    vec2 mins;
+    vec2 maxs;
+};
+
+struct g_imgBounds_t
+{
+    vec2 mins;
+    vec2 size;
+};
+
+struct g_styles_t
+{
+    vec4 color[3];
+    float blend;
+    float premul;
+    float _anon_0;
+    float _anon_1;
+    float _anon_2;
+    float _anon_3;
+    float _anon_4;
+    float _anon_5;
+    float _anon_6;
+    float _anon_7;
+    float _anon_8;
+    float _anon_9;
+};
+
+layout(std430, binding = 5) readonly buffer FontBoundsBuffer {
+    g_fontBounds_t g_fontBounds[];
+};
+
+layout(std430, binding = 6) readonly buffer ImgBoundsBuffer {
+    g_imgBounds_t g_imgBounds[];
+};
+
+layout(std430, binding = 4) readonly buffer StylesBuffer {
+    g_styles_t g_styles[];
+};
+
+
+layout(binding = 0) uniform sampler2D fontTexture;
+layout(binding = 1) uniform sampler2D materialTexture;
+
+void main()
+{
+    g_styles_t style = g_styles[out_texcoord2.x];
+    g_imgBounds_t imgBounds = g_imgBounds[out_texcoord2.y];
+    g_fontBounds_t fontBounds = g_fontBounds[out_texcoord2.z];
+    style.color[0] = style.color[0] * style.blend;
+    style.color[1] = style.color[1] * style.blend;
+    style.color[2] = style.color[2] * style.blend;
+    vec2 uv = vec2(out_texcoord1.x, 1.0 - out_texcoord1.y);
+    out_color = texture(materialTexture, uv) * style.color[0] * imgBounds.size.x * imgBounds.size.y + texture(fontTexture, out_texcoord0.xy) * style.color[1] * fontBounds.maxs.x * fontBounds.maxs.y + style.color[2] * imgBounds.size.x * imgBounds.size.y;
+}
