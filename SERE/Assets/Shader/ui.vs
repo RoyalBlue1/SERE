@@ -107,35 +107,17 @@ void main() {
     out_texcoord0 = in_texcoord1;
     out_texcoord1 = in_texcoord2;
     out_texcoord2 = in_texcoord3;
-    
-    /* r0.x = dot(input.position_0.xyz, c_modelInst.objectToCameraRelative[0].xyz);
-    r0.x = r0.x + c_modelInst.objectToCameraRelative[0].w;
-    r0.w = dot(input.position_0.xyz, c_modelInst.objectToCameraRelative[1].xyz);
-    r0.y = r0.w + c_modelInst.objectToCameraRelative[1].w;
-    r0.w = dot(input.position_0.xyz, c_modelInst.objectToCameraRelative[2].xyz);
-    r0.z = r0.w + c_modelInst.objectToCameraRelative[2].w;
-    r0.w = dot(r0.xyz, c_cameraRelativeToClip[0].xyz);
-    output.svposition_0.x = r0.w + c_cameraRelativeToClip[0].w;
-    r0.w = dot(r0.xyz, c_cameraRelativeToClip[1].xyz);
-    output.svposition_0.y = r0.w + c_cameraRelativeToClip[1].w;
-    r0.w = dot(r0.xyz, c_cameraRelativeToClip[2].xyz);
-    r0.x = dot(r0.xyz, c_cameraRelativeToClip[3].xyz);
-    output.svposition_0.w = r0.x + c_cameraRelativeToClip[3].w;
-    output.svposition_0.z = r0.w + c_cameraRelativeToClip[2].w;
-    */
 
-    mat4x4 c_cameraRelativeToClip = CBufCommonPerCamera.c_cameraRelativeToClip;
     vec4 cameraRelativePos;
     cameraRelativePos.x = dot(in_position, CBufModelInstance.objectToCameraRelative[0].xyz) + CBufModelInstance.objectToCameraRelative[0].w;
     cameraRelativePos.y = dot(in_position, CBufModelInstance.objectToCameraRelative[1].xyz) + CBufModelInstance.objectToCameraRelative[1].w;
     cameraRelativePos.z = dot(in_position, CBufModelInstance.objectToCameraRelative[2].xyz) + CBufModelInstance.objectToCameraRelative[2].w;
     cameraRelativePos.w = 1.0;
     vec4 clipPos;
-    // flip the x cordinate to convert from left-handed to right-handed clip space
-    clipPos.x = dot(cameraRelativePos, -c_cameraRelativeToClip[0]);
-    clipPos.y = dot(cameraRelativePos, c_cameraRelativeToClip[1]);
-    clipPos.z = dot(cameraRelativePos, -c_cameraRelativeToClip[2]);
-    clipPos.w = dot(cameraRelativePos, c_cameraRelativeToClip[3]);
+    clipPos.x = dot(cameraRelativePos, CBufCommonPerCamera.c_cameraRelativeToClip[0]);
+    clipPos.y = dot(cameraRelativePos, -CBufCommonPerCamera.c_cameraRelativeToClip[1]);
+    clipPos.z = dot(cameraRelativePos, CBufCommonPerCamera.c_cameraRelativeToClip[2]);
+    clipPos.w = dot(cameraRelativePos, CBufCommonPerCamera.c_cameraRelativeToClip[3]);
     gl_Position = clipPos;
 
 }
