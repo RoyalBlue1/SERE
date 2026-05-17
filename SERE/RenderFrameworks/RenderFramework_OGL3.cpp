@@ -143,7 +143,7 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
     }
     if (resources[2] != ~0) {
         resourceViews[2] = buffers[resources[2]].id;
-    }
+    } 
     if (resources[3] != ~0) {
         resourceViews[3] = buffers[resources[3]].id;
     }
@@ -158,6 +158,7 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
 
 	for (int i = 2; i < 4; i++) { 
         if (resources[i] != ~0) {
+			// font and image bounds are bound to slots 5 and 6 in the shader, so we bind them to 5 and 6 here
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, i + 3, resourceViews[i]);
         }
     }
@@ -172,10 +173,10 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer); 
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
         sizeof(Vertex_t), (void*)0x00);
 
     glEnableVertexAttribArray(1);
@@ -366,11 +367,13 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
 
   
     CBufCommonPerCamera cam{};
+
     cam.c_cameraRelativeToClip.a.x = 2.f;
     cam.c_cameraRelativeToClip.a.w = -1.0f;
     cam.c_cameraRelativeToClip.b.y = -2.f;
     cam.c_cameraRelativeToClip.b.w = 1.0f;
     cam.c_cameraRelativeToClip.c.z = 1.f;
+    //cam.c_cameraRelativeToClip.c.w = 0.5f;
     cam.c_cameraRelativeToClip.d.w = 1.0f;
     cam.c_cameraRelativeToClipPrevFrame.a.x = 1.0f;
     cam.c_cameraRelativeToClipPrevFrame.b.y = 1.0f;
@@ -399,7 +402,7 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
 
     glGenBuffers(1, &commonPerCameraUBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, commonPerCameraUBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, 576, &cam, GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(cam), &cam, GL_STATIC_DRAW);
 
     ModelInstance inst{};
     //memset(inst, 0, sizeof(ModelInstance));
@@ -417,7 +420,7 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
 
     glGenBuffers(1, &modelInstanceUBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelInstanceUBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, 208, &inst, GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(inst), &inst, GL_STATIC_DRAW);
 
     
     glGenBuffers(1, &indexBuffer);

@@ -1,8 +1,8 @@
 #version 450
 
-in vec4       out_texcoord0;  // TEXCOORD
-in vec2       out_texcoord1;  // TEXCOORD1
-flat in ivec4 out_texcoord2;  // TEXCOORD2 (flat = no interp)
+in vec4       in_texcoord0;  // TEXCOORD
+in vec2       in_texcoord1;  // TEXCOORD1
+flat in ivec4 in_texcoord2;  // TEXCOORD2 (flat = no interp)
 
 
 out vec4 out_color;
@@ -54,12 +54,13 @@ layout(binding = 1) uniform sampler2D materialTexture;
 
 void main()
 {
-    g_styles_t style = g_styles[out_texcoord2.x];
-    g_imgBounds_t imgBounds = g_imgBounds[out_texcoord2.y];
-    g_fontBounds_t fontBounds = g_fontBounds[out_texcoord2.z];
+    int type = in_texcoord2.w >> 12;
+    g_styles_t style = g_styles[in_texcoord2.x];
+    g_imgBounds_t imgBounds = g_imgBounds[in_texcoord2.y];
+    g_fontBounds_t fontBounds = g_fontBounds[in_texcoord2.z];
     style.color[0] = style.color[0] * style.blend;
     style.color[1] = style.color[1] * style.blend;
     style.color[2] = style.color[2] * style.blend;
-    vec2 uv = vec2(out_texcoord1.x, 1.0 - out_texcoord1.y);
-    out_color = texture(materialTexture, uv) * style.color[0] * imgBounds.size.x * imgBounds.size.y + texture(fontTexture, out_texcoord0.xy) * style.color[1] * fontBounds.maxs.x * fontBounds.maxs.y + style.color[2] * imgBounds.size.x * imgBounds.size.y;
+    vec2 uv = vec2(in_texcoord1.x, 1.0 - in_texcoord1.y);
+    out_color = vec4(1.0);
 }
