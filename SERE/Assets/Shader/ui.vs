@@ -5,9 +5,9 @@ layout(location = 1) in vec4  in_texcoord1;  // TEXCOORD1
 layout(location = 2) in vec2  in_texcoord2;  // TEXCOORD2
 layout(location = 3) in ivec4 in_texcoord3;  // TEXCOORD3
 
-layout(location = 0) out vec4       out_texcoord0;  // TEXCOORD
-layout(location = 1) out vec2       out_texcoord1;  // TEXCOORD1
-layout(location = 2) flat out ivec4 out_texcoord2;  // TEXCOORD2 (flat = no interp)
+layout(location = 0) out vec4       texcoord0;  // TEXCOORD
+layout(location = 1) out vec2       texcoord1;  // TEXCOORD1
+layout(location = 2) flat out ivec4 texcoord2;  // TEXCOORD2 (flat = no interp)
 
 struct c_fogParams_t
 {
@@ -104,9 +104,9 @@ layout(std430,binding = 3) readonly buffer Uni3 {
 
 
 void main() {
-    out_texcoord0 = in_texcoord1;
-    out_texcoord1 = in_texcoord2;
-    out_texcoord2 = in_texcoord3;
+    texcoord0 = in_texcoord1;
+    texcoord1 = in_texcoord2;
+    texcoord2 = in_texcoord3;
 
     vec4 cameraRelativePos;
     cameraRelativePos.x = dot(in_position, CBufModelInstance.objectToCameraRelative[0].xyz) + CBufModelInstance.objectToCameraRelative[0].w;
