@@ -198,11 +198,10 @@ void main()
             vec2 boundsSize = imgBounds.size;
 
             r1.xyzw = multisample(materialTexture, texcoord0.xy,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
-            out_color = r1;
-            // r0.x = r0.w * edgeAlpha + -r1.w;
-            // r0.x = sliceBegin.w * r0.x + r1.w;
-            // out_color.xyz = r1.xyz * r0.xxx;
-            // out_color.w = r1.w * sliceBegin.x;
+            r0.x = r0.w * edgeAlpha + -r1.w;
+            r0.x = premul * r0.x + r1.w;
+            out_color.xyz = r1.xyz * r0.xxx;
+            out_color.w = r1.w * blend;
             return;
         }
         default:
