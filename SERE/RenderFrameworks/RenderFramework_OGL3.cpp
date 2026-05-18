@@ -188,7 +188,7 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
         sizeof(Vertex_t), (void*)0x28);
      
     glEnableVertexAttribArray(3);
-    glVertexAttribIPointer(3, 4, GL_INT,
+    glVertexAttribIPointer(3, 4, GL_SHORT,
         sizeof(Vertex_t), (void*)0x30); 
     glUseProgram(shaderProgram);
 	glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_SHORT, (void*)(start * sizeof(uint16_t)));
@@ -625,7 +625,7 @@ void RenderFramework_OGL3::RuiReCreatePipeline(int width, int height)
     glDisable(GL_CULL_FACE);                   
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  
     glDisable(GL_SCISSOR_TEST);                 
-    glDisable(GL_MULTISAMPLE);                  
+    glEnable(GL_MULTISAMPLE);
     glDisable(GL_LINE_SMOOTH);                  
     glEnable(GL_DEPTH_CLAMP);                   
     glDisable(GL_POLYGON_OFFSET_FILL);

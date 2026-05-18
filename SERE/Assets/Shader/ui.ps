@@ -1,7 +1,7 @@
 #version 450
 
 in vec4       texcoord0;  // TEXCOORD
-in vec2       texcoord1;  // TEXCOORD1
+in vec4       texcoord1;  // TEXCOORD1
 flat in ivec4 texcoord2;  // TEXCOORD2 (flat = no interp)
 
 
@@ -57,6 +57,21 @@ float saturate(float x)
     return clamp(x, 0.0, 1.0);
 }
 
+vec2 saturate(vec2 x)
+{
+    return clamp(x, vec2(0.0), vec2(1.0));
+}
+
+vec3 saturate(vec3 x)
+{
+    return clamp(x, vec3(0.0), vec3(1.0));
+}
+
+vec4 saturate(vec4 x)
+{
+    return clamp(x, vec4(0.0), vec4(1.0));
+}
+
 float rsrqt(float x)
 {
     return inversesqrt(x);
@@ -70,18 +85,36 @@ void sincos(float x, out float s, out float c)
 
 vec4 multisample(sampler2D tex, vec2 uv, vec2 boundsSize, vec2 boundsMins, ivec2 sampleMask)
 {
-    vec4 result = vec4(0.0);
-    for(int i = 0; i < 4; i++)
-    {
-        if((sampleMask & (1 << i)) != 0)
-        {
-            vec2 offset = vec2(float(i & 1), float(i >> 1)) * 0.5;
-            vec2 sampleUV = (uv * boundsSize + boundsMins + offset) / boundsSize;
-            result += texture(tex, sampleUV);
-        }
-    }
-    // return result / float(bitCount(sampleMask));
-    return texture(tex, uv);
+    /*
+    r3.zw = saturate(r4.zw + r3.zw);
+      r5.x = g_imgBounds[v2.x].mins.x;
+      r5.y = g_imgBounds[v2.x].mins.y;
+      r5.z = g_imgBounds[v2.x].size.x;
+      r5.w = g_imgBounds[v2.x].size.y;
+      r3.zw = r3.zw * r5.zw + r5.xy;
+      r7.xyzw = materialTexture.SampleLevel(bilinearSampler_s, r3.zw, 0).xyzw;
+      r3.xy = r2.xy * float2(0.25,0.25) + r3.xy;
+      r3.zw = floor(r3.xy);
+      r3.zw = r4.xy ? -r3.zw : float2(-0,-0);
+      r3.xy = saturate(r3.xy + r3.zw);
+      r3.xy = r3.xy * r5.zw + r5.xy;
+      r3.xyzw = materialTexture.SampleLevel(bilinearSampler_s, r3.xy, 0).xyzw;
+      r3.xyzw = r7.xyzw + r3.xyzw;
+    */
+    vec4 r3;
+    r3.zw = uv + boundsMins;
+    r3.zw = r3.zw * boundsSize;
+    vec4 r7 = textureLod(tex, r3.zw, 0);
+    // r3.xy = texcoord0.xy * vec2(0.25, 0.25) + r3.xy;
+    // r3.zw = floor(r3.xy);
+    // r3.zw = sampleMask.xy != ivec2(0) ? -r3.zw : vec2(-0.0, -0.0);
+    // r3.xy = saturate(r3.xy + r3.zw);
+    // r3.xy = r3.xy * boundsSize + boundsMins;
+    // r3.xyzw = texture(tex, r3.xy) + r7;
+    // r3.xyzw = r3.xyzw * 0.25;
+    // r3.xyzw = clamp(r3.xyzw, 0.0, 1.0);
+    // r3.xyzw = r3.xyzw * r3.w;
+    return r7;
 }
 
 float antiAlias(float x)
@@ -106,14 +139,12 @@ void main()
     style.color[0] = style.color[0] * style.blend;
     style.color[1] = style.color[1] * style.blend;
     style.color[2] = style.color[2] * style.blend;
-    out_color = texture(materialTexture, texcoord1);
+    out_color = texture(materialTexture, texcoord1.xy);
     switch (type)
     {
         case 0:
-            out_color *= style.color[0];
             break;
         case 1:
-            out_color *= style.color[1];
             break;
         case 2:
         {
@@ -167,14 +198,15 @@ void main()
             vec2 boundsSize = imgBounds.size;
 
             r1.xyzw = multisample(materialTexture, texcoord0.xy,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
-            r0.x = r0.w * edgeAlpha + -r1.w;
+            out_color = r1;
+            // r0.x = r0.w * edgeAlpha + -r1.w;
             // r0.x = sliceBegin.w * r0.x + r1.w;
-            out_color.xyz = r1.xyz * r0.xxx;
-            out_color.w = r1.w * sliceBegin.x;
+            // out_color.xyz = r1.xyz * r0.xxx;
+            // out_color.w = r1.w * sliceBegin.x;
             return;
         }
         default:
-            out_color = vec4(1.0, 0.0, 1.0, 1.0);
+            multisample(materialTexture, texcoord0.xy, imgBounds.size, imgBounds.mins, texcoord2.ww & ivec2(16,32));
             break;
     }
 }
