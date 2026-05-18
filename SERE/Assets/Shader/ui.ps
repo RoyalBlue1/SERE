@@ -52,14 +52,129 @@ layout(std430, binding = 4) readonly buffer StylesBuffer {
 layout(binding = 0) uniform sampler2D fontTexture;
 layout(binding = 1) uniform sampler2D materialTexture;
 
+float saturate(float x)
+{
+    return clamp(x, 0.0, 1.0);
+}
+
+float rsrqt(float x)
+{
+    return inversesqrt(x);
+}
+
+void sincos(float x, out float s, out float c)
+{
+    s = sin(x);
+    c = cos(x);
+}
+
+vec4 multisample(sampler2D tex, vec2 uv, vec2 boundsSize, vec2 boundsMins, ivec2 sampleMask)
+{
+    vec4 result = vec4(0.0);
+    for(int i = 0; i < 4; i++)
+    {
+        if((sampleMask & (1 << i)) != 0)
+        {
+            vec2 offset = vec2(float(i & 1), float(i >> 1)) * 0.5;
+            vec2 sampleUV = (uv * boundsSize + boundsMins + offset) / boundsSize;
+            result += texture(tex, sampleUV);
+        }
+    }
+    return result / float(popcount(sampleMask));
+}
+
+float antiAlias(float x)
+{
+    return saturate(x);
+}
+
+vec4 lerp(vec4 a, vec4 b, float t)
+{
+    return a + t * (b - a);
+}
+
+
 void main()
 {
+    vec4 r1;
     int type = texcoord2.w >> 12;
-    g_styles_t style = g_styles[texcoord2.x];
-    g_imgBounds_t imgBounds = g_imgBounds[texcoord2.y];
+    int styleIndex = texcoord2.z;
+    g_styles_t style = g_styles[styleIndex];
+    g_imgBounds_t imgBounds = g_imgBounds[texcoord2.x];
     g_fontBounds_t fontBounds = g_fontBounds[texcoord2.z];
     style.color[0] = style.color[0] * style.blend;
     style.color[1] = style.color[1] * style.blend;
     style.color[2] = style.color[2] * style.blend;
     out_color = texture(materialTexture, texcoord1);
+    switch (type)
+    {
+        case 0:
+            out_color *= style.color[0];
+            break;
+        case 1:
+            out_color *= style.color[1];
+            break;
+        case 2:
+        {
+            float ellipseSizeX = g_styles[styleIndex]._anon_3;
+            float ellipseSizeY = g_styles[styleIndex]._anon_4;
+            float innerMask = g_styles[styleIndex]._anon_5;
+            float vingette = g_styles[styleIndex]._anon_6;
+            float ellipseMetric = ellipseSizeX * ellipseSizeY; //r1.y
+            // dFdxCoarse
+            r1.zw = texcoord0.zw * vec2(ellipseSizeX, ellipseSizeY);
+            float distanceToCenter = sqrt(dot(r1.zw, r1.zw));
+            float signedDistanceToCenter = ellipseMetric - distanceToCenter;
+            vec2 grad = vec2(
+                dFdxCoarse(signedDistanceToCenter),
+                dFdyCoarse(signedDistanceToCenter)
+            );
+            float aa = rsrqt(dot(grad, grad));
+            float artistCoverage = saturate(signedDistanceToCenter * vingette + 0.5);
+            float aaCoverage = saturate(signedDistanceToCenter * aa);
+            float edgeAlpha = min(artistCoverage, aaCoverage);
+            if(0 >= edgeAlpha)
+            {
+                discard;
+            }
+
+            vec4 color0 = g_styles[styleIndex].color[0];
+            vec4 color1 = g_styles[styleIndex].color[1];
+            vec4 color2 = g_styles[styleIndex].color[2];
+            
+            float blend = g_styles[styleIndex].blend;
+            float premul = g_styles[styleIndex].premul;
+            float innerSliceBlend = g_styles[styleIndex]._anon_0;
+            float sliceBegin = g_styles[styleIndex]._anon_1;
+            float sliceEnd = g_styles[styleIndex]._anon_2;
+            float innerAA = signedDistanceToCenter - innerMask * eclipseMetric;
+            float innerMask = saturate(innerAA * ellipseSizeY + 0.5);
+            float beginSin;
+            float beginCos;
+            sincos(sliceBegin, beginSin, beginCos);
+            float endCos = -cos(sliceEnd);
+            float beginCos = sin(-sliceEnd);
+
+            float sliceBeginMask = antiAlias(dot(v0.zw, vec2(beginSin,beginCos))); //r0.z
+            float sliceEndMask = antiAlias(dot(v0.zw, vec2(endCos,endSin))); //r0.w
+            float sliceMask = (sliceEnd - sliceBegin) >= 3.14159274 ? min(1, sliceBeginMask + sliceEndMask) : min(sliceBeginMask, sliceEndMask);//r0.x  
+            vec4 innerColor = vec4(innerSliceBlend * color2.xyz,min(color2.w,color1.w));
+            vec4 outerSliceColor = lerp(color2,color0,innerMask);
+            vec4 innerSliceColor = lerp(innerColor,color1,innerMask);
+            vec4 finalColor = lerp(r3,r1,sliceMask) * vec4(1,1,1,edgeAlpha);
+
+            vec2 boundsMins = imgBounds.mins;
+            vec2 boundsSize = imgBounds.size;
+
+            r1.xyzw = multisample(materialTexture, texcord0.xy,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
+            r0.x = r0.w * edgeAlpha + -r1.w;
+            r0.x = r6.w * r0.x + r1.w;
+            out_color.xyz = r1.xyz * r0.xxx;
+            out_color.w = r1.w * r6.x;
+            return;
+        }
+        default:
+            out_color = vec4(1.0, 0.0, 1.0, 1.0);
+            break;
+    }
 }
