@@ -80,7 +80,8 @@ vec4 multisample(sampler2D tex, vec2 uv, vec2 boundsSize, vec2 boundsMins, ivec2
             result += texture(tex, sampleUV);
         }
     }
-    return result / float(popcount(sampleMask));
+    // return result / float(bitCount(sampleMask));
+    return texture(tex, uv);
 }
 
 float antiAlias(float x)
@@ -96,7 +97,7 @@ vec4 lerp(vec4 a, vec4 b, float t)
 
 void main()
 {
-    vec4 r1;
+    vec4 r1, r0;
     int type = texcoord2.w >> 12;
     int styleIndex = texcoord2.z;
     g_styles_t style = g_styles[styleIndex];
@@ -147,30 +148,29 @@ void main()
             float innerSliceBlend = g_styles[styleIndex]._anon_0;
             float sliceBegin = g_styles[styleIndex]._anon_1;
             float sliceEnd = g_styles[styleIndex]._anon_2;
-            float innerAA = signedDistanceToCenter - innerMask * eclipseMetric;
-            float innerMask = saturate(innerAA * ellipseSizeY + 0.5);
+            float innerAA = signedDistanceToCenter - innerMask * ellipseMetric;
+            innerMask = saturate(innerAA * ellipseSizeY + 0.5);
             float beginSin;
             float beginCos;
             sincos(sliceBegin, beginSin, beginCos);
             float endCos = -cos(sliceEnd);
-            float beginCos = sin(-sliceEnd);
-
-            float sliceBeginMask = antiAlias(dot(v0.zw, vec2(beginSin,beginCos))); //r0.z
-            float sliceEndMask = antiAlias(dot(v0.zw, vec2(endCos,endSin))); //r0.w
+            float endSin = -sin(sliceEnd);
+            float sliceBeginMask = antiAlias(dot(texcoord0.zw, vec2(beginSin,beginCos))); //r0.z
+            float sliceEndMask = antiAlias(dot(texcoord0.zw, vec2(endCos,endSin))); //r0.w
             float sliceMask = (sliceEnd - sliceBegin) >= 3.14159274 ? min(1, sliceBeginMask + sliceEndMask) : min(sliceBeginMask, sliceEndMask);//r0.x  
             vec4 innerColor = vec4(innerSliceBlend * color2.xyz,min(color2.w,color1.w));
             vec4 outerSliceColor = lerp(color2,color0,innerMask);
             vec4 innerSliceColor = lerp(innerColor,color1,innerMask);
-            vec4 finalColor = lerp(r3,r1,sliceMask) * vec4(1,1,1,edgeAlpha);
+            vec4 finalColor = lerp(outerSliceColor, innerSliceColor, sliceMask);
 
             vec2 boundsMins = imgBounds.mins;
             vec2 boundsSize = imgBounds.size;
 
-            r1.xyzw = multisample(materialTexture, texcord0.xy,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
+            r1.xyzw = multisample(materialTexture, texcoord0.xy,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
             r0.x = r0.w * edgeAlpha + -r1.w;
-            r0.x = r6.w * r0.x + r1.w;
+            // r0.x = sliceBegin.w * r0.x + r1.w;
             out_color.xyz = r1.xyz * r0.xxx;
-            out_color.w = r1.w * r6.x;
+            out_color.w = r1.w * sliceBegin.x;
             return;
         }
         default:

@@ -388,7 +388,7 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
     cam.c_rcpNumCoverageSamples = 1.0f;
     cam.c_cloudRelConst.x = 0.5f;
     cam.c_cloudRelConst.y = 0.5f;
-    cam.c_useRealTimeLighting = 1.0f;
+    cam.c_useRealTimeLighting = 1.0f; 
     cam.c_maxLightingValue = 5.0f;
     cam.c_viewportMaxZ = 1.0f;
     cam.c_viewportScale.x = 1.0f;
@@ -481,7 +481,7 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
         GLint ok;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
         if (!ok) {
-            char log[512];
+            char log[4096];
             glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
             printf("Shader compile error: %s\n", log);
             return 0;
