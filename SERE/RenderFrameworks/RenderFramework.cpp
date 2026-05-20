@@ -6,11 +6,11 @@ std::unique_ptr<RenderFramework> g_renderFramework;
 void CreateRenderFramework(char** argv, int argc) {
 	if (argc > 1) {
 		std::string api = argv[1];
-		if (api == "dx11") {
+		if (api == "-dx11") {
 			g_renderFramework = std::make_unique<RenderFramework_Dx11>();
 			return;
 		}
-		else if (api == "ogl") {
+		else if (api == "-ogl") {
 			g_renderFramework = std::make_unique< RenderFramework_OGL3>();
 			return;
 		}
