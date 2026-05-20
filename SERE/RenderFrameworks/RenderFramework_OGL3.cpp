@@ -245,7 +245,6 @@ size_t RenderFramework_OGL3::CreateTextureFromData(void* data, uint32_t width, u
     }
     auto error = glGetError();
     if (error != GL_NO_ERROR) {
-        printf("CreateTextureFromData failed (GL error) %d\n", error);
         glDeleteTextures(1, &texture);
         return ~0ULL;
     }
