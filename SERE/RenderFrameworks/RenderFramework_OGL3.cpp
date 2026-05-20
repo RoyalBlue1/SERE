@@ -220,9 +220,6 @@ size_t RenderFramework_OGL3::CreateTextureFromData(void* data, uint32_t width, u
     // Immutable storage — equivalent to D3D11_USAGE_IMMUTABLE with 1 mip level
     glTextureStorage2D(texture, 1, fmt.internalFormat, width, height);
 
-	// flip the image data vertically to match OpenGL's coordinate system
-    
-
     if (fmt.compressed) {
         // For BCn/DXT formats — slicePitch is the total compressed data size
         glCompressedTextureSubImage2D(
@@ -268,30 +265,13 @@ void RenderFramework_OGL3::RuiWriteIndexBuffer(std::vector<uint16_t>& data)
     //indexBuffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(uint16_t), data.data(), GL_STATIC_DRAW);
-    //glBufferSubData(
-    //    GL_ELEMENT_ARRAY_BUFFER,
-    //    0,
-    //    data.size() * sizeof(uint16_t),
-    //    data.data()
-    //);
 }
 
 void RenderFramework_OGL3::RuiWriteVertexBuffer(std::vector<Vertex_t>&data)
 {
     glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
- //   glBufferSubData(
- //       GL_ARRAY_BUFFER,
- //       0,
- //       data.size() * sizeof(Vertex_t),
- //       data.data()
-	//);
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(Vertex_t), data.data(), GL_STATIC_DRAW);
-    auto err = glGetError();
-    if (err != 0) {
-		printf("Error updating vertex buffer: %d\n", err);
-    }
-
 }
 
 void RenderFramework_OGL3::RuiWriteStyleBuffer(std::vector<StyleDescriptorShader_t>&data)

@@ -118,12 +118,14 @@ vec4 multisample(sampler2D tex, vec2 uv, vec2 boundsSize, vec2 boundsMins, uvec2
 
 float antiAlias(float x)
 {
-    return x;
+    vec2 g = vec2(dFdx(x), dFdy(x));
+    float w = length(g);
+    return saturate(x*w + 0.5);
 }
 
 vec4 lerp(vec4 a, vec4 b, float t)
 {
-    return a + t * (b - a);
+    return mix(a, b, t);
 }
 
 
@@ -212,9 +214,6 @@ void main()
     g_styles_t style = g_styles[styleIndex];
     g_imgBounds_t imgBounds = g_imgBounds[texcoord2.x];
     g_fontBounds_t fontBounds = g_fontBounds[texcoord2.z];
-    style.color[0] = style.color[0] * style.blend;
-    style.color[1] = style.color[1] * style.blend;
-    style.color[2] = style.color[2] * style.blend;
     switch (type)
     {
         case 0:
@@ -363,19 +362,20 @@ void main()
             float sliceEndMask = antiAlias(dot(texcoord0.zw, vec2(endCos,endSin))); //r0.w
             float sliceMask = (sliceEnd - sliceBegin) >= 3.14159274 ? min(1, sliceBeginMask + sliceEndMask) : min(sliceBeginMask, sliceEndMask);//r0.x  
             vec4 innerColor = vec4(innerSliceBlend * color2.xyz,min(color2.w,color1.w));
-            vec4 outerSliceColor = lerp(color2,color0,innerMask);
-            vec4 innerSliceColor = lerp(innerColor,color1,innerMask);
-            vec4 finalColor = lerp(outerSliceColor, innerSliceColor, sliceMask);
+            vec4 outerSliceColor = mix(color0, color1, sliceMask);
+            vec4 innerSliceColor = mix(color1, innerColor, innerMask);
+            vec4 finalColor = mix(outerSliceColor, innerSliceColor, sliceMask);
+            float finalAlpha = finalColor.a;
+            finalColor *= vec4(1,1,1,edgeAlpha);
 
             vec2 boundsMins = imgBounds.mins;
             vec2 boundsSize = imgBounds.size;
             vec2 texUV = vec2(texcoord0.x, texcoord0.y);
 
-            r1.xyzw = multisample(materialTexture, texUV,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
-            r0.x = r0.w * edgeAlpha + -r1.w;
-            r0.x = premul * r0.x + r1.w;
-            out_color.xyz = r1.xyz * r0.xxx;
-            out_color.w = r1.w * blend;
+            vec4 textureColor = multisample(materialTexture, texUV,boundsSize,boundsMins,texcoord2.ww & ivec2(16,32));
+            vec4 color = finalColor * textureColor;
+            float outAlpha = mix(finalAlpha*edgeAlpha,color.a,premul);
+            out_color = vec4(color.rgb * outAlpha, color.a * blend);
             return;
         }
         default:
