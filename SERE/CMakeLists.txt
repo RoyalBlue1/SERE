@@ -5,10 +5,15 @@
 # Add source to this project's executable.
 
 add_subdirectory(Thirdparty/nativefiledialog-extended)
+add_subdirectory(Thirdparty/SDL EXCLUDE_FROM_ALL)
+add_subdirectory(Thirdparty/glew)
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR,ON)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+find_package(OpenGL)
 
 
 
@@ -31,7 +36,10 @@ add_executable (SERE
 	"imgui/imgui_tables.cpp"
 	"imgui/imgui_widgets.cpp"
 	"imgui/imgui_impl_dx11.cpp"
-	"imgui/imgui_impl_win32.cpp"
+	"imgui/imgui_impl_sdl3.cpp"
+	"imgui/imgui_impl_opengl3.cpp"
+	"imgui/imgui_impl_opengl3_loader.h"
+
 	"imgui/ImNodeFlow.cpp"
 	"imgui/implot.cpp"
 	"imgui/implot_demo.cpp"
@@ -60,10 +68,13 @@ add_executable (SERE
 	
 	"PakLoading/utils.cpp"
 
- "Settings.h" "RenderFrameworks/RenderFramework.cpp")
+ "Settings.h" "RenderFrameworks/RenderFramework.cpp" "RenderFrameworks/RenderFramework_OGL3.cpp" "RenderFrameworks/RenderFramework_OGL3.h")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
 target_link_libraries(SERE PUBLIC nfd)
+target_link_libraries(SERE PRIVATE SDL3::SDL3)
+target_link_libraries(SERE PRIVATE libglew_static)
+target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
 
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Assets ${CMAKE_CURRENT_BINARY_DIR}/Assets)
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/DroidSans.ttf ${CMAKE_CURRENT_BINARY_DIR}/Imgui/DroidSans.ttf)

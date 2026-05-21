@@ -2,7 +2,7 @@
 
 #include "RenderFrameWork.h"
 #include <d3d11.h>
-
+#include <SDL3/SDL.h>
 
 static const DXGI_FORMAT s_PakToDxgiFormat[] =
 {
@@ -119,8 +119,8 @@ private:
 	bool                     g_SwapChainOccluded = false;
 
 	ID3D11RenderTargetView*  g_mainRenderTargetView = nullptr;
-	WNDCLASSEXW wc;
 	HWND hwnd;
+	SDL_Window* window;
 	
 	ID3D11SamplerState* samplerState = nullptr;
 
