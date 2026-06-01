@@ -1,7 +1,7 @@
 #include "RuiNodeEditor.h"
-#include "imgui/imgui.h"
+#include "Imgui/imgui.h"
 
-#include "imgui/imgui_stdlib.h"
+#include "Imgui/imgui_stdlib.h"
 
 #include "Util.h"
 
@@ -14,7 +14,7 @@
 #include "Nodes/GlobalNodes.h"
 #include "Nodes/ConditionalNodes.h"
 
-#include "Thirdparty/rapidjson/istreamwrapper.h"
+#include "ThirdParty/rapidjson/istreamwrapper.h"
 #include "ThirdParty/rapidjson/prettywriter.h"
 #include "ThirdParty/rapidjson/stringbuffer.h"
 #include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"

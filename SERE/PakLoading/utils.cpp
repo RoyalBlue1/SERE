@@ -2498,14 +2498,14 @@ static uint64_t Pak_StringToGuidUnaligned(const char* string)
 	return v13 + v12 - 0xAE502812AA7333i64 * (uint32_t)(i + v14 / 8);
 }
 
-uint64_t __fastcall RTech::StringToGuid(const char* str)
+uint64_t RTech::StringToGuid(const char* str)
 {
 	return ((uintptr_t)str & 3)
 		? Pak_StringToGuidUnaligned(str)
 		: Pak_StringToGuidAligned(str);
 }
 
-uint32_t __fastcall RTech::StringToUIMGHash(const char* str)
+uint32_t RTech::StringToUIMGHash(const char* str)
 {
     std::uint64_t r = StringToGuid(str);
     unsigned int l = (r & 0xFFFFFFFF);

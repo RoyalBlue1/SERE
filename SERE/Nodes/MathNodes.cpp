@@ -910,6 +910,128 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TruncNode::GetPinInfo() {
 	return info;
 }
 
+ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+
+		const FloatVariable& min = getInNumeric("Min");
+		const FloatVariable& max = getInNumeric("Max");
+		const FloatVariable& val = getInNumeric("Val");
+		std::string name = (min.IsConstant()&&max.IsConstant()&&val.IsConstant()) ? "" : outName;
+		if(min.value>max.value)
+			return FloatVariable(0.f,name);
+		return FloatVariable(std::clamp(val.value,min.value,max.value), name);
+
+	});
+
+}
+
+ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ClampNode(rend, style) {}
+
+void ClampNode::draw() {
+	const FloatVariable& min = getInNumeric("Min");
+	const FloatVariable& max = getInNumeric("Max");
+	const FloatVariable& val = getInNumeric("Val");
+
+
+	ImGui::Text("Min %f", min.value);
+	ImGui::Text("Max %f", max.value);
+	ImGui::Text("Val %f", val.value);
+	if (min.value > max.value)
+		ImGui::Text("Error");
+	else
+		ImGui::Text("Res %f", std::clamp(val.value,min.value,max.value));
+
+}
+
+void ClampNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void ClampNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const FloatVariable& min = getInNumeric("Min");
+	const FloatVariable& max = getInNumeric("Max");
+	const FloatVariable& val = getInNumeric("Val");
+
+	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	ele.dependencys = { min.name,max.name,val.name };
+	ele.identifier = out.name;
+	ele.callback = [out, min,max,val](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = std::clamp( (float){}, (float){}, (float){});", out.GetFormattedName(proto), val.GetFormattedName(proto),min.GetFormattedName(proto),max.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = std::clamp( (float){}, (float){}, (float){});", out.GetFormattedName(proto), val.GetFormattedName(proto),min.GetFormattedName(proto),max.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Min", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Max", isPinNumeric, FloatVariable(1.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Val", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	getOut<Float2Variable>("Res")->behaviour([this, outName]() {
+
+		return Float2Variable(Vector2(0.5f,0.5f), name);
+
+	});
+
+}
+
+ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ProjectionNode(rend, style) {}
+
+void ProjectionNode::draw() {
+
+
+}
+
+void ProjectionNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void ProjectionNode::Export(RuiExportPrototype& proto) {
+	const auto& out = getOut<Float2Variable>("Res")->val();
+	const auto& pos = getInVal<Float3Variable>("Position");
+
+	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	ele.dependencys = { pos.name };
+	ele.identifier = out.name;
+	ele.callback = [out, pos](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = project3d(funcs,globals,inst,{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = project3d(funcs,globals,inst,{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> ProjectionNode::GetPinInfo() {
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<Float3Variable>>("Position",ImFlow::ConnectionFilter::SameType() , Float3Variable(Vector3(0.f,0.f,0.f))));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Res"));
+	return info;
+}
+
+
+
+
 void AddMathNodes(NodeEditor& editor) {
 
 	editor.AddNodeType<AdditionNode>();
@@ -928,4 +1050,6 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<FloorNode>();
 	editor.AddNodeType<CeilNode>();
 	editor.AddNodeType<TruncNode>();
+	editor.AddNodeType<ClampNode>();
+	editor.AddNodeType<ProjectionNode>();
 }

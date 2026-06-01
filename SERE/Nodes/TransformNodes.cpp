@@ -1,5 +1,5 @@
 #include "TransformNodes.h"
-#include "imgui/imgui_stdlib.h"
+#include "Imgui/imgui_stdlib.h"
 #include "Util.h"
 
 __m128 xmmword_12A146C0 = _mm_castsi128_ps(_mm_set_epi32(0xFFFFFFFF,0,0,0xFFFFFFFF));
@@ -1281,7 +1281,7 @@ void Transform10Node::Export(RuiExportPrototype& proto) {
 	ele.sourceNodeName = typeid(*this).name();
 #endif
 	ele.identifier = out.hash;
-	ele.dependencys = {p1parent.hash,p2parent.hash};
+	ele.dependencys = {p1parent.hash,p2parent.hash,p3parent.hash};
 	ele.callback = [p1parent,p1Pos,p2parent,p2Pos,p3parent,p3Pos,translate,point1,point2,out,size](RuiExportPrototype& proto) {
 		struct Transform10FileStruct {
 			uint8_t type = 7;
@@ -1463,6 +1463,7 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 	const Float2Variable& center = getInVal<Float2Variable>("Rotation Origin");
 	const FloatVariable& rot = getInVal<FloatVariable>("Rotation");
 	const TransformResult& out = getOut<TransformResult>("Out")->val();
+	
 	proto.AddDataVariable(center);
 	proto.AddDataVariable(rot);
 
@@ -1471,7 +1472,7 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 	ele.sourceNodeName = typeid(*this).name();
 #endif
 	ele.identifier = out.hash;
-	ele.dependencys = {parent.hash,};
+	ele.dependencys = {parent.hash};
 	ele.callback = [parent,center,rot,out,size](RuiExportPrototype& proto) {
 		struct Transform11FileStruct {
 			uint8_t type = 1;
@@ -1531,7 +1532,7 @@ void AddTransformNodes(NodeEditor& editor) {
 	editor.AddNodeType<Transform8Node>();
 	editor.AddNodeType<Transform9Node>();
 	editor.AddNodeType<Transform10Node>();
-	//editor.AddNodeType<Transform11Node>();
+	editor.AddNodeType<Transform11Node>();
 	//editor.AddNodeType<Transform12Node>();
 	//editor.AddNodeType<Transform13Node>();
 }

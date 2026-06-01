@@ -4,7 +4,7 @@
 
 # Add source to this project's executable.
 
-add_subdirectory(Thirdparty/nativefiledialog-extended)
+add_subdirectory(ThirdParty/nativefiledialog-extended)
 
 set(CMAKE_INCLUDE_CURRENT_DIR,ON)
 
@@ -25,18 +25,18 @@ add_executable (SERE
 	"RuiRendering/RenderFunctions.cpp"
 	"RuiRendering/RenderManager.cpp"
 
-	"imgui/imgui.cpp"
-	"imgui/imgui_demo.cpp"
-	"imgui/imgui_draw.cpp"
-	"imgui/imgui_tables.cpp"
-	"imgui/imgui_widgets.cpp"
-	"imgui/imgui_impl_dx11.cpp"
-	"imgui/imgui_impl_win32.cpp"
-	"imgui/ImNodeFlow.cpp"
-	"imgui/implot.cpp"
-	"imgui/implot_demo.cpp"
-	"imgui/implot_items.cpp"
-	"imgui/imgui_stdlib.cpp"
+	"Imgui/imgui.cpp"
+	"Imgui/imgui_demo.cpp"
+	"Imgui/imgui_draw.cpp"
+	"Imgui/imgui_tables.cpp"
+	"Imgui/imgui_widgets.cpp"
+	"Imgui/imgui_impl_dx11.cpp"
+	"Imgui/imgui_impl_win32.cpp"
+	"Imgui/ImNodeFlow.cpp"
+	"Imgui/implot.cpp"
+	"Imgui/implot_demo.cpp"
+	"Imgui/implot_items.cpp"
+	"Imgui/imgui_stdlib.cpp"
 
 	"Nodes/ArgumentNodes.cpp"
 	"Nodes/TransformNodes.cpp"

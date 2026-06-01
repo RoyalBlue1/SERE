@@ -173,6 +173,8 @@ struct TransformSize :Variable {
 	}
 	__m128 size;
 	std::string Literal() const override {
-		return std::format("_mm_set_ps({},{},{},{})", size.m128_f32[3], size.m128_f32[2], size.m128_f32[1], size.m128_f32[0]);
+		float sizef[4];
+		_mm_store_ps(sizef, size);
+		return std::format("_mm_set_ps({},{},{},{})", sizef[3], sizef[2], sizef[1], sizef[0]);
 	}
 };

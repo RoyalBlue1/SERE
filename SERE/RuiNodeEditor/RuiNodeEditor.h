@@ -5,7 +5,7 @@
 #include <map>
 #include <filesystem>
 
-#include "imgui/ImNodeFlow.h"
+#include "Imgui/ImNodeFlow.h"
 #include "RuiRendering/RenderManager.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"

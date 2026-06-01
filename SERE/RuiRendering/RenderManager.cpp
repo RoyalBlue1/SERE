@@ -24,13 +24,16 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 		__m128 a = _mm_add_ps(
 			_mm_add_ps(_mm_mul_ps(quad.xUvVector, v18), _mm_mul_ps(v19, quad.yUvVector)),
 			quad.UvBase);
-		ruiVertex.float_18[0] = a.m128_f32[0];
-		ruiVertex.float_18[1] = a.m128_f32[1];
-		ruiVertex.float_18[2] = a.m128_f32[2];
-		ruiVertex.float_18[3] = a.m128_f32[3];
+		// ruiVertex.float_18[0] = a.m128_f32[0];
+		// ruiVertex.float_18[1] = a.m128_f32[1];
+		// ruiVertex.float_18[2] = a.m128_f32[2];
+		// ruiVertex.float_18[3] = a.m128_f32[3];
+		_mm_store_ps(ruiVertex.float_18,a);
 		__m128 b = quad.m128_50;
-		ruiVertex.float_28[0] = b.m128_f32[0];
-		ruiVertex.float_28[1] = b.m128_f32[1];
+		float bStore[4];
+		_mm_store_ps(bStore, b);
+		ruiVertex.float_28[0] = bStore[0];
+		ruiVertex.float_28[1] = bStore[1];
 		ruiVertex.assetIndex = quad.assetIndex;
 		ruiVertex.assetIndex2 = quad.assetIndex2;
 		ruiVertex.word_34 = quad.styleDescriptorIndex;
@@ -41,7 +44,7 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 }
 
 
-void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
+void RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
 {
 
 
@@ -121,7 +124,7 @@ void __fastcall RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
 	v37 = _mm_mul_ps(unk3Float_4, v25);
 
 
-	v33.m128_f32[0] = 1 * 2.0;
+	//v33.m128_f32[0] = 1 * 2.0;
 
 
 	v65 = a5.b;
@@ -233,7 +236,7 @@ void RenderInstance::sub_F9B80_rev(
 	const __m128& texSize)
 {
 	ImageAtlas *imageAtlas; // r13
-	__int16 v24; // r14
+	int16_t v24; // r14
 	uint16_t assetIndex; // cx
 	uiImageAtlasUnk *v35; // rcx
 	__m128 v38; // xmm1
@@ -351,7 +354,7 @@ void RenderInstance::sub_F9B80_rev(
 		return;
 	}
 
-	v35 = &imageAtlas->renderOffsets[(__int16)assetIndex];
+	v35 = &imageAtlas->renderOffsets[assetIndex];
 
 
 	v38 = _mm_mul_ps(_mm_set_ps(0,0,1,1),ruiSize);
@@ -371,26 +374,26 @@ void RenderInstance::sub_F9B80_rev(
 		_mm_shuffle_ps(v35->m128_10,v35->m128_10,_MM_SHUFFLE(3,2,3,2)));
 	v47 = _mm_sub_ps(v46, v41);
 	v50 = _mm_movelh_ps(v46, _mm_set1_ps(1));
-	v51 = _mm_mul_ps(v50, a4.UvBase);
-	v52 = _mm_mul_ps(v50, a4.yUvVector);
+	v51 = _mm_mul_ps(v50, a4.yUvVector);
+	v52 = _mm_mul_ps(v50, a4.xUvVector);
 	v184[0] = _mm_add_ps(_mm_sub_ps(_mm_set1_ps(1), v50), v51);
 	v53 = NRReciprocal(v47);
 	v54 = _mm_movelh_ps(_mm_mul_ps(_mm_mul_ps(v42, v46), v53), _mm_set1_ps(1));
-	v55 = _mm_mul_ps(v54, a4.xUvVector);
+	v55 = _mm_mul_ps(v54, a4.UvBase);
 	v56 = _mm_mul_ps(
-		_mm_sub_ps(_mm_add_ps(_mm_mul_ps((__m128)_mm_shuffle_ps(v53,v53, 238), v39), _mm_set_ps(1,1,0,0)), texMin),
+		_mm_sub_ps(_mm_add_ps(_mm_mul_ps((__m128)_mm_shuffle_ps(v53,v53, _MM_SHUFFLE(3,2,3,2)), v39), _mm_set_ps(1,1,0,0)), texMin),
 		texSizeRcp);
-	v57 = _mm_mul_ps(v50, a4.xUvVector);
-	v58 = _mm_mul_ps(v54, a4.yUvVector);
+	v57 = _mm_mul_ps(v50, a4.UvBase);
+	v58 = _mm_mul_ps(v54, a4.xUvVector);
 	v59 = _mm_sub_ps(v40, _mm_mul_ps(_mm_mul_ps(v40, v42), (__m128)v53));
 	v60 = _mm_shuffle_ps(v56,v56, _MM_SHUFFLE(3,1,2,0));
 	v61 = _mm_shuffle_ps(a8,a8, _MM_SHUFFLE(3,1,2,0));
 	v62 = _mm_unpackhi_ps(v61, v60);
 	v63 = _mm_unpacklo_ps(v61, v60);
-	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.UvBase));
-	v65 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps((__m128)v56, _mm_set_ps(-0.0,-0.0,0,0))));
+	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.yUvVector));
+	v65 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(v56, _mm_set_ps(-0.0,-0.0,0,0))));
 
-	v187 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps((__m128)_mm_shuffle_ps(v56,v56, 78),_mm_set_ps(-0.0,-0.0,0,0))));
+	v187 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(_mm_shuffle_ps(v56,v56, _MM_SHUFFLE(1,0,3,2)),_mm_set_ps(-0.0,-0.0,0,0))));
 	if ( (v65 & 3) == 0 )
 	{
 

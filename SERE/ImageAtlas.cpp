@@ -6,7 +6,7 @@
 #include <mutex>
 
 #include "ThirdParty/rapidjson/document.h"
-#include "Thirdparty/DDSTextureLoader11.h"
+#include "ThirdParty/DDSTextureLoader11.h"
 
 
 #undef GetObject

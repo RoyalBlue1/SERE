@@ -1,4 +1,5 @@
 #include "SplitMergeNodes.h"
+#include <immintrin.h>
 
 SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string nameX = Variable::UniqueName();
@@ -623,26 +624,29 @@ SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 	std::string name = Variable::UniqueName();
 	getOut<FloatVariable>("X")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[0], name);
+		return FloatVariable(_mm_cvtss_f32(in.size), name);
 		});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("Y")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[1], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(1,1,1,1));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("Z")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[2], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(2,2,2,2));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("W")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[3], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(3,3,3,3));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 }
 
 
