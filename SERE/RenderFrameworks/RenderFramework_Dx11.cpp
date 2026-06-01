@@ -1,8 +1,9 @@
 #include "RenderFrameworks/RenderFramework_Dx11.h"
 #include "ThirdParty/DDSTextureLoader11.h"
 #include "Imgui/imgui_impl_dx11.h"
-#include "Imgui/imgui_impl_win32.h"
+#include "Imgui/imgui_impl_sdl3.h"
 
+#include <SDL3/SDL.h>
 #include <fstream>
 
 #include <d3dcompiler.h>
@@ -12,61 +13,31 @@
 
 UINT g_WinResizeWidth = 0, g_WinResizeHeight = 0;
 
-
-// Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-// Win32 message handler
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-		return true;
-
-	switch (msg)
-	{
-	case WM_SIZE:
-		if (wParam == SIZE_MINIMIZED)
-			return 0;
-		g_WinResizeWidth = (UINT)LOWORD(lParam); // Queue resize
-		g_WinResizeHeight = (UINT)HIWORD(lParam);
-		return 0;
-	case WM_SYSCOMMAND:
-		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-			return 0;
-		break;
-	case WM_DESTROY:
-		::PostQuitMessage(0);
-		return 0;
-	}
-	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
-}
-
-
 RenderFramework_Dx11::RenderFramework_Dx11() {
     // Create application window
-    //ImGui_ImplWin32_EnableDpiAwareness();
-    wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr),::LoadIcon(nullptr,MAKEINTRESOURCE(1)) , nullptr, nullptr, nullptr, L"SERE", ::LoadIcon(nullptr,MAKEINTRESOURCE(1))};
-    ::RegisterClassExW(&wc);
-    hwnd = ::CreateWindowW(wc.lpszClassName, L"SERE", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+	}
+	SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
+	window = SDL_CreateWindow("SERE", 1280, 800, window_flags);
+	SDL_PropertiesID props = SDL_GetWindowProperties(window);
+	hwnd = (HWND)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
+	
     // Initialize Direct3D
     if (!CreateDeviceD3D())
     {
-        CleanupDeviceD3D();
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-        
+        CleanupDeviceD3D();        
     }
 
     // Show the window
-    ::ShowWindow(hwnd, SW_SHOWMAXIMIZED);
-    ::UpdateWindow(hwnd);
-
+	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_ShowWindow(window);
+	SDL_StartTextInput(window);
+	SDL_MaximizeWindow(window);
+	SDL_SetHint(SDL_HINT_WINDOWS_ENABLE_MENU_MNEMONICS, "0"); // Disable ALT key mnemonics to avoid interfering with ImGui input handling
     // Setup Platform/Renderer backends
-    ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplSDL3_InitForD3D(window);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
 
@@ -75,23 +46,36 @@ RenderFramework_Dx11::RenderFramework_Dx11() {
 RenderFramework_Dx11::~RenderFramework_Dx11() {
 
 	CleanupDeviceD3D();
-	::DestroyWindow(hwnd);
-	::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+	SDL_DestroyWindow(window);
 }
 
 void RenderFramework_Dx11::ImGuiDeInit() {
 	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplWin32_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
 }
 
 bool RenderFramework_Dx11::ShouldMainLoopRun() {
-	MSG msg;
-	while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
 	{
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
-		if (msg.message == WM_QUIT)
+		//if(	event.type == SDL_EVENT_KEY_DOWN)
+		//{
+		//	if (event.key.key == SDLK_LALT || event.key.key == SDLK_RALT)
+		//	{
+		//		continue;
+		//	}
+		//}
+		if (event.type == SDL_EVENT_QUIT)
 			return false;
+		if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
+			return false;
+		if (event.type == SDL_EVENT_WINDOW_RESIZED && event.window.windowID == SDL_GetWindowID(window))
+		{
+			// Release all outstanding references to the swap chain's buffers before resizing.
+			g_WinResizeWidth = (UINT)event.window.data1; // Queue resize
+			g_WinResizeHeight = (UINT)event.window.data2;
+		}
+		ImGui_ImplSDL3_ProcessEvent(&event);
 	}
 	return true;
 }
@@ -155,12 +139,12 @@ void RenderFramework_Dx11::CleanupRenderTarget()
 
 bool RenderFramework_Dx11::ImGuiStartFrame() {
     ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
 
     if (g_SwapChainOccluded && g_pSwapChain->Present(0, DXGI_PRESENT_TEST) == DXGI_STATUS_OCCLUDED)
     {
-        ::Sleep(10);
-        return false;
+		SDL_Delay(10);
+		return false;
     }
     g_SwapChainOccluded = false;
 

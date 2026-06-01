@@ -1,0 +1,478 @@
+#version 450
+
+in vec4       texcoord0;  // TEXCOORD
+in vec4       texcoord1;  // TEXCOORD1
+flat in ivec4 texcoord2;  // TEXCOORD2 (flat = no interp)
+
+
+out vec4 out_color;
+
+struct g_fontBounds_t
+{
+    vec2 mins;
+    vec2 maxs;
+};
+
+struct g_imgBounds_t
+{
+    vec2 mins;
+    vec2 size;
+};
+
+struct g_styles_t
+{
+    vec4 color[3];
+    float blend;
+    float premul;
+    float _anon_0;
+    float _anon_1;
+    float _anon_2;
+    float _anon_3;
+    float _anon_4;
+    float _anon_5;
+    float _anon_6;
+    float _anon_7;
+    float _anon_8;
+    float _anon_9;
+};
+
+layout(std430, binding = 5) readonly buffer FontBoundsBuffer {
+    g_fontBounds_t g_fontBounds[];
+};
+
+layout(std430, binding = 6) readonly buffer ImgBoundsBuffer {
+    g_imgBounds_t g_imgBounds[];
+};
+
+layout(std430, binding = 4) readonly buffer StylesBuffer {
+    g_styles_t g_styles[];
+};
+
+
+layout(binding = 0) uniform sampler2D fontTexture;
+layout(binding = 1) uniform sampler2D materialTexture;
+
+float saturate(float x)
+{
+    return clamp(x, 0.0, 1.0);
+}
+
+vec2 saturate(vec2 x)
+{
+    return clamp(x, vec2(0.0), vec2(1.0));
+}
+
+vec3 saturate(vec3 x)
+{
+    return clamp(x, vec3(0.0), vec3(1.0));
+}
+
+vec4 saturate(vec4 x)
+{
+    return clamp(x, vec4(0.0), vec4(1.0));
+}
+
+float rsrqt(float x)
+{
+    return inversesqrt(x);
+}
+
+void sincos(float x, out float s, out float c)
+{
+    s = sin(x);
+    c = cos(x);
+}
+
+
+vec4 multisample(sampler2D tex, vec2 uv, vec2 boundsSize, vec2 boundsMins, uvec2 sampleMask)
+{
+    vec2 ddx = dFdxCoarse(uv);
+    vec2 ddy = dFdyCoarse(uv);
+
+    vec2 newUv = (-ddx -ddy) * vec2(0.25,0.25) + uv;
+    vec2 a = floor(newUv);
+    a = sampleMask.x != 0 ? -a : vec2(-0,-0);
+    newUv = saturate(a + newUv);
+    vec4 res = textureLod(tex, newUv * boundsSize + boundsMins, 0).xyzw;
+
+    newUv = (-ddx + ddy) * vec2(0.25,0.25) + uv;
+    a = floor(newUv);
+    a = sampleMask.x != 0 ? a : vec2(-0,-0);
+    newUv = saturate(newUv + a);
+    res += textureLod(tex, newUv * boundsSize + boundsMins, 0).xyzw;
+
+    newUv = (ddx - ddy) * vec2(0.25,0.25) + uv;
+    a = floor(newUv);
+    a = sampleMask.y != 0 ? a : vec2(-0,-0);
+    newUv = saturate(newUv + a);
+    res += textureLod(tex, newUv * boundsSize + boundsMins, 0).xyzw;
+
+    newUv = (ddx + ddy) * vec2(0.25,0.25) + uv;
+    a = floor(newUv);
+    a = sampleMask.y != 0 ? -a : vec2(-0,-0);
+    newUv = saturate(newUv + a);
+    res += textureLod(tex, newUv * boundsSize + boundsMins, 0).xyzw;
+
+    return vec4(0.25,0.25,0.25,0.25) * res;
+}
+
+float antiAlias(float x)
+{
+    vec2 g = vec2(dFdx(x), dFdy(x));
+    float w = length(g);
+    return saturate(x*w + 0.5);
+}
+
+vec4 lerp(vec4 a, vec4 b, float t)
+{
+    return mix(a, b, t);
+}
+
+
+float fontDistance(vec2 uv, float bias)
+{
+    return textureLod(fontTexture, uv, 0.0).r * 12.75 + bias - 10.0;
+}
+
+vec3 evalGlyph(
+    vec2 uv,
+    vec4 bounds,
+    vec2 dx,
+    vec2 dy,
+    float pxScale,
+    float glyphScale,
+    float strokeWidth,
+    float distBias,
+    float maxFilterWidth
+)
+{
+    if (!all(greaterThanEqual(uv, bounds.xy)) ||
+        !all(lessThanEqual(uv, bounds.zw)))
+        return vec3(0.0);
+
+    float aaScale = 2.23606801 * pxScale;
+    float filterWidth = min(maxFilterWidth / glyphScale, aaScale);
+    float scaledStroke = strokeWidth * glyphScale;
+
+    float sdf = fontDistance(uv, distBias * glyphScale);
+    float fillEdge = sdf * filterWidth;
+
+    if ((sdf + scaledStroke) * filterWidth < -1.0)
+        return vec3(0.0);
+
+    if (fillEdge > 1.0)
+        return vec3(1.0);
+
+    float strokeBlend = saturate(1.0 + sdf / max(1.0e-20, scaledStroke));
+
+    float fill = saturate(fillEdge + 0.5);
+    float stroke = saturate((sdf + scaledStroke) * filterWidth + 0.5);
+
+    vec2 taps[4] = vec2[4](
+        uv - dx * 0.4 - dy * 0.2,
+        uv - dx * 0.2 + dy * 0.4,
+        uv + dx * 0.2 - dy * 0.4,
+        uv + dx * 0.4 + dy * 0.2
+    );
+
+    for (int i = 0; i < 4; ++i)
+    {
+        float tapSdf = fontDistance(taps[i], distBias * glyphScale);
+        fill += saturate(tapSdf * filterWidth + 0.5);
+        stroke += saturate((tapSdf + scaledStroke) * aaScale + 0.5);
+    }
+
+    return vec3(fill, stroke, strokeBlend) * vec3(0.2, 0.2, 1.0);
+}
+
+float evalShadow(
+    vec2 uv,
+    vec4 bounds,
+    float pxScale,
+    float glyphScale,
+    float distBias,
+    float shadowFilterWidth
+)
+{
+    if (!all(greaterThanEqual(uv, bounds.xy)) ||
+        !all(lessThanEqual(uv, bounds.zw)))
+        return 0.0;
+
+    float aaScale = 2.23606801 * pxScale;
+    float filterWidth = min(shadowFilterWidth / glyphScale, aaScale);
+    float sdf = fontDistance(uv, distBias * glyphScale);
+
+    return saturate(sdf * filterWidth + 0.5);
+}
+
+
+void main()
+{
+    vec4 r1, r0;
+    int type = texcoord2.w >> 12;
+    int styleIndex = texcoord2.z;
+    g_styles_t style = g_styles[styleIndex];
+    g_imgBounds_t imgBounds = g_imgBounds[texcoord2.x];
+    g_fontBounds_t fontBounds = g_fontBounds[texcoord2.z];
+    switch (type)
+    {
+        case 0:
+        {
+        uvec2 glyphIndex = uvec2(texcoord2.xy) & uvec2(0xffffu);
+        int styleIndex = texcoord2.z;
+
+        vec4 bounds0 = vec4(
+            g_fontBounds[int(glyphIndex.x)].mins,
+            g_fontBounds[int(glyphIndex.x)].maxs
+        );
+
+        vec4 bounds1 = vec4(
+            g_fontBounds[int(glyphIndex.y)].mins,
+            g_fontBounds[int(glyphIndex.y)].maxs
+        );
+
+        vec4 fillColor = g_styles[styleIndex].color[0];
+        vec4 innerStrokeColor = g_styles[styleIndex].color[1];
+        vec4 outerStrokeColor = g_styles[styleIndex].color[2];
+
+        vec2 shadowOffset = vec2(g_styles[styleIndex]._anon_0,
+                                g_styles[styleIndex]._anon_1);
+
+        float shadowOpacity = g_styles[styleIndex]._anon_2;
+        float shadowFilterWidth = g_styles[styleIndex]._anon_3;
+        float strokeWidth = g_styles[styleIndex]._anon_4;
+        float distBias = g_styles[styleIndex]._anon_5;
+        float maxFilterWidth = g_styles[styleIndex]._anon_6;
+
+        vec2 texSize = vec2(textureSize(fontTexture, 0));
+
+        vec2 uv0 = texcoord0.xy;
+        vec2 uv1 = texcoord0.zw;
+
+        vec2 dx0 = dFdxCoarse(uv0);
+        vec2 dy0 = dFdyCoarse(uv0);
+        vec2 dx1 = dFdxCoarse(uv1);
+        vec2 dy1 = dFdyCoarse(uv1);
+
+        float pxScale0 = inversesqrt(max(
+            dot(dx0 * texSize, dx0 * texSize),
+            dot(dy0 * texSize, dy0 * texSize)
+        ));
+
+        float pxScale1 = inversesqrt(max(
+            dot(dx1 * texSize, dx1 * texSize),
+            dot(dy1 * texSize, dy1 * texSize)
+        ));
+
+        vec3 glyph0 = evalGlyph(
+            uv0, bounds0, dx0, dy0,
+            pxScale0, texcoord1.x,
+            strokeWidth, distBias, maxFilterWidth
+        );
+
+        vec3 glyph1 = evalGlyph(
+            uv1, bounds1, dx1, dy1,
+            pxScale1, texcoord1.y,
+            strokeWidth, distBias, maxFilterWidth
+        );
+
+        vec3 glyph = max(glyph0, glyph1);
+
+        float fillAlpha = fillColor.a * glyph.x;
+        float strokeCoverage = glyph.y - glyph.x;
+
+        vec4 strokeColor = mix(outerStrokeColor, innerStrokeColor, glyph.z);
+        float strokeAlpha = strokeColor.a * strokeCoverage;
+
+        vec3 rgb = fillColor.rgb * fillAlpha +
+                strokeColor.rgb * strokeAlpha;
+
+        float alpha = fillAlpha + strokeAlpha;
+
+        if (alpha < 1.0 && shadowOpacity > 0.0)
+        {
+            float shadow0 = evalShadow(
+                uv0 - shadowOffset * texcoord1.x,
+                bounds0,
+                pxScale0,
+                texcoord1.x,
+                distBias,
+                shadowFilterWidth
+            );
+
+            float shadow1 = evalShadow(
+                uv1 - shadowOffset * texcoord1.y,
+                bounds1,
+                pxScale1,
+                texcoord1.y,
+                distBias,
+                shadowFilterWidth
+            );
+
+            alpha += max(shadow0, shadow1) * shadowOpacity * (1.0 - alpha);
+        }
+
+            out_color = vec4(rgb, alpha);
+            return;
+        }
+        case 1:
+        {
+            uint flags = uint(texcoord2.w);
+            vec4 baseColor = style.color[0];
+            float blend = style.blend;
+            float premul = style.premul;
+
+            uvec2 baseMask = uvec2(flags & 16u, flags & 32u);
+
+            vec4 texColor = multisample(
+                materialTexture,
+                texcoord0.xy,
+                g_imgBounds[texcoord2.x].size,
+                g_imgBounds[texcoord2.x].mins,
+                baseMask
+            );
+
+            if (texcoord2.y >= 0)
+            {
+                vec4 color1 = style.color[1];
+                vec4 color2 = style.color[2];
+
+                uvec2 layerMask = uvec2(flags & 64u, flags & 128u);
+
+                vec4 layerSample = multisample(
+                    materialTexture,
+                    texcoord0.zw,
+                    g_imgBounds[texcoord2.y].size,
+                    g_imgBounds[texcoord2.y].mins,
+                    layerMask
+                );
+
+                vec4 layerColor = layerSample * (color2 - color1) + color1;
+
+                texColor = ((flags & 1u) != 0u)
+                    ? texColor + layerColor
+                    : texColor * layerColor;
+            }
+
+            vec4 color = texColor * baseColor;
+
+            bool useCornerMask = (flags & 3840) != 3840;
+
+            float coveredAlpha = color.a;
+            float coverage = 1.0;
+
+            if (useCornerMask)
+            {
+                vec2 dx = dFdxCoarse(texcoord0.zw);
+                vec2 dy = dFdyCoarse(texcoord0.zw);
+                vec2 invGrad = inversesqrt(dx * dx + dy * dy);
+
+                float bit8  = float((flags >> 8u)  & 1u);
+                float bit9  = float((flags >> 9u)  & 1u);
+                float bit10 = float((flags >> 10u) & 1u);
+                float bit11 = float((flags >> 11u) & 1u);
+
+                vec2 startEdge = saturate(texcoord0.zw * invGrad * 0.699999988 + 0.5);
+                vec2 endEdge = saturate((vec2(1.0) - texcoord0.zw) * invGrad * 0.699999988 + 0.5);
+
+                float xMask = max(0.0, max(bit8, startEdge.x) + max(bit9, endEdge.x) - 1.0);
+                float yMask = max(0.0, max(bit10, startEdge.y) + max(bit11, endEdge.y) - 1.0);
+
+                coverage = xMask * yMask;
+                coveredAlpha = color.a * coverage;
+            }
+
+        float rgbFactor = mix(coveredAlpha, coverage, premul);
+        out_color = vec4(color.rgb * rgbFactor, coveredAlpha * blend);
+        return;
+        }
+        case 2:
+        {
+            vec4 color0 = style.color[0];
+            vec4 color1 = style.color[1];
+            vec4 color2 = style.color[2];
+
+            float blend = style.blend;
+            float premul = style.premul;
+
+            float innerSliceBlend = style._anon_0;
+            float sliceBegin = style._anon_1;
+            float sliceEnd = style._anon_2;
+            float ellipseY = style._anon_3;
+            float ellipseX = style._anon_4;
+            float innerMaskScale = style._anon_5;
+            float edgeSoftness = style._anon_6;
+
+            float ellipseMetric = ellipseY * ellipseX;
+            float signedDistance = ellipseMetric - length(texcoord0.zw * vec2(ellipseX, ellipseY));
+
+            vec2 distGrad = vec2(dFdxCoarse(signedDistance), dFdyCoarse(signedDistance));
+            float distAA = inversesqrt(max(dot(distGrad, distGrad), 1.0e-20));
+
+            float artistCoverage = saturate(signedDistance * edgeSoftness + 0.5);
+            float aaCoverage = saturate(signedDistance * distAA);
+            float edgeAlpha = min(artistCoverage, aaCoverage);
+
+            if (edgeAlpha <= 0.0)
+            {
+                discard;
+            }
+
+            float innerMask = saturate(
+                (signedDistance - innerMaskScale * ellipseMetric) * distAA + 0.5
+            );
+
+            float beginSin;
+            float beginCos;
+            sincos(sliceBegin, beginSin, beginCos);
+
+            float beginPlane = dot(texcoord0.zw, vec2(beginCos, beginSin));
+            float endPlane = dot(texcoord0.zw, vec2(-cos(sliceEnd), -sin(sliceEnd)));
+
+            vec2 beginGrad = vec2(dFdxCoarse(beginPlane), dFdyCoarse(beginPlane));
+            vec2 endGrad = vec2(dFdxCoarse(endPlane), dFdyCoarse(endPlane));
+
+            float beginMask = saturate(
+                beginPlane * inversesqrt(max(dot(beginGrad, beginGrad), 1.0e-20)) + 0.5
+            );
+
+            float endMask = saturate(
+                endPlane * inversesqrt(max(dot(endGrad, endGrad), 1.0e-20)) + 0.5
+            );
+
+            float sliceMask = (sliceEnd - sliceBegin) >= 3.14159274
+                ? min(1.0, beginMask + endMask)
+                : min(beginMask, endMask);
+
+            vec4 outerRadialColor = mix(color0, color2, innerMask);
+
+            vec4 innerTargetColor = vec4(
+                innerSliceBlend * color2.rgb,
+                min(color2.a, color1.a)
+            );
+
+            vec4 innerRadialColor = mix(color1, innerTargetColor, innerMask);
+
+            vec4 finalColor = mix(innerRadialColor, outerRadialColor, sliceMask);
+            float finalAlpha = finalColor.a;
+
+            finalColor.a *= edgeAlpha;
+
+            uint flags = uint(texcoord2.w);
+            vec4 textureColor = multisample(
+                materialTexture,
+                texcoord0.xy,
+                imgBounds.size,
+                imgBounds.mins,
+                uvec2(flags & 16u, flags & 32u)
+            );
+
+            vec4 color = textureColor * finalColor;
+
+            float rgbScale = mix(color.a, finalAlpha * edgeAlpha, premul);
+
+            out_color = vec4(color.rgb * rgbScale, color.a * blend);
+            return;
+        }
+    }
+}

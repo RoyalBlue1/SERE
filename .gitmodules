@@ -2,3 +2,9 @@
 [submodule "SERE/ThirdParty/nativefiledialog-extended"]
 	path = SERE/ThirdParty/nativefiledialog-extended
 	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "SERE/ThirdParty/SDL"]
+	path = SERE/ThirdParty/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "SERE/ThirdParty/glew"]
+	path = SERE/ThirdParty/glew
+	url = https://github.com/Perlmint/glew-cmake.git
