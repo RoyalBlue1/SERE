@@ -25,7 +25,7 @@ CPakFile::~CPakFile()
         SegmentCollection_t* const collection = &this->segmentCollections[i];
         if (collection->buffer)
         {
-            _aligned_free(collection->buffer);
+            aligned_free_compat(collection->buffer);
             collection->buffer = nullptr;
         }
     }
@@ -376,8 +376,7 @@ const bool CPakFile::DecompressFileBuffer(const char* fileBuffer, std::shared_pt
         {
 
             // get pakhdr back from compressed buffer
-            memcpy_s(dcmpBuf.get(), header->pakHdrSize, fileBuffer, header->pakHdrSize);
-
+			MEMCPY_S(dcmpBuf.get(), header->pakHdrSize, fileBuffer, header->pakHdrSize);
             if (outBuffer->get() != nullptr)
                 outBuffer->reset();
 
@@ -399,8 +398,7 @@ const bool CPakFile::DecompressFileBuffer(const char* fileBuffer, std::shared_pt
         // allocate a buffer for just the compressed file data
         // since the oodle decomp util func needs just the compressed data
         std::unique_ptr<char[]> cmpBuf = std::make_unique<char[]>(compressedDataSize);
-        memcpy_s(cmpBuf.get(), compressedDataSize, fileBuffer + header->pakHdrSize, compressedDataSize);
-
+        MEMCPY_S(cmpBuf.get(), compressedDataSize, fileBuffer + header->pakHdrSize, compressedDataSize);
         uint64_t decodeSize = header->dcmpSize;
 
         std::unique_ptr<char[]> data = RTech::DecompressStreamedBuffer(std::move(cmpBuf), decodeSize, eCompressionType::OODLE);
@@ -414,10 +412,10 @@ const bool CPakFile::DecompressFileBuffer(const char* fileBuffer, std::shared_pt
         //assertm(decodeSize == header->dcmpSize, "mismatch on decode size.");
 
         // copy pak header to the decompressed buffer
-        memcpy_s(dcmpBuf.get(), header->pakHdrSize, fileBuffer, header->pakHdrSize);
+        MEMCPY_S(dcmpBuf.get(), header->pakHdrSize, fileBuffer, header->pakHdrSize);
 
         // copy all of the decoded data into the decompressed buffer
-        memcpy_s(dcmpBuf.get() + header->pakHdrSize, header->dcmpSize, data.get(), decodeSize);
+        MEMCPY_S(dcmpBuf.get() + header->pakHdrSize, header->dcmpSize, data.get(), decodeSize);
 
         // release the oodle decomp buffer now we are done with it
         data.release();
@@ -508,7 +506,7 @@ void CPakFile::AllocateSegments()
         // This data will be aligned to the highest alignment of any contained page data, as all other data will then be able
         // to align themselves within this alignment.
         // Since all alignments must be a power of 2, data with smaller alignments will always be aligned when the alignment is greater.
-        collection->buffer = reinterpret_cast<char*>(_aligned_malloc(collection->dataSize, collection->dataAlignment));
+        collection->buffer = reinterpret_cast<char*>(aligned_malloc_compat(collection->dataSize, collection->dataAlignment));
     }
 
     this->pageBuffers.resize(this->pageCount());

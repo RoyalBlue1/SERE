@@ -251,7 +251,7 @@ std::unique_ptr<char[]> GetTextureDataForMip(CPakAsset& asset, const TextureMip_
     case eTextureMipType::RPak:
     {
         txtrData = std::make_unique<char[]>(mip->sizeSingle);
-        memcpy_s(txtrData.get(), mip->sizeSingle, mip->assetPtr.ptr + (mip->sizeSingle * arrayIndex), mip->sizeSingle);
+        MEMCPY_S(txtrData.get(), mip->sizeSingle, mip->assetPtr.ptr + (mip->sizeSingle * arrayIndex), mip->sizeSingle);
         break;
     }
     case eTextureMipType::StarPak:
