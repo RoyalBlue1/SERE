@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RuiNodeEditor/RuiNodeEditor.h"
-
+#include <format>
 
 class SplitFloat2Node : public RuiBaseNode
 {

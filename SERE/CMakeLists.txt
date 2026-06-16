@@ -17,7 +17,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(OpenGL)
 
 
-
 add_executable (SERE
 	"SERE.cpp"
 	"SERE.rc"
@@ -31,13 +30,12 @@ add_executable (SERE
 	"RuiRendering/RenderFunctions.cpp"
 	"RuiRendering/RenderManager.cpp"
 
-
+	"defs.h"
 	"Imgui/imgui.cpp"
 	"Imgui/imgui_demo.cpp"
 	"Imgui/imgui_draw.cpp"
 	"Imgui/imgui_tables.cpp"
 	"Imgui/imgui_widgets.cpp"
-	"Imgui/imgui_impl_dx11.cpp"
 	"Imgui/imgui_impl_sdl3.cpp"
 	"Imgui/imgui_impl_opengl3.cpp"
 	"Imgui/imgui_impl_opengl3_loader.h"
@@ -56,12 +54,9 @@ add_executable (SERE
 	"Nodes/MathNodes.cpp"
 	"Nodes/GlobalNodes.cpp"
 	
-	"ThirdParty/DDSTextureLoader11.cpp"
 	"RuiNodeEditor/RuiBaseNode.cpp"
 	"RuiNodeEditor/RuiExportPrototype.cpp"
 	"Nodes/ConditionalNodes.cpp"
-
-	"RenderFrameworks/RenderFramework_Dx11.cpp"
 	"RenderFrameworks/RenderFramework.cpp"
 	"RenderFrameworks/RenderFramework_OGL3.cpp"
 	"RenderFrameworks/RenderFramework_OGL3.h"
@@ -85,9 +80,17 @@ target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Assets ${CMAKE_CURRENT_BINARY_DIR}/Assets)
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/DroidSans.ttf ${CMAKE_CURRENT_BINARY_DIR}/Imgui/DroidSans.ttf)
 
+if(WIN32)
+	target_sources(SERE PRIVATE
+	"Imgui/imgui_impl_dx11.cpp"
+	"ThirdParty/DDSTextureLoader11.cpp"
+	"RenderFrameworks/RenderFramework_Dx11.cpp"
+	)
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET SERE PROPERTY CXX_STANDARD 20)
 endif()
+target_compile_options(SERE PRIVATE -mssse3)
 
 # TODO: Add tests and install targets if needed.

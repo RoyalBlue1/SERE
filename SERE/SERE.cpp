@@ -12,7 +12,8 @@
 #include "Imgui/imgui_impl_dx11.h"
 #include "Imgui/implot.h"
 
-#include "RenderFrameworks/RenderFramework_Dx11.h"
+#include "RenderFrameworks/RenderFramework.h"
+
 #include "RuiNodeEditor/RuiNodeEditor.h"
 
 #include "Nodes/ArgumentNodes.h"

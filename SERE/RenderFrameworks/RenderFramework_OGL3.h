@@ -1,9 +1,11 @@
 #include "RenderFramework.h"
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
-#include <Windows.h>
-#include <gl/GL.h>
+#ifdef _WIN32
+    #include <Windows.h>
+    #include <gl/GL.h>
+#endif
 struct GLTextureFormat {
     GLenum internalFormat;
     GLenum format;

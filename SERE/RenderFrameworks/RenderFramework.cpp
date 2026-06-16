@@ -1,16 +1,20 @@
 #include "RenderFrameworks/RenderFramework.h"
-#include "RenderFrameworks/RenderFramework_Dx11.h"
+#ifdef _WIN32
+	#include "RenderFrameworks/RenderFramework_Dx11.h"
+#endif
 #include "RenderFrameworks/RenderFramework_OGL3.h"
 std::unique_ptr<RenderFramework> g_renderFramework;
 
 void CreateRenderFramework(char** argv, int argc) {
 	if (argc > 1) {
 		std::string api = argv[1];
+		#ifdef _WIN32
 		if (api == "-dx11") {
 			g_renderFramework = std::make_unique<RenderFramework_Dx11>();
 			return;
 		}
-		else if (api == "-ogl") {
+		#endif
+		if (api == "-ogl") {
 			g_renderFramework = std::make_unique< RenderFramework_OGL3>();
 			return;
 		}

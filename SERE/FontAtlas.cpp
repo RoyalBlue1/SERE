@@ -4,7 +4,9 @@
 
 #include <fstream>
 #include <mutex>
-#include "ThirdParty/DDSTextureLoader11.h"
+#ifdef _WIN32
+    #include "ThirdParty/DDSTextureLoader11.h"
+#endif
 #include "ThirdParty/rapidjson/document.h"
 
 
@@ -282,8 +284,8 @@ void FontAtlas_t::CreateShaderDataBuffer() {
 
 
 void loadFonts() {
-    fs::path folderPath = ".\\Assets\\Fonts";
-
+    fs::path folderPath = fs::path(".") / "Assets" / "Fonts";
+    if(!std::filesystem::exists(folderPath)) return;
     for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
         if(!dirEntry.is_regular_file())continue;
         fs::path jsonName = dirEntry;
