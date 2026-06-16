@@ -20,7 +20,6 @@
 #include <SDL3/SDL_dialog.h>
 #include <SDL3/SDL.h>
 
-#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #undef GetObject
 
 NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {

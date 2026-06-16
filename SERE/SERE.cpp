@@ -25,8 +25,6 @@
 #include "Nodes/TransformNodes.h"
 #include "Nodes/ConditionalNodes.h"
 
-#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
-
 #include "Settings.h"
 #include "PakLoading/cpakfile.h"
 

@@ -4,8 +4,6 @@
 
 # Add source to this project's executable.
 
-
-add_subdirectory(ThirdParty/nativefiledialog-extended)
 add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(ThirdParty/glew)
 
@@ -72,7 +70,6 @@ add_executable (SERE
  	"Settings.h")
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
-target_link_libraries(SERE PUBLIC nfd)
 target_link_libraries(SERE PRIVATE SDL3::SDL3)
 target_link_libraries(SERE PRIVATE libglew_static)
 target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
