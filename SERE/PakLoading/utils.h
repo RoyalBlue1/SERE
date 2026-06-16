@@ -8,8 +8,57 @@
 #include <memory>
 #include <filesystem>
 #include <sstream>
+#include "../Util.h"
 
 #define IALIGN(a, b) (((a)+((b)-1)) & ~((b)-1))
+#if defined(_MSC_VER)
+    #define MEMCPY_S(dest, destsz, src, count) memcpy_s((dest), (destsz), (src), (count))
+#else
+    inline int MEMCPY_S(void* dest, size_t destsz, const void* src, size_t count)
+    {
+        if (count > destsz)
+            return 1;
+
+        std::memcpy(dest, src, count);
+        return 0;
+    }
+#endif
+
+
+#if defined(_MSC_VER)
+    #include <malloc.h>
+
+    static inline void* aligned_malloc_compat(std::size_t size, std::size_t alignment)
+    {
+        return _aligned_malloc(size, alignment);
+    }
+
+    static inline void aligned_free_compat(void* ptr)
+    {
+        _aligned_free(ptr);
+    }
+#else
+    static inline void* aligned_malloc_compat(std::size_t size, std::size_t alignment)
+    {
+        void* ptr = nullptr;
+
+        if (alignment < sizeof(void*))
+            alignment = sizeof(void*);
+
+        if (posix_memalign(&ptr, alignment, size) != 0)
+            return nullptr;
+
+        return ptr;
+    }
+
+    static inline void aligned_free_compat(void* ptr)
+    {
+        std::free(ptr);
+    }
+#endif
+
+
+
 
 namespace
 {
@@ -150,7 +199,7 @@ namespace
     };
 }
 
-#define PAK_DECODE_MASK 0xFFFFFFFFFFFFFFFFui64
+#define PAK_DECODE_MASK 0xFFFFFFFFFFFFFFFF
 
 enum eCompressionType : uint8_t
 {

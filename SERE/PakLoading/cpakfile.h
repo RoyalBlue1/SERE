@@ -14,6 +14,10 @@
 // maximum number of "segments" that can be present in a pak
 #define PAK_MAX_SEGMENTS 20
 
+#ifndef _MSC_VER
+    typedef long long __int64;
+#endif
+
 // maximum number of segment "collections"
 #define PAK_MAX_SEGMENT_COLLECTIONS 4
 

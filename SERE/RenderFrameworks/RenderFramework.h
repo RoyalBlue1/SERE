@@ -80,6 +80,8 @@ public:
 	virtual void* GetTextureView(size_t id) = 0;
 	virtual void* GetRuiView() = 0;
 
+	virtual void* GetWindow() = 0;
+
 };
 
 void CreateRenderFramework(char** argv,int argc);

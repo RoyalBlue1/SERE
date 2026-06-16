@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <fstream>
 
-UINT WinResizeWidth = 0, WinResizeHeight = 0;
+uint32_t WinResizeWidth = 0, WinResizeHeight = 0;
 
 
 RenderFramework_OGL3::RenderFramework_OGL3()
@@ -78,8 +78,8 @@ bool RenderFramework_OGL3::ShouldMainLoopRun()
 			return false;
 		if (event.type == SDL_EVENT_WINDOW_RESIZED && event.window.windowID == SDL_GetWindowID(window))
 		{
-			WinResizeWidth = (UINT)event.window.data1;
-			WinResizeHeight = (UINT)event.window.data2;
+			WinResizeWidth = event.window.data1;
+			WinResizeHeight = event.window.data2;
 		}
 		ImGui_ImplSDL3_ProcessEvent(&event);
 	}
@@ -640,4 +640,9 @@ void* RenderFramework_OGL3::GetTextureView(size_t id)
 void* RenderFramework_OGL3::GetRuiView()
 {
 	return (void*)colorTexture;
+}
+
+void* RenderFramework_OGL3::GetWindow()
+{
+    return window;
 }

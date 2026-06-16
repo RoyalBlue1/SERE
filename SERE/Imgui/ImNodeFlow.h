@@ -1281,7 +1281,7 @@ namespace ImFlow
          * @brief <BR>Get InPin's connection filter
          * @return InPin's connection filter configuration
          */
-        [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_proto->filter; }
+        // [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_proto->filter; }
 
         /**
          * @brief <BR>Get pin's data type (aka: \<T>)

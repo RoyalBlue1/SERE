@@ -346,7 +346,7 @@ public:
         permanentMipLevels(hdr->permanentMipLevels), streamedMipLevels(hdr->streamedMipLevels), optStreamedMipLevels(hdr->optStreamedMipLevels), unkMipLevels(0u), totalMipLevels(0u), mipSorting(eTextureMipSorting::SORT_BOTTOM_TOP),
         type(eTextureType::_UNUSED), legacy(true), compTypePacked(0), compressedBytes(), swizzle(static_cast<eTextureSwizzle>(hdr->unk_1C))
     {
-        memcpy_s(unkPerMip_Legacy, sizeof(unkPerMip_Legacy), hdr->unk_23, sizeof(hdr->unk_23));
+        MEMCPY_S(unkPerMip_Legacy, sizeof(unkPerMip_Legacy), hdr->unk_23, sizeof(hdr->unk_23));
     };
 
     TextureAsset(TextureAssetHeader_v9_t* const hdr, const uint64_t guid) : guid(guid), name(hdr->name),
@@ -355,7 +355,7 @@ public:
         permanentMipLevels(hdr->permanentMipLevels), streamedMipLevels(hdr->streamedMipLevels), optStreamedMipLevels(hdr->optStreamedMipLevels), unkMipLevels(0u), totalMipLevels(0u), mipSorting(eTextureMipSorting::SORT_MIXED),
         type(hdr->type), legacy(false), compTypePacked(hdr->compTypePacked), swizzle(static_cast<eTextureSwizzle>(hdr->unk_12))
     {
-        memcpy_s(compressedBytes, sizeof(compressedBytes), hdr->compressedBytes, sizeof(hdr->compressedBytes));
+        MEMCPY_S(compressedBytes, sizeof(compressedBytes), hdr->compressedBytes, sizeof(hdr->compressedBytes));
     };
 
     TextureAsset(TextureAssetHeader_v10_t* const hdr, const uint64_t guid) : guid(guid), name(hdr->name),
@@ -364,7 +364,7 @@ public:
         permanentMipLevels(hdr->permanentMipLevels), streamedMipLevels(hdr->streamedMipLevels), optStreamedMipLevels(hdr->optStreamedMipLevels), unkMipLevels(hdr->unkMipLevels), totalMipLevels(0u), mipSorting(eTextureMipSorting::SORT_MIXED),
         type(hdr->type), legacy(false), compTypePacked(hdr->compTypePacked), swizzle(static_cast<eTextureSwizzle>(hdr->unk_12))
     {
-        memcpy_s(compressedBytes, sizeof(compressedBytes), hdr->compressedBytes, sizeof(hdr->compressedBytes));
+        MEMCPY_S(compressedBytes, sizeof(compressedBytes), hdr->compressedBytes, sizeof(hdr->compressedBytes));
     };
 
     //
