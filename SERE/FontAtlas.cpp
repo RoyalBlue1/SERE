@@ -180,8 +180,10 @@ FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex) {
 #undef max
 FontAtlas_t::FontAtlas_t(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr,size_t texture):
     textureId(texture)
-
 {
+    unk_2 = fontAtlasHdr->unk_2;
+    width = fontAtlasHdr->width;
+    height = fontAtlasHdr->height;
     uint8_t highest_unk_6 = 0;
     for (uint16_t i = 0; i < fontAtlasHdr->fontCount; i++) {
         Font_t font;
