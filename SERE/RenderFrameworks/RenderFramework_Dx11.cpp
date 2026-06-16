@@ -624,6 +624,10 @@ void* RenderFramework_Dx11::GetRuiView() {
 	return targetResourceView;
 }
 
+void* RenderFramework_Dx11::GetWindow() {
+	return window;
+}
+
 
 size_t RenderFramework_Dx11::CreateTextureFromData(void* data,uint32_t width,uint32_t height,uint16_t format,uint32_t pitch,uint32_t slicePitch) {
 

@@ -112,6 +112,8 @@ public:
 	void* GetTextureView(size_t id);
 	void* GetRuiView();
 
+	void* GetWindow();
+
 private:
 	ID3D11Device*            g_pd3dDevice = nullptr;
 	ID3D11DeviceContext*     g_pd3dDeviceContext = nullptr;

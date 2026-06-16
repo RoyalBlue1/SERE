@@ -212,7 +212,7 @@ int main(int argc, char** argv)
     //IM_ASSERT(font != nullptr);
 
     bool use_docking_space = false;
-
+    bool is_exporting = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     RenderInstance render{(float)ruiSize.width,(float)ruiSize.height};
@@ -256,6 +256,7 @@ int main(int argc, char** argv)
                 }
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
+					is_exporting = true;
                 }
                 ImGui::EndMenu();
             }
@@ -264,6 +265,17 @@ int main(int argc, char** argv)
             }
             
             ImGui::EndMainMenuBar();
+        }
+        if (nodeEdit.currentFilePath.has_value()) {
+            auto path = *nodeEdit.currentFilePath;
+            nodeEdit.currentFilePath.reset();
+            if (is_exporting) {
+				nodeEdit.ExportToPath(path);
+				is_exporting = false;
+            }
+            else {
+                nodeEdit.DeserializeFromPath(path);
+            }
         }
         settings.ShowSettingsWindow();
         if (settings.HasChanged()) {

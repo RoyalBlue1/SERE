@@ -641,3 +641,8 @@ void* RenderFramework_OGL3::GetRuiView()
 {
 	return (void*)colorTexture;
 }
+
+void* RenderFramework_OGL3::GetWindow()
+{
+    return window;
+}

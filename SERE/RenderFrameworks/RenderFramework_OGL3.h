@@ -142,6 +142,7 @@ public:
 
     void* GetTextureView(size_t id);
     void* GetRuiView();
+    void* GetWindow();
 private:
     std::vector<Buffer> buffers;
     std::vector<Texture> textures;

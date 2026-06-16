@@ -2,11 +2,11 @@
 #include <string>
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_stdlib.h"
-#include "ThirdParty/nativefiledialog-extended/src/include/nfd.hpp"
 #include "ThirdParty/rapidjson/rapidjson.h"
 #include "ThirdParty/rapidjson/prettywriter.h"
 #include "ThirdParty/rapidjson/ostreamwrapper.h"
 #include "ThirdParty/rapidjson/istreamwrapper.h"
+#include <SDL3/SDL.h>
 
 class Settings {
 	struct RuiSize_t {
@@ -58,10 +58,27 @@ public:
 		ImGui::InputText("Titanfall 2 Path",&titanfall2Path);
 		ImGui::SameLine();
 		if(ImGui::Button("Browse")) {
-			NFD::UniquePath path;
-			if (NFD::PickFolder(path, (nfdchar_t*)titanfall2Path.c_str()) == NFD_OKAY) {
-				titanfall2Path = std::string(path.get());
-			}
+			SDL_ShowOpenFolderDialog(
+				[](void* userdata, const char* const* filelist, int filter) {
+					auto* pathString = static_cast<std::string*>(userdata);
+
+					if (!filelist) {
+						SDL_Log("Folder dialog error: %s", SDL_GetError());
+						return;
+					}
+
+					if (!filelist[0]) {
+						SDL_Log("Folder selection cancelled");
+						return;
+					}
+
+					*pathString = filelist[0];
+				},
+				&titanfall2Path,
+				static_cast<SDL_Window*>(g_renderFramework->GetWindow()),
+				titanfall2Path.empty() ? nullptr : titanfall2Path.c_str(),
+				false
+			);
 		}
 
 		ImGui::SeparatorText("Rui Size");
