@@ -420,7 +420,7 @@ SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 	getOut<TransformSize>("Value")->behaviour([this]() {
 		TransformSize var;
 
-		var.size = _mm_load_ps(value);
+		var.size = _mm_loadu_ps(value);
 		return var;
 
 	});
