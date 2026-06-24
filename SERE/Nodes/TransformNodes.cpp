@@ -1371,6 +1371,7 @@ Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& styl
 
 
 		res = parent;
+		res.hash = outHash;
 		res.inputSize = size.size;
 
 		__m128 v7 = _mm_set_ps(0,0,0,rot.value);
@@ -1439,6 +1440,7 @@ Transform11Node::Transform11Node(RenderInstance& rend,ImFlow::StyleManager& styl
 		res.position = _mm_add_ps(_mm_add_ps(_mm_shuffle_ps(v19,v19, 78), v19), res.position);
 		res.directionVector = v18;
 
+		render.transformResults.push_back(res);
 		return res;
 	});
 }
@@ -1463,7 +1465,6 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 	const Float2Variable& center = getInVal<Float2Variable>("Rotation Origin");
 	const FloatVariable& rot = getInVal<FloatVariable>("Rotation");
 	const TransformResult& out = getOut<TransformResult>("Out")->val();
-	
 	proto.AddDataVariable(center);
 	proto.AddDataVariable(rot);
 
