@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <functional>
 #include <unordered_map>
+#include <cstdint>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_bezier_math.h"
@@ -1000,7 +1001,7 @@ namespace ImFlow
 
         virtual void CreatePin(BaseNode* node,StyleManager& style) = 0;
         virtual bool CanCreateLink(PinProto* other) = 0;
-        virtual [[nodiscard]] const std::type_info& getDataType() const = 0;
+        [[nodiscard]] virtual  const std::type_info& getDataType() const = 0;
         virtual PinType GetPinType() const = 0;
     protected:
         PinProto(std::string n):name(n){}
@@ -1280,7 +1281,7 @@ namespace ImFlow
          * @brief <BR>Get InPin's connection filter
          * @return InPin's connection filter configuration
          */
-        [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_proto->filter; }
+        // [[nodiscard]] const std::function<bool(Pin*, Pin*)>& getFilter() const { return m_proto->filter; }
 
         /**
          * @brief <BR>Get pin's data type (aka: \<T>)

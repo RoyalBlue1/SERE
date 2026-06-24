@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RuiNodeEditor/RuiNodeEditor.h"
-#include <intrin.h>
+#include <immintrin.h>
 
 struct AssetInputData {
 	ColorVariable mainColor;

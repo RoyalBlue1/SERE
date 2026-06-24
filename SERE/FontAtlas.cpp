@@ -4,7 +4,9 @@
 
 #include <fstream>
 #include <mutex>
-#include "ThirdParty/DDSTextureLoader11.h"
+#ifdef _WIN32
+    #include "ThirdParty/DDSTextureLoader11.h"
+#endif
 #include "ThirdParty/rapidjson/document.h"
 
 
@@ -178,8 +180,10 @@ FontAtlas_t::FontAtlas_t(fs::path& jsonPath,size_t atlasIndex) {
 #undef max
 FontAtlas_t::FontAtlas_t(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr,size_t texture):
     textureId(texture)
-
 {
+    unk_2 = fontAtlasHdr->unk_2;
+    width = fontAtlasHdr->width;
+    height = fontAtlasHdr->height;
     uint8_t highest_unk_6 = 0;
     for (uint16_t i = 0; i < fontAtlasHdr->fontCount; i++) {
         Font_t font;
@@ -282,8 +286,8 @@ void FontAtlas_t::CreateShaderDataBuffer() {
 
 
 void loadFonts() {
-    fs::path folderPath = ".\\Assets\\Fonts";
-
+    fs::path folderPath = fs::path(".") / "Assets" / "Fonts";
+    if(!std::filesystem::exists(folderPath)) return;
     for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
         if(!dirEntry.is_regular_file())continue;
         fs::path jsonName = dirEntry;

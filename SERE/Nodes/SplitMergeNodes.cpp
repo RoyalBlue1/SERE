@@ -1,4 +1,11 @@
 #include "SplitMergeNodes.h"
+#include <immintrin.h>
+
+#define extract_f32(v, idx) \
+    ((idx) == 0 ? _mm_cvtss_f32(v) : \
+     (idx) == 1 ? _mm_cvtss_f32(_mm_shuffle_ps((v), (v), _MM_SHUFFLE(1, 1, 1, 1))) : \
+     (idx) == 2 ? _mm_cvtss_f32(_mm_shuffle_ps((v), (v), _MM_SHUFFLE(2, 2, 2, 2))) : \
+                  _mm_cvtss_f32(_mm_shuffle_ps((v), (v), _MM_SHUFFLE(3, 3, 3, 3))))
 
 SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string nameX = Variable::UniqueName();
@@ -623,26 +630,29 @@ SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 	std::string name = Variable::UniqueName();
 	getOut<FloatVariable>("X")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[0], name);
+		return FloatVariable(_mm_cvtss_f32(in.size), name);
 		});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("Y")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[1], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(1,1,1,1));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("Z")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[2], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(2,2,2,2));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 
 	name = Variable::UniqueName();
 	getOut<FloatVariable>("W")->behaviour([this, name]() {
 		const TransformSize& in = getInVal<TransformSize>("In");
-		return FloatVariable(in.size.m128_f32[3], name);
-		});
+		__m128 shuf = _mm_shuffle_ps(in.size,in.size,_MM_SHUFFLE(3,3,3,3));
+		return FloatVariable(_mm_cvtss_f32(shuf), name);
+	});
 }
 
 
@@ -650,11 +660,12 @@ SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 
 void SplitTransformSizeNode::draw() {
 	const TransformSize& in = getInVal<TransformSize>("In");
-
-	ImGui::Text("X: %f", in.size.m128_f32[0]);
-	ImGui::Text("Y: %f", in.size.m128_f32[1]);
-	ImGui::Text("Z: %f", in.size.m128_f32[2]);
-	ImGui::Text("W: %f", in.size.m128_f32[3]);
+	float size[4];
+	_mm_storeu_ps(size, in.size);
+	ImGui::Text("X: %f", size[0]);
+	ImGui::Text("Y: %f", size[1]);
+	ImGui::Text("Z: %f", size[2]);
+	ImGui::Text("W: %f", size[3]);
 
 }
 
@@ -671,7 +682,7 @@ void SplitTransformSizeNode::Export(RuiExportPrototype& proto) {
 		ele.callback = [in, var, idx](RuiExportPrototype& proto) {
 			std::string typeName = proto.varsInDataStruct.contains(var.name) ? "" : "float";
 			if (in.IsConstant())
-				proto.codeLines.push_back(std::format("{} {} = {};", typeName, var.GetFormattedName(proto), in.size.m128_f32[idx]));
+				proto.codeLines.push_back(std::format("{} {} = {};", typeName, var.GetFormattedName(proto), extract_f32(in.size, idx)));
 			else
 				proto.codeLines.push_back(std::format("{} {} = {}.m128_f32[{}];", typeName, var.GetFormattedName(proto), in.GetFormattedName(proto), idx));
 			};

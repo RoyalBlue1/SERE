@@ -2,7 +2,11 @@
 
 #include "PakLoading/utils.h"
 
-#include <intrin.h>
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include <immintrin.h>
+
+#include <bit>
 
 #define LAST_IND(x,part_type)    (sizeof(x)/sizeof(part_type) - 1)
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
@@ -31,33 +35,46 @@
 #define BYTE2(x)   BYTEn(x,  2)
 #define _LONGLONG __int128
 
+static inline unsigned char BitScanReverse64Compat(unsigned long* index, uint64_t mask)
+{
+#if defined(_MSC_VER)
+    return _BitScanReverse64(index, mask);
+#else
+    if (mask == 0)
+        return 0;
+
+    *index = static_cast<unsigned long>(63u - __builtin_clzll(mask));
+    return 1;
+#endif
+}
+
 size_t RTech::InitPakDecoder(
 	PakDecompressContext_t* const context, const uint8_t* const fileBuffer,
 	const uint64_t inputMask, const size_t dataSize,
 	const size_t dataOffset, const size_t headerSize)
 {
-	unsigned __int64 v7; // r9
+	uint64_t v7; // r9
 	int v8; // ecx
-	unsigned __int64 v9; // rbx
+	uint64_t v9; // rbx
 	uint64_t v10; // r9
 	unsigned int v11; // er15
-	unsigned __int64 v12; // rbx
+	uint64_t v12; // rbx
 	unsigned int v13; // ebp
-	unsigned __int64 v14; // r8
+	uint64_t v14; // r8
 	uint64_t v15; // r11
-	unsigned __int64 v16; // r12
+	uint64_t v16; // r12
 	int v17; // er15
-	unsigned __int64 v18; // r12
+	uint64_t v18; // r12
 	unsigned int v19; // ebp
-	__int64 v20; // rdx
-	__int64 v21; // rsi
+	int64_t v20; // rdx
+	int64_t v21; // rsi
 	uint64_t result; // rax
 	uint64_t v23; // r8
 	uint64_t v24; // rdx
 
 	context->m_inputBuf = (uint64_t)fileBuffer;
-	context->m_outputBuf = 0i64;
-	context->m_outputMask = 0i64;
+	context->m_outputBuf = 0;
+	context->m_outputMask = 0;
 	context->dword44 = 0;
 	context->m_fileSize = dataOffset + dataSize;
 	context->m_inputMask = inputMask;
@@ -67,23 +84,23 @@ size_t RTech::InitPakDecoder(
 	v8 = v7 & 0x3F;
 	v7 >>= 6;
 	context->m_decompBytePosition = headerSize;
-	context->m_decompSize = v7 & ((1i64 << v8) - 1) | (1i64 << v8);
-	v9 = (v7 >> v8) | (*(uint64_t*)&fileBuffer[((uint32_t)unkPos) & inputMask] << (64 - ((unsigned __int8)v8 + 6)));
-	v10 = unkPos + ((unsigned __int64)(unsigned int)(v8 + 6) >> 3);
+	context->m_decompSize = v7 & ((1 << v8) - 1) | (1 << v8);
+	v9 = (v7 >> v8) | (*(uint64_t*)&fileBuffer[((uint32_t)unkPos) & inputMask] << (64 - ((uint8_t)v8 + 6)));
+	v10 = unkPos + ((uint64_t)(unsigned int)(v8 + 6) >> 3);
 	LOBYTE(v8) = (v8 + 6) & 7;
 	context->m_fileBytePosition = v10;
-	v11 = (unsigned __int8)v8 + 13;
-	v12 = (0xFFFFFFFFFFFFFFFFui64 >> v8) & v9;
+	v11 = (uint8_t)v8 + 13;
+	v12 = (0xFFFFFFFFFFFFFFFF >> v8) & v9;
 	v13 = (((uint8_t)v12 - 1) & 0x3F) + 1;
-	v14 = 0xFFFFFFFFFFFFFFFFui64 >> (64 - (unsigned __int8)v13);
+	v14 = 0xFFFFFFFFFFFFFFFFULL >> (64 - (uint8_t)v13);
 	context->m_inputInvMask = v14;
-	v15 = v10 + ((unsigned __int64)v11 >> 3);
-	context->m_outputInvMask = 0xFFFFFFFFFFFFFFFFui64 >> (63 - (((v12 >> 6) - 1) & 0x3F));
-	v16 = (v12 >> 13) | (*(uint64_t*)&fileBuffer[v10 & inputMask] << (64 - (unsigned __int8)v11));
+	v15 = v10 + ((uint64_t)v11 >> 3);
+	context->m_outputInvMask = 0xFFFFFFFFFFFFFFFF >> (63 - (((v12 >> 6) - 1) & 0x3F));
+	v16 = (v12 >> 13) | (*(uint64_t*)&fileBuffer[v10 & inputMask] << (64 - (uint8_t)v11));
 	context->m_fileBytePosition = v15;
 	v17 = v11 & 7;
-	v18 = (0xFFFFFFFFFFFFFFFFui64 >> v17) & v16;
-	if (v14 == -1i64)
+	v18 = (0xFFFFFFFFFFFFFFFF >> v17) & v16;
+	if (v14 == -1)
 	{
 		context->m_headerOffset = 0;
 		v21 = dataSize;
@@ -94,7 +111,8 @@ size_t RTech::InitPakDecoder(
 		context->m_headerOffset = v19 + 1;
 		v20 = *(uint64_t*)&fileBuffer[v15 & inputMask];
 		context->m_fileBytePosition = v15 + v19 + 1;
-		v21 = v20 & ((1i64 << (8 * ((unsigned __int8)v19 + 1))) - 1);
+		
+		v21 = v20 & ((int64_t{ 1 } << (8 * (static_cast<unsigned char>(v19) + 1))) - 1);
 	}
 	result = context->m_decompSize;
 	v23 = context->m_outputInvMask;
@@ -205,28 +223,28 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 	v71 = v12;
 	if (!v7)
 		goto LABEL_11;
-	v13 = (*(uint64_t*)((v9 & context->m_inputMask) + v11) << (64 - (unsigned __int8)v7)) | v8;
+	v13 = (*(uint64_t*)((v9 & context->m_inputMask) + v11) << (64 - (uint8_t)v7)) | v8;
 	for (i = v7; ; i = v7)
 	{
 		v7 &= 7u;
 		v9 += i >> 3;
 		v12 = v71;
-		v8 = (0xFFFFFFFFFFFFFFFFui64 >> v7) & v13;
+		v8 = (0xFFFFFFFFFFFFFFFF >> v7) & v13;
 	LABEL_11:
-		v15 = (unsigned __int64)v12 << 8;
+		v15 = (uint64_t)v12 << 8;
 		v16 = v12;
-		v17 = *((unsigned __int8*)&s_PakFileCompressionLUT + (unsigned __int8)v8 + v15 + 512);
-		v18 = (unsigned __int8)v8 + v15;
+		v17 = *((uint8_t*)&s_PakFileCompressionLUT + (uint8_t)v8 + v15 + 512);
+		v18 = (uint8_t)v8 + v15;
 		v7 += v17;
 		v19 = v8 >> v17;
 		v20 = (unsigned int)*((char*)&s_PakFileCompressionLUT + v18);
 		if (*((char*)&s_PakFileCompressionLUT + v18) < 0)
 		{
 			v56 = -(int)v20;
-			v57 = (__int64*)(v11 + (v9 & context->m_inputMask));
+			v57 = (int64_t*)(v11 + (v9 & context->m_inputMask));
 			v71 = 1;
-			v58 = (__int64*)(v6 + (v5 & context->m_outputMask));
-			if (v56 == *((unsigned __int8*)&s_PakFileCompressionLUT + v16 + 1248))
+			v58 = (int64_t*)(v6 + (v5 & context->m_outputMask));
+			if (v56 == *((uint8_t*)&s_PakFileCompressionLUT + v16 + 1248))
 			{
 				if ((~v9 & context->m_inputInvMask) < 0xF || (context->m_outputInvMask & ~v5) < 15 || context->m_decompSize - v5 < 0x10)
 					v56 = 1;
@@ -236,7 +254,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 				v62 = v60;
 				if (v61)
 				{
-					v63 = *((unsigned __int8*)&s_PakFileCompressionLUT + v61 + 1232);
+					v63 = *((uint8_t*)&s_PakFileCompressionLUT + v61 + 1232);
 					v64 = *((uint8_t*)&s_PakFileCompressionLUT + v61 + 1240);
 				}
 				else
@@ -258,14 +276,14 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 				if ((v66 & 4) != 0)
 				{
 					*(uint32_t*)v58 = *(uint32_t*)v57;
-					v58 = (__int64*)((char*)v58 + 4);
-					v57 = (__int64*)((char*)v57 + 4);
+					v58 = (int64_t*)((char*)v58 + 4);
+					v57 = (int64_t*)((char*)v57 + 4);
 				}
 				if ((v66 & 2) != 0)
 				{
 					*(uint16_t*)v58 = *(uint16_t*)v57;
-					v58 = (__int64*)((char*)v58 + 2);
-					v57 = (__int64*)((char*)v57 + 2);
+					v58 = (int64_t*)((char*)v58 + 2);
+					v57 = (int64_t*)((char*)v57 + 2);
 				}
 				if ((v66 & 1) != 0)
 					*(uint8_t*)v58 = *(uint8_t*)v57;
@@ -284,13 +302,13 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 		{
 			v21 = v19 & 0xF;
 			v71 = 0;
-			v22 = ((unsigned __int64)(unsigned int)v19 >> (((unsigned int)(v21 - 31) >> 3) & 6)) & 0x3F;
+			v22 = ((uint64_t)(unsigned int)v19 >> (((unsigned int)(v21 - 31) >> 3) & 6)) & 0x3F;
 			v23 = 1 << (v21 + ((v19 >> 4) & ((24 * (((unsigned int)(v21 - 31) >> 3) & 2)) >> 4)));
-			v7 += (((unsigned int)(v21 - 31) >> 3) & 6) + *((unsigned __int8*)&s_PakFileCompressionLUT + v22 + 1088) + v21 + ((v19 >> 4) & ((24 * (((unsigned int)(v21 - 31) >> 3) & 2)) >> 4));
+			v7 += (((unsigned int)(v21 - 31) >> 3) & 6) + *((uint8_t*)&s_PakFileCompressionLUT + v22 + 1088) + v21 + ((v19 >> 4) & ((24 * (((unsigned int)(v21 - 31) >> 3) & 2)) >> 4));
 			v24 = context->m_outputMask;
 			v25 = 16 * (v23 + ((v23 - 1) & (v19 >> ((((unsigned int)(v21 - 31) >> 3) & 6) + *((uint8_t*)&s_PakFileCompressionLUT + v22 + 1088)))));
 			v19 >>= (((unsigned int)(v21 - 31) >> 3) & 6) + *((uint8_t*)&s_PakFileCompressionLUT + v22 + 1088) + v21 + ((v19 >> 4) & ((24 * (((unsigned int)(v21 - 31) >> 3) & 2)) >> 4));
-			v26 = v25 + *((unsigned __int8*)&s_PakFileCompressionLUT + v22 + 1024) - 16;
+			v26 = v25 + *((uint8_t*)&s_PakFileCompressionLUT + v22 + 1024) - 16;
 			v27 = v24 & (v5 - v26);
 			v28 = v70 + (v5 & v24);
 			v29 = (uint64_t*)(v70 + v27);
@@ -302,7 +320,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 				v43 = v41;
 				if (v42)
 				{
-					v44 = *((unsigned __int8*)&s_PakFileCompressionLUT + v42 + 1232);
+					v44 = *((uint8_t*)&s_PakFileCompressionLUT + v42 + 1232);
 					v45 = *((uint8_t*)&s_PakFileCompressionLUT + v42 + 1240);
 				}
 				else
@@ -315,7 +333,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 					if (v74 && v7 + v45 >= 61)
 					{
 						v47 = v9++ & context->m_inputMask;
-						v43 |= (unsigned __int64)*(unsigned __int8*)(v47 + v74) << (61 - (unsigned __int8)v7);
+						v43 |= (uint64_t)*(uint8_t*)(v47 + v74) << (61 - (uint8_t)v7);
 						v7 -= 8;
 					}
 				}
@@ -326,13 +344,13 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 				if (v26 < 8)
 				{
 					v50 = uint32_t(v48 - 13);
-					v5 -= 13i64;
+					v5 -= 13;
 					if (v26 == 1)
 					{
-						v51 = *(unsigned __int8*)v29;
+						v51 = *(uint8_t*)v29;
 						//++dword_14D40B2BC;
-						v52 = 0i64;
-						for (k = 0x101010101010101i64 * v51; (unsigned int)v52 < v50; v52 = (unsigned int)(v52 + 8))
+						v52 = 0;
+						for (k = 0x101010101010101 * v51; (unsigned int)v52 < v50; v52 = (unsigned int)(v52 + 8))
 							*(uint64_t*)(v52 + v28) = k;
 					}
 					else
@@ -354,7 +372,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 				else
 				{
 					//++dword_14D40B2AC;
-					for (l = 0i64; (unsigned int)l < (unsigned int)v48; l = (unsigned int)(l + 8))
+					for (l = 0; (unsigned int)l < (unsigned int)v48; l = (unsigned int)(l + 8))
 						*(uint64_t*)(l + v28) = *(uint64_t*)((char*)v29 + l);
 				}
 			}
@@ -370,7 +388,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 			break;
 	LABEL_29:
 		v6 = v70;
-		v13 = (*(uint64_t*)((v9 & context->m_inputMask) + v11) << (64 - (unsigned __int8)v7)) | v19;
+		v13 = (*(uint64_t*)((v9 & context->m_inputMask) + v11) << (64 - (uint8_t)v7)) | v19;
 	}
 	if (v5 != context->m_decompStreamSize)
 		goto LABEL_25;
@@ -382,7 +400,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 	}
 	v31 = context->m_inputInvMask;
 	v32 = context->m_headerOffset;
-	v33 = v31 & -(__int64)v9;
+	v33 = v31 & -(int64_t)v9;
 	v19 >>= 1;
 	++v7;
 	if (v32 > v33)
@@ -395,7 +413,7 @@ bool RTech::DecompressPakFile(RTech::PakDecompressContext_t* context, size_t inL
 	v35 = v9 & context->m_inputMask;
 	v9 += v32;
 	v36 = v5 + context->m_outputInvMask + 1;
-	v37 = *(uint64_t*)(v35 + v11) & ((1i64 << (8 * (unsigned __int8)v32)) - 1);
+	v37 = *(uint64_t*)(v35 + v11) & ((1 << (8 * (uint8_t)v32)) - 1);
 	v38 = v37 + context->m_bufferSizeNeeded;
 	v39 = v37 + context->m_compressedStreamSize;
 	context->m_bufferSizeNeeded = v38;
@@ -440,72 +458,72 @@ LABEL_69:
 #pragma warning(push, 0)
 int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 {
-	__int64 v2; // r9
+	int64_t v2; // r9
 	unsigned int v4; // er11
 	char v5; // cl
 	char v6; // al
 	char v7; // cl
-	__int64 v8; // r9
+	int64_t v8; // r9
 	unsigned int v9; // edi
-	unsigned __int16 v10; // cx
+	uint16_t v10; // cx
 	unsigned int v11; // ebp
 	int v12; // esi
 	unsigned int v13; // ebx
 	int v14; // eax
 	unsigned int v15; // eax
 	unsigned int v16; // edx
-	__int64 v17; // rcx
+	int64_t v17; // rcx
 	unsigned int v18; // er11
 	unsigned int v19; // ecx
 	unsigned int v20; // edx
-	__int64 i; // r10
+	int64_t i; // r10
 	unsigned int v22; // eax
 	unsigned int v23; // eax
-	__int64 result; // rax
+	int64_t result; // rax
 	int v25; // [rsp+0h] [rbp-A8h]
-	__int16 v26[17]; // [rsp+8h] [rbp-A0h]
-	__int16 v27; // [rsp+Ch] [rbp-9Ch]
-	__int16 v28; // [rsp+Eh] [rbp-9Ah]
-	__int16 v29; // [rsp+10h] [rbp-98h]
-	__int16 v30; // [rsp+12h] [rbp-96h]
-	__int16 v31; // [rsp+14h] [rbp-94h]
-	__int16 v32; // [rsp+16h] [rbp-92h]
-	__int16 v33; // [rsp+18h] [rbp-90h]
-	__int16 v34; // [rsp+1Ah] [rbp-8Eh]
-	__int16 v35; // [rsp+1Ch] [rbp-8Ch]
-	__int16 v36; // [rsp+1Eh] [rbp-8Ah]
-	__int16 v37; // [rsp+20h] [rbp-88h]
-	__int16 v38; // [rsp+22h] [rbp-86h]
-	__int16 v39; // [rsp+24h] [rbp-84h]
-	__int16 v40; // [rsp+26h] [rbp-82h]
-	__int16 v41; // [rsp+28h] [rbp-80h]
+	int16_t v26[17]; // [rsp+8h] [rbp-A0h]
+	int16_t v27; // [rsp+Ch] [rbp-9Ch]
+	int16_t v28; // [rsp+Eh] [rbp-9Ah]
+	int16_t v29; // [rsp+10h] [rbp-98h]
+	int16_t v30; // [rsp+12h] [rbp-96h]
+	int16_t v31; // [rsp+14h] [rbp-94h]
+	int16_t v32; // [rsp+16h] [rbp-92h]
+	int16_t v33; // [rsp+18h] [rbp-90h]
+	int16_t v34; // [rsp+1Ah] [rbp-8Eh]
+	int16_t v35; // [rsp+1Ch] [rbp-8Ch]
+	int16_t v36; // [rsp+1Eh] [rbp-8Ah]
+	int16_t v37; // [rsp+20h] [rbp-88h]
+	int16_t v38; // [rsp+22h] [rbp-86h]
+	int16_t v39; // [rsp+24h] [rbp-84h]
+	int16_t v40; // [rsp+26h] [rbp-82h]
+	int16_t v41; // [rsp+28h] [rbp-80h]
 	int v42; // [rsp+30h] [rbp-78h]
 	int v43; // [rsp+34h] [rbp-74h]
 	unsigned int v44; // [rsp+38h] [rbp-70h]
-	__int64 v45; // [rsp+40h] [rbp-68h]
-	__int64 v46; // [rsp+48h] [rbp-60h]
-	__int64 v47; // [rsp+50h] [rbp-58h]
-	__int64 v48; // [rsp+58h] [rbp-50h]
-	__int16 v49; // [rsp+B0h] [rbp+8h]
-	__int64 v50; // [rsp+B8h] [rbp+10h]
-	unsigned __int16 v51; // [rsp+C0h] [rbp+18h]
+	int64_t v45; // [rsp+40h] [rbp-68h]
+	int64_t v46; // [rsp+48h] [rbp-60h]
+	int64_t v47; // [rsp+50h] [rbp-58h]
+	int64_t v48; // [rsp+58h] [rbp-50h]
+	int16_t v49; // [rsp+B0h] [rbp+8h]
+	int64_t v50; // [rsp+B8h] [rbp+10h]
+	uint16_t v51; // [rsp+C0h] [rbp+18h]
 	unsigned int v52; // [rsp+C8h] [rbp+20h]
 
 	v50 = a2;
 	v2 = a2;
-	v44 = *(unsigned __int8*)(param_buffer + 1108) + 1;
+	v44 = *(uint8_t*)(param_buffer + 1108) + 1;
 	v49 = 0;
 	v4 = 0;
 	v52 = 0;
-	v45 = 0i64;
+	v45 = 0;
 	do // This below can heavily be cleaned up and made looks nicer, will do when its actually working.
 	{
 		v41 = 0;
 		v47 = 16 * v4;
 		v25 = 0;
-		v43 = (unsigned __int16)(1 << (15 - *(uint8_t*)(v47 + v2)));
+		v43 = (uint16_t)(1 << (15 - *(uint8_t*)(v47 + v2)));
 		v26[0] = v43;
-		v42 = (unsigned __int16)(1 << (15 - *(uint8_t*)((unsigned int)(v47 + 1) + v2)));
+		v42 = (uint16_t)(1 << (15 - *(uint8_t*)((unsigned int)(v47 + 1) + v2)));
 		v26[1] = v42;
 		v27 = 1 << (15 - *(uint8_t*)((unsigned int)(v47 + 2) + v2));
 		v26[2] = v27;
@@ -524,8 +542,8 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 		v34 = 1 << (15 - *(uint8_t*)((unsigned int)(v47 + 9) + v2));
 		v26[9] = v34;
 		v5 = 15 - *(uint8_t*)((unsigned int)(v47 + 10) + v2);
-		v48 = 0i64;
-		v46 = 17i64;
+		v48 = 0;
+		v46 = 17;
 		v6 = *(uint8_t*)((unsigned int)(v47 + 11) + v2);
 		v35 = 1 << v5;
 		v26[10] = v35;
@@ -540,7 +558,7 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 		v26[14] = v39;
 		v40 = 1 << (15 - *(uint8_t*)((unsigned int)(v47 + 15) + v50));
 		v26[15] = v40;
-		v8 = 0i64;
+		v8 = 0;
 		v9 = v44;
 		v10 = v32 + v33 + v34 + v35 + v36 + (1 << v7) + v38 + v39 + v40 + v43 + v42 + v27 + v28 + v29 + v30 + v31;
 		v11 = v10;
@@ -550,7 +568,7 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 		do
 		{
 			v14 = v25 << 15;
-			v25 += (unsigned __int16)v26[v8];
+			v25 += (uint16_t)v26[v8];
 			v15 = (v12 + v14) / v11;
 			v16 = 0;
 			v17 = v15;
@@ -559,23 +577,23 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 				v18 = v52;
 				do
 				{
-					*(uint16_t*)(param_buffer + 2 * (v8 + 272 * (v52 | (unsigned __int64)(16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 1i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 2i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 3i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 4i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 5i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 6i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 7i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 8i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 9i64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xAi64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xBi64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xCi64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xDi64)) + 9816) = v15;
-					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xEi64)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 272 * (v52 | (uint64_t)(16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 1)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 2)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 3)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 4)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 5)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 6)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 7)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 8)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 9)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xA)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xB)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xC)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xD)) + 9816) = v15;
+					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * ((16 * (v52 | (16 * (v16 & *(uint8_t*)(param_buffer + 1108))))) | 0xE)) + 9816) = v15;
 					v19 = v16++ & *(uint8_t*)(param_buffer + 1108);
-					v17 = (16 * (v52 | (16 * v19))) | 0xFi64;
+					v17 = (16 * (v52 | (16 * v19))) | 0xF;
 					*(uint16_t*)(param_buffer + 2 * (v8 + 17 * v17) + 9816) = v15;
 				} while (v16 < v9);
 			}
@@ -589,23 +607,23 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 		v20 = 0;
 		for (i = v45; v20 < v9; *(uint16_t*)(param_buffer + 2 * v17 + 1112) = v49)
 		{
-			*(uint16_t*)(param_buffer + 2 * (i + 272i64 * (v20 & *(uint8_t*)(param_buffer + 1108))) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 1i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 2i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 3i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 4i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 5i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 6i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 7i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 8i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 9i64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xAi64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xBi64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xCi64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xDi64)) + 1112) = v49;
-			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xEi64)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 272 * (v20 & *(uint8_t*)(param_buffer + 1108))) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 1)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 2)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 3)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 4)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 5)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 6)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 7)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 8)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 9)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xA)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xB)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xC)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xD)) + 1112) = v49;
+			*(uint16_t*)(param_buffer + 2 * (i + 17 * ((16 * (v20 & *(uint8_t*)(param_buffer + 1108))) | 0xE)) + 1112) = v49;
 			v22 = v20++ & *(uint8_t*)(param_buffer + 1108);
-			v17 = i + 17 * ((16 * v22) | 0xFi64);
+			v17 = i + 17 * ((16 * v22) | 0xF);
 		}
 		v4 = v18 + 1;
 		v52 = v4;
@@ -617,60 +635,60 @@ int64_t RTech::sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2)
 		return v17;
 	do
 	{
-		*(uint16_t*)(544i64 * (v13 & *(uint8_t*)(param_buffer + 1108)) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 1i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 2i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 3i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 4i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 5i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 6i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 7i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 8i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 9i64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xAi64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xBi64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xCi64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xDi64) + param_buffer + 1144) = 0x8000;
-		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xEi64) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(544 * (v13 & *(uint8_t*)(param_buffer + 1108)) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 1) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 2) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 3) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 4) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 5) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 6) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 7) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 8) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 9) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xA) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xB) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xC) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xD) + param_buffer + 1144) = 0x8000;
+		*(uint16_t*)(34 * ((16 * (v13 & *(uint8_t*)(param_buffer + 1108))) | 0xE) + param_buffer + 1144) = 0x8000;
 		v23 = v13++ & *(uint8_t*)(param_buffer + 1108);
-		result = 34 * ((16 * v23) | 0xFi64);
+		result = 34 * ((16 * v23) | 0xF);
 		*(uint16_t*)(result + param_buffer + 1144) = 0x8000;
 	} while (v13 < v9);
 	return result;
 }
 
-__int64 RTech::sub_7FF7FC23C680(__int64 a1, unsigned __int64* a2, unsigned __int8 a3, unsigned int a4, void* a5)
+int64_t RTech::sub_7FF7FC23C680(int64_t a1, uint64_t* a2, uint8_t a3, unsigned int a4, void* a5)
 {
-	unsigned __int64 v5; // rbx
+	uint64_t v5; // rbx
 	void* v7; // r14
 	int v9; // er15
-	unsigned __int64 v10; // rbx
+	uint64_t v10; // rbx
 	unsigned int v11; // esi
 	unsigned int v12; // er11
 	char v13; // r10
-	unsigned __int16 v14; // r10
-	unsigned __int16 v15; // r8
-	unsigned __int16 i; // ax
-	__int16 v17; // r9
-	__int16 v18; // dx
-	__int64 v19; // rax
+	uint16_t v14; // r10
+	uint16_t v15; // r8
+	uint16_t i; // ax
+	int16_t v17; // r9
+	int16_t v18; // dx
+	int64_t v19; // rax
 	char v20; // bl
 	uint64_t* v21; // rdi
 	unsigned int v22; // ebx
-	unsigned __int64 v23; // rdx
-	__int64 v24; // rax
+	uint64_t v23; // rdx
+	int64_t v24; // rax
 	int v25; // ecx
-	unsigned __int64 v26; // rax
+	uint64_t v26; // rax
 	unsigned int v27; // eax
-	__int64 v29[66]; // [rsp+20h] [rbp-258h]
+	int64_t v29[66]; // [rsp+20h] [rbp-258h]
 
 	v5 = *a2;
 	v7 = a5; // watch this cast fuck everything.
 	v9 = a3;
-	v29[0] = -65536i64;
+	v29[0] = -65536;
 	v10 = v5 >> a3;
 	v11 = 0;
-	v29[1] = -1i64;
+	v29[1] = -1;
 	v12 = 0;
 	do
 	{
@@ -707,7 +725,7 @@ __int64 RTech::sub_7FF7FC23C680(__int64 a1, unsigned __int64* a2, unsigned __int
 		++v12;
 	} while (v12 <= a4);
 	v20 = a4 + 1;
-	v21 = (unsigned __int64*)((char*)a2 + ((unsigned __int64)(a4 + 1 + v9 + 2 * (a4 + 1)) >> 3));
+	v21 = (uint64_t*)((char*)a2 + ((uint64_t)(a4 + 1 + v9 + 2 * (a4 + 1)) >> 3));
 	v22 = ((uint8_t)v9 + 2 * v20 + v20) & 7;
 	if (LOWORD(v29[0]))
 	{
@@ -715,7 +733,7 @@ __int64 RTech::sub_7FF7FC23C680(__int64 a1, unsigned __int64* a2, unsigned __int
 		do
 		{
 			v24 = v23 & 0x7F;
-			v25 = *((unsigned __int16*)&v29[2] + 2 * v24 + 1);
+			v25 = *((uint16_t*)&v29[2] + 2 * v24 + 1);
 			v22 += v25;
 			*(uint8_t*)v7 = *((uint8_t*)&v29[2] + 4 * v24);
 			v23 >>= v25;
@@ -732,10 +750,10 @@ __int64 RTech::sub_7FF7FC23C680(__int64 a1, unsigned __int64* a2, unsigned __int
 	}
 	else
 	{
-		_BitScanReverse((unsigned long*)&v27, 0x100u); // meme cast
-		memset(a5, (char)v27, 0x100ui64);
+		BitScanReverseCompat((unsigned long*)&v27, 0x100u); // meme cast
+		memset(a5, (char)v27, 0x100);
 	}
-	return v22 + 8 * ((uint32_t)v21 - (uint32_t)a2) - v9;
+	return v22 + 8 * ((uint32_t)(uint64_t)(v21 - (uint32_t)(uint64_t)a2) - v9);
 }
 
 int64_t RTech::sub_7FF7FC23B960(int64_t param_buffer, uint32_t unk1)
@@ -787,7 +805,7 @@ int64_t RTech::sub_7FF7FC23B960(int64_t param_buffer, uint32_t unk1)
 			v8 += 32;
 		}
 		*(uint32_t*)(param_buffer + 44) = v8;
-		result = v11 & ((1i64 << unk1) - 1);
+		result = v11 & ((1 << unk1) - 1);
 		*(uint32_t*)(param_buffer + 40) = v13;
 	}
 
@@ -810,7 +828,7 @@ int64_t RTech::sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3)
 	int64_t result; // rax
 
 	v4 = a2;
-	v5 = 4i64;
+	v5 = 4;
 	v6 = param_buffer + 216;
 	*(uint8_t*)(param_buffer + 1108) = LUT_Snowflake_0[v4];
 	*(uint16_t*)(param_buffer + 1088) = 2048;
@@ -940,7 +958,7 @@ int64_t RTech::sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3)
 	else
 	{
 		v8 = param_buffer + 1116;
-		v9 = 256i64;
+		v9 = 256;
 		do
 		{
 			*(uint32_t*)(v8 - 4) = 0x8000000;
@@ -952,10 +970,10 @@ int64_t RTech::sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3)
 			*(uint32_t*)(v8 + 16) = 1476415488;
 			*(uint32_t*)(v8 + 20) = 1744855040;
 			*(uint32_t*)(v8 + 24) = 2013294592;
-			v8 += 34i64;
+			v8 += 34;
 			--v9;
 		} while (v9);
-		v10 = 4096i64;
+		v10 = 4096;
 		v11 = param_buffer + 9820;
 		do
 		{
@@ -968,13 +986,13 @@ int64_t RTech::sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3)
 			*(uint32_t*)(v11 + 16) = 1476415488;
 			*(uint32_t*)(v11 + 20) = 1744855040;
 			*(uint32_t*)(v11 + 24) = 2013294592;
-			v11 += 34i64;
+			v11 += 34;
 			--v10;
 		} while (v10);
 	}
 	*(uint32_t*)(param_buffer + 1092) = 96;
 	*(uint16_t*)(param_buffer + 1090) = 1024;
-	result = 0i64;
+	result = 0;
 	*(uint32_t*)(param_buffer + 1096) = 128;
 	*(uint32_t*)(param_buffer + 1100) = 80;
 	*(uint32_t*)(param_buffer + 1104) = 112;
@@ -982,20 +1000,20 @@ int64_t RTech::sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3)
 	return result;
 }
 
-__int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
+int64_t RTech::sub_7FF7FC23CD20(uint8_t* param_buffer, unsigned int a2)
 {
-	__int64 v2; // rsi
-	unsigned __int64 v3; // rbx
+	int64_t v2; // rsi
+	uint64_t v3; // rbx
 	uint8_t* v4; // r14
 	unsigned int v5; // er15
-	__int64 v6; // r13
-	__int64 v7; // r9
-	__int64 v8; // r10
-	__int64 v9; // rbp
-	unsigned __int16 v10; // r8
-	unsigned __int64 v11; // r11
-	__int64 v12; // r8
-	__int64 v13; // r9
+	int64_t v6; // r13
+	int64_t v7; // r9
+	int64_t v8; // r10
+	int64_t v9; // rbp
+	uint16_t v10; // r8
+	uint64_t v11; // r11
+	int64_t v12; // r8
+	int64_t v13; // r9
 	__m128i v14; // xmm7
 	__m128i v15; // xmm5
 	__m128i v16; // xmm8
@@ -1003,28 +1021,28 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	__m128i v18; // xmm6
 	__m128i v19; // xmm10
 	__m128i* v20; // r11
-	unsigned __int64 v21; // r10
-	__int64 v22; // r8
-	__int64 v23; // r9
+	uint64_t v21; // r10
+	int64_t v22; // r8
+	int64_t v23; // r9
 	int v24; // er8
 	unsigned int v25; // er8
-	unsigned __int64 v26; // rax
+	uint64_t v26; // rax
 	__m128i v27; // xmm2
 	__m128i v28; // xmm4
 	unsigned int v29; // er9
 	__m128i v30; // xmm0
 	__m128i v31; // xmm1
 	__m128i v32; // xmm3
-	__int64 v33; // rdx
-	__int64 result; // rax
+	int64_t v33; // rdx
+	int64_t result; // rax
 	__m128i v35; // xmm4
 	__m128i v36; // xmm0
 	__m128i v37; // xmm2
 	__m128i v38; // xmm3
 	__m128i v39; // xmm0
-	unsigned __int64 v40; // r10
-	__int64 v41; // r8
-	__int64 v42; // r9
+	uint64_t v40; // r10
+	int64_t v41; // r8
+	int64_t v42; // r9
 	char v43; // r12
 	unsigned int v44; // ebp
 	__m128i* v45; // rsi
@@ -1036,19 +1054,19 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	__m128i v51; // xmm3
 	unsigned int v52; // edx
 	unsigned int v53; // er11
-	__int64 v54; // r9
-	unsigned __int64 v55; // r10
-	__int64 v56; // r9
-	__int64 v57; // r8
+	int64_t v54; // r9
+	uint64_t v55; // r10
+	int64_t v56; // r9
+	int64_t v57; // r8
 	__m128i v58; // xmm7
 	__m128i v59; // xmm14
 	__m128i v60; // xmm15
 	__m128i v61; // xmm12
 	__m128i v62; // xmm6
 	__m128i v63; // xmm13
-	unsigned __int8 v64; // al
+	uint8_t v64; // al
 	int v65; // edx
-	__int64 v66; // r15
+	int64_t v66; // r15
 	__m128i* v67; // r13
 	__m128i v68; // xmm8
 	__m128i v69; // xmm9
@@ -1064,12 +1082,12 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	__m128i v79; // xmm5
 	int v80; // edx
 	unsigned int v81; // er10
-	__int64 v82; // r9
-	unsigned __int64 v83; // r10
-	__int64 v84; // r8
-	__int64 v85; // r9
-	__int64 v86; // r8
-	__int64 v87; // r9
+	int64_t v82; // r9
+	uint64_t v83; // r10
+	int64_t v84; // r8
+	int64_t v85; // r9
+	int64_t v86; // r8
+	int64_t v87; // r9
 	char v88; // dl
 	__m128i v89; // xmm4
 	__m128i v90; // xmm5
@@ -1078,13 +1096,13 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	__m128i v93; // xmm2
 	__m128i v94; // xmm3
 	unsigned int v95; // ebx
-	__int64 v96; // r9
-	unsigned __int64 v97; // r10
-	__int64 v98; // r8
-	__int64 v99; // r9
+	int64_t v96; // r9
+	uint64_t v97; // r10
+	int64_t v98; // r8
+	int64_t v99; // r9
 	char v100; // [rsp+8h] [rbp-F0h]
 	__m128i* v101; // [rsp+10h] [rbp-E8h]
-	unsigned __int64 v102; // [rsp+18h] [rbp-E0h]
+	uint64_t v102; // [rsp+18h] [rbp-E0h]
 
 	__m128i m1 = _mm_set_epi32(0x77106f2, 0x67305f4, 0x57504f6, 0x47703f8);
 	__m128i m2 = _mm_set_epi32(0x788f788f, 0x788f788f, 0x788f788f, 0x788f788f);
@@ -1103,15 +1121,15 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	*((uint64_t*)param_buffer + 18651) = v2 + a2;
 	if (a2 > 0xF)
 	{
-		v7 = *((unsigned __int16*)param_buffer + 568);
+		v7 = *((uint16_t*)param_buffer + 568);
 		v8 = *(uint64_t*)param_buffer >> 12;
-		v9 = *(uint64_t*)param_buffer & 0xFFFi64;
+		v9 = *(uint64_t*)param_buffer & 0xFFF;
 		v10 = 4096 - v7;
 		if ((*(uint32_t*)param_buffer & 0xFFFu) >= (unsigned int)v7)
 		{
 			v11 = v9 + v8 * v10 - v7;
-			*((uint16_t*)param_buffer + 568) = v7 - ((unsigned __int16)v7 >> 4);
-			if (v11 < 0x100000000i64)
+			*((uint16_t*)param_buffer + 568) = v7 - ((uint16_t)v7 >> 4);
+			if (v11 < 0x100000000)
 			{
 				v12 = *((uint64_t*)param_buffer + 3);
 				v13 = *(unsigned int*)((v12 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1130,7 +1148,7 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 			{
 				LODWORD(v20) = *param_buffer;
 				v21 = *(uint64_t*)param_buffer >> 8;
-				if (v21 < 0x100000000i64)
+				if (v21 < 0x100000000)
 				{
 					v22 = *((uint64_t*)param_buffer + 3);
 					v23 = *(unsigned int*)((v22 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1142,14 +1160,14 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 				v25 = v2 & v24;
 				*((uint64_t*)param_buffer + 1) = v21;
 				LODWORD(v2) = v2 + 1;
-				*v4++ = (uint8_t)v20;
+				*v4++ = (uint8_t)(uint64_t)v20;
 				v25 *= 16;
-				v26 = 34 * (v25 | ((unsigned __int64)(unsigned int)v3 >> 4));
+				v26 = 34 * (v25 | ((uint64_t)(unsigned int)v3 >> 4));
 				v27 = _mm_loadu_si128((const __m128i*) & param_buffer[v26 + 1160]);
 				v28 = _mm_loadu_si128((const __m128i*) & param_buffer[v26 + 1176]);
-				v29 = v3 & 0xF | (16 * (v25 | ((unsigned int)v20 >> 4)));
-				LODWORD(v3) = (uint32_t)v20;
-				v30 = _mm_cvtsi32_si128((unsigned int)v20 >> 4);
+				v29 = v3 & 0xF | (16 * (v25 | ((unsigned int)(uint64_t)v20 >> 4)));
+				LODWORD(v3) = (uint32_t)(uint64_t)v20;
+				v30 = _mm_cvtsi32_si128((unsigned int)(uint64_t)v20 >> 4);
 				v31 = _mm_shuffle_epi32(_mm_unpacklo_epi16(v30, v30), 0);
 				v32 = _mm_add_epi16(
 					_mm_srai_epi16(
@@ -1174,8 +1192,8 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 						7u),
 					v27);
 				*(__m128i*)& param_buffer[v26 + 1176] = v32;
-				v33 = 34i64 * v29;
-				result = (unsigned __int8)v20 & 0xF;
+				v33 = 34 * v29;
+				result = (uint8_t)(uint64_t)v20 & 0xF;
 				v35 = _mm_loadu_si128((const __m128i*) & param_buffer[v33 + 9880]);
 				v36 = _mm_cvtsi32_si128(result);
 				v37 = _mm_shuffle_epi32(_mm_unpacklo_epi16(v36, v36), 0);
@@ -1209,7 +1227,7 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 		}
 		v40 = v9 + v7 * v8;
 		*((uint16_t*)param_buffer + 568) = v7 + (v10 >> 4);
-		if (v40 < 0x100000000i64)
+		if (v40 < 0x100000000)
 		{
 			v41 = *((uint64_t*)param_buffer + 3);
 			v42 = *(unsigned int*)((v41 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1220,7 +1238,7 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 		*((uint64_t*)param_buffer + 1) = v40;
 	}
 	v43 = v2;
-	v44 = ((unsigned int)v3 >> 4) | (16 * (unsigned __int8)(v2 & param_buffer[1156]));
+	v44 = ((unsigned int)v3 >> 4) | (16 * (uint8_t)(v2 & param_buffer[1156]));
 	v45 = (__m128i*) & param_buffer[34 * v44 + 1160];
 	v46 = _mm_loadu_si128(v45);
 	v47 = _mm_loadu_si128(v45 + 1);
@@ -1228,12 +1246,14 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	v49 = _mm_unpacklo_epi16(v48, v48);
 	v50 = _mm_cmpgt_epi16(v46, v49);
 	v51 = _mm_cmpgt_epi16(v47, v49);
-	v52 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v50, v51)));
+	v52 = std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v50, v51)));
 	v53 = 15 - v52;
 	v100 = 15 - v52;
-	v54 = v45->m128i_u16[15 - v52];
-	v55 = (*(uint64_t*)param_buffer & 0x7FFFi64) + (*(uint64_t*)param_buffer >> 15) * (v45->m128i_u16[16 - v52] - (unsigned int)v54) - v54;
-	if (v55 < 0x100000000i64)
+	uint16_t v45_u16[8];
+	_mm_storeu_si128(reinterpret_cast<__m128i*>(v45_u16), *v45);
+	v54 = v45_u16[15 - v52];
+	v55 = (*(uint64_t*)param_buffer & 0x7FFF) + (*(uint64_t*)param_buffer >> 15) * (v45_u16[16 - v52] - (unsigned int)v54) - v54;
+	if (v55 < 0x100000000)
 	{
 		v56 = *((uint64_t*)param_buffer + 3);
 		v57 = *(unsigned int*)((v56 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1263,7 +1283,7 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 			v67 = (__m128i*) & param_buffer[34 * v44 + 1160];
 			v68 = _mm_loadu_si128(v67);
 			v69 = _mm_loadu_si128(v67 + 1);
-			v102 = v3 & 0xF | (16 * ((unsigned int)v45 | (16 * (unsigned __int8)(param_buffer[1156] & v43))));
+			v102 = v3 & 0xF | (16 * ((unsigned int)(uint64_t)v45 | (16 * (uint8_t)(param_buffer[1156] & v43))));
 			v101 = (__m128i*) & param_buffer[34 * v102 + 9864];
 			v70 = _mm_loadu_si128(v101);
 			v71 = _mm_loadu_si128(v101 + 1);
@@ -1275,24 +1295,28 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 			v77 = _mm_unpacklo_epi16(v76, v76);
 			v78 = _mm_cmpgt_epi16(v68, v77);
 			v79 = _mm_cmpgt_epi16(v69, v77);
-			_BitScanForward((unsigned long*)&v65, _mm_movemask_epi8(_mm_packs_epi16(v74, v75)) | 0x10000); // unsigned int cast before
+			BitScanForwardCompat((unsigned long*)&v65, _mm_movemask_epi8(_mm_packs_epi16(v74, v75)) | 0x10000); // unsigned int cast before
 			LODWORD(v102) = v65;
-			_BitScanForward((unsigned long*)&v81, _mm_movemask_epi8(_mm_packs_epi16(v78, v79)) | 0x10000); // unsigned int before cast
-			v82 = v101->m128i_u16[v65 - 1];
+			BitScanForwardCompat((unsigned long*)&v81, _mm_movemask_epi8(_mm_packs_epi16(v78, v79)) | 0x10000); // unsigned int before cast
+			uint16_t v101_u16[8];
+			_mm_storeu_si128(reinterpret_cast<__m128i*>(v101_u16), *v101);
+			v82 = v101_u16[v65 - 1];
 			v45 = (__m128i*)(v81 - 1);
-			v3 = (*(uint64_t*)param_buffer & 0x7FFFi64) + (*(uint64_t*)param_buffer >> 15) * (v101->m128i_u16[v102] - (unsigned int)v82) - v82;
-			v83 = (*((uint64_t*)param_buffer + 1) & 0x7FFFi64)
+			v3 = (*(uint64_t*)param_buffer & 0x7FFF) + (*(uint64_t*)param_buffer >> 15) * (v101_u16[v102] - (unsigned int)v82) - v82;
+			uint16_t v67_u16[8];
+			_mm_storeu_si128(reinterpret_cast<__m128i*>(v67_u16), *v67);
+			v83 = (*((uint64_t*)param_buffer + 1) & 0x7FFF)
 				+ (*((uint64_t*)param_buffer + 1) >> 15)
-				* (*(unsigned __int16*)((char*)v67->m128i_u16 + (int)(2 * v81)) - (unsigned int)v67->m128i_u16[(uint64_t)v45])
-				- v67->m128i_u16[(uint64_t)v45];
-			if (v3 < 0x100000000i64)
+				* (*(uint16_t*)((char*)v67_u16 + (int)(2 * v81)) - (unsigned int)v67_u16[(uint64_t)v45])
+				- v67_u16[(uint64_t)v45];
+			if (v3 < 0x100000000)
 			{
 				v84 = *((uint64_t*)param_buffer + 3);
 				v85 = *(unsigned int*)((v84 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
 				*((uint64_t*)param_buffer + 3) = v84 + 4;
 				v3 = v85 | (v3 << 32);
 			}
-			if (v83 < 0x100000000i64)
+			if (v83 < 0x100000000)
 			{
 				v86 = *((uint64_t*)param_buffer + 3);
 				v87 = *(unsigned int*)((v86 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1302,11 +1326,11 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 			*(uint64_t*)param_buffer = v3;
 			*((uint64_t*)param_buffer + 1) = v83;
 			v88 = (v65 - 1) | (16 * v100);
-			v100 = (char)v45;
+			v100 = (char)(uint64_t)v45;
 			LOBYTE(v3) = v88;
 			*v101 = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v74, v62), v63), v70), 6u), v70);
 			++v43;
-			v53 = (unsigned int)v45;
+			v53 = (unsigned int)(uint64_t)v45;
 			v101[1] = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v75, v62), v61), v71), 6u), v71);
 			*v67 = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v78, v58), v59), v68), 7u), v68);
 			v67[1] = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v79, v58), v60), v69), 7u), v69);
@@ -1317,17 +1341,19 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 		}
 		v64 = param_buffer[1156];
 	}
-	v20 = (__m128i*) & param_buffer[34 * (v3 & 0xF | (16 * (v53 | (16 * (unsigned __int8)(v64 & v43))))) + 9864];
+	v20 = (__m128i*) & param_buffer[34 * (v3 & 0xF | (16 * (v53 | (16 * (uint8_t)(v64 & v43))))) + 9864];
 	v89 = _mm_loadu_si128(v20);
 	v90 = _mm_loadu_si128(v20 + 1);
 	v91 = _mm_shufflelo_epi16(_mm_cvtsi32_si128(*(uint32_t*)param_buffer & 0x7FFF), 0);
 	v92 = _mm_unpacklo_epi16(v91, v91);
 	v93 = _mm_cmpgt_epi16(v89, v92);
 	v94 = _mm_cmpgt_epi16(v90, v92);
-	v95 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v93, v94)));
-	v96 = v20->m128i_u16[15 - v95];
-	v97 = (*(uint64_t*)param_buffer & 0x7FFFi64) + (*(uint64_t*)param_buffer >> 15) * (v20->m128i_u16[16 - v95] - (unsigned int)v96) - v96;
-	if (v97 < 0x100000000i64)
+	v95 = std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v93, v94)));
+	uint16_t v20_u16[8];
+	_mm_storeu_si128(reinterpret_cast<__m128i*>(v20_u16), *v20);
+	v96 = v20_u16[15 - v95];
+	v97 = (*(uint64_t*)param_buffer & 0x7FFF) + (*(uint64_t*)param_buffer >> 15) * (v20_u16[16 - v95] - (unsigned int)v96) - v96;
+	if (v97 < 0x100000000)
 	{
 		v98 = *((uint64_t*)param_buffer + 3);
 		v99 = *(unsigned int*)((v98 & *((uint64_t*)param_buffer + 4)) + *((uint64_t*)param_buffer + 2));
@@ -1339,10 +1365,10 @@ __int64 RTech::sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2)
 	*((uint64_t*)param_buffer + 1) = v97;
 	*v20 = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v93, v62), v63), v89), 6u), v89);
 	v20[1] = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v94, v62), v61), v90), 6u), v90);
-	*v4 = (16 * (uint8_t)v45) | (15 - v95);
-	LOBYTE(v20) = (16 * (uint8_t)v45) | (15 - v95);
+	*v4 = (16 * (uint8_t)(uint64_t)v45) | (15 - v95);
+	LOBYTE(v20) = (16 * (uint8_t)(uint64_t)v45) | (15 - v95);
 LABEL_27:
-	param_buffer[1138] = (unsigned __int8)v20;
+	param_buffer[1138] = (uint8_t)(uint64_t)v20;
 	return result;
 }
 
@@ -1375,29 +1401,29 @@ int64_t RTech::InitSnowflakeDecompState(int64_t param_buffer, int64_t data_buffe
 
     v2 = sub_7FF7FC23B960(param_buffer, 6);
     v3 = -1;
-    v4 = (sub_7FF7FC23B960(param_buffer, v2) | (1i64 << v2)) - 1;
+    v4 = (sub_7FF7FC23B960(param_buffer, v2) | (1 << v2)) - 1;
     *(uint64_t*)(param_buffer + 149144) = v4;
-    if (_BitScanReverse64((unsigned long*)&v6, (v4 >> 6) + 100 + v4)) // Had to cast v6 to unsigned long here, it might cause issues. THIS MAY RUIN SMTH KEEP IN MIND.
+    if (BitScanReverse64Compat((unsigned long*)&v6, (v4 >> 6) + 100 + v4)) // Had to cast v6 to unsigned long here, it might cause issues. THIS MAY RUIN SMTH KEEP IN MIND.
         v3 = v6;
     *(uint64_t*)(param_buffer + 149160) = sub_7FF7FC23B960(param_buffer, (unsigned int)(v3 + 1));
     v7 = sub_7FF7FC23B960(param_buffer, 4);
     v8 = sub_7FF7FC23B960(param_buffer, 4);
-    *(uint32_t*)(param_buffer + 149136) = 1 << ((unsigned __int8)v7 + 9);
+    *(uint32_t*)(param_buffer + 149136) = 1 << ((uint8_t)v7 + 9);
     *(uint32_t*)(param_buffer + 149140) = 1 << (v8 + 9);
     *(uint32_t*)(param_buffer + 149132) = v7 + 8;
     v9 = sub_7FF7FC23B960(param_buffer, 2);
     v10 = sub_7FF7FC23B960(param_buffer, 3) | 8;
     if (v10 <= 8)
-        return sub_7FF7FC23C880(param_buffer + 48, v9, 0i64);
+        return sub_7FF7FC23C880(param_buffer + 48, v9, 0);
 
     v12 = *(uint32_t*)(param_buffer + 44);
     v13 = -v12 & 0x1F;
     v14 = *(uint64_t*)(param_buffer + 149184) - (v12 != 0 ? 4 : 0);
-    v15 = sub_7FF7FC23C680(v10, (unsigned __int64*)(*(uint64_t*)(param_buffer + 149168) + v14 + ((unsigned __int64)v13 >> 3)), -(char)v12 & 7, v10, v18);
+    v15 = sub_7FF7FC23C680(v10, (uint64_t*)(*(uint64_t*)(param_buffer + 149168) + v14 + ((uint64_t)v13 >> 3)), -(char)v12 & 7, v10, v18);
 
-    result = sub_7FF7FC23C880(param_buffer + 48, v9, (__int64)v18);
+    result = sub_7FF7FC23C880(param_buffer + 48, v9, (int64_t)v18);
     int test = *(uint32_t*)(param_buffer + 0x484);
-    v16 = v14 + 4 * ((unsigned __int64)(v15 + v13 + 31) >> 5);
+    v16 = v14 + 4 * ((uint64_t)(v15 + v13 + 31) >> 5);
     *(uint64_t*)(param_buffer + 149184) = v16;
     v17 = (v15 + v13) & 0x1F;
     if (v17)
@@ -1408,7 +1434,7 @@ int64_t RTech::InitSnowflakeDecompState(int64_t param_buffer, int64_t data_buffe
     }
     else
     {
-        *(uint64_t*)(param_buffer + 40) = 0i64;
+        *(uint64_t*)(param_buffer + 40) = 0;
     }
 
     return result;
@@ -1416,22 +1442,22 @@ int64_t RTech::InitSnowflakeDecompState(int64_t param_buffer, int64_t data_buffe
 
 bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64_t buffer_size)
 {
-	unsigned __int64 v3; // rsi
+	uint64_t v3; // rsi
 	size_t v4; // r8
-	unsigned __int64 v5; // rax
+	uint64_t v5; // rax
 	int v8; // ebp
-	unsigned __int64 v9; // rcx
+	uint64_t v9; // rcx
 	__m128i v10; // xmm6
 	__m128i v11; // xmm13
 	__m128i v12; // xmm7
 	__m128i v13; // xmm12
 	__m128i v14; // xmm15
-	unsigned __int64 v15; // r8
+	uint64_t v15; // r8
 	int v16; // eax
-	__int64 v17; // rax
+	int64_t v17; // rax
 	int v18; // er15
-	unsigned __int64 v19; // r10
-	unsigned __int64 v20; // rdx
+	uint64_t v19; // r10
+	uint64_t v20; // rdx
 	__m128i v21; // xmm3
 	__m128i v22; // xmm4
 	__m128i v23; // xmm0
@@ -1439,37 +1465,37 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 	__m128i v25; // xmm2
 	unsigned int v26; // ecx
 	unsigned int v27; // edi
-	__int64 v28; // r8
-	unsigned __int64 v29; // r9
-	unsigned __int64 v30; // rcx
-	unsigned __int64 v31; // r8
+	int64_t v28; // r8
+	uint64_t v29; // r9
+	uint64_t v30; // rcx
+	uint64_t v31; // r8
 	__m128i v32; // xmm2
 	__m128i v33; // xmm1
 	int v34; // eax
 	int v35; // esi
-	__int64 v36; // rdx
-	unsigned __int64 v37; // r9
-	__int64 v38; // rdx
-	unsigned __int64 v39; // r8
+	int64_t v36; // rdx
+	uint64_t v37; // r9
+	int64_t v38; // rdx
+	uint64_t v39; // r8
 	__m128i v40; // xmm1
 	__m128i v41; // xmm2
 	__m128i v42; // xmm1
 	int v43; // eax
 	unsigned int v44; // edi
-	__int64 v45; // rdx
-	unsigned __int64 v46; // r9
-	__int64 v47; // rdx
-	__int64 v48; // r8
-	unsigned __int64 v49; // r11
+	int64_t v45; // rdx
+	uint64_t v46; // r9
+	int64_t v47; // rdx
+	int64_t v48; // r8
+	uint64_t v49; // r11
 	__m128i v50; // xmm1
-	unsigned __int64 v51; // r9
-	unsigned __int64 v52; // r10
-	__int64 v53; // rdx
-	__int64 v54; // r8
+	uint64_t v51; // r9
+	uint64_t v52; // r10
+	int64_t v53; // rdx
+	int64_t v54; // r8
 	char v55; // al
-	unsigned __int64 v56; // r9
-	__int64 v57; // rdx
-	__int64 v58; // r8
+	uint64_t v56; // r9
+	int64_t v57; // rdx
+	int64_t v58; // r8
 	unsigned int v59; // edx
 	__m128i v60; // xmm3
 	__m128i v61; // xmm4
@@ -1478,24 +1504,24 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 	__m128i v64; // xmm2
 	unsigned int v65; // ecx
 	unsigned int v66; // er10
-	__int64 v67; // r8
-	unsigned __int64 v68; // r9
-	__int64 v69; // rdx
-	__int64 v70; // r8
-	unsigned __int64 v71; // r11
+	int64_t v67; // r8
+	uint64_t v68; // r9
+	int64_t v69; // rdx
+	int64_t v70; // r8
+	uint64_t v71; // r11
 	__m128i v72; // xmm14
-	unsigned __int64 v73; // rsi
-	unsigned __int64 v74; // rdi
+	uint64_t v73; // rsi
+	uint64_t v74; // rdi
 	__m128i v75; // xmm3
 	__m128i v76; // xmm4
 	__m128i v77; // xmm0
 	__m128i v78; // xmm1
 	__m128i v79; // xmm2
 	unsigned int v80; // ecx
-	__int64 v81; // rdx
-	unsigned __int64 v82; // r9
-	__int64 v83; // rdx
-	__int64 v84; // r8
+	int64_t v81; // rdx
+	uint64_t v82; // r9
+	int64_t v83; // rdx
+	int64_t v84; // r8
 	__m128i v85; // xmm2
 	__m128i v86; // xmm8
 	__m128i v87; // xmm9
@@ -1512,31 +1538,31 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 	unsigned int v98; // edi
 	unsigned int v99; // edx
 	char v100; // si
-	__int64 v101; // rcx
-	__int64 v102; // rbp
-	__int64 v103; // r8
-	unsigned __int64 v104; // r10
-	unsigned __int64 v105; // r11
-	__int64 v106; // rdx
-	__int64 v107; // r8
-	__int64 v108; // rdx
-	__int64 v109; // r8
+	int64_t v101; // rcx
+	int64_t v102; // rbp
+	int64_t v103; // r8
+	uint64_t v104; // r10
+	uint64_t v105; // r11
+	int64_t v106; // rdx
+	int64_t v107; // r8
+	int64_t v108; // rdx
+	int64_t v109; // r8
 	__m128i v110; // xmm4
 	__m128i v111; // xmm5
 	int v112; // er11
-	unsigned __int64 v113; // r10
-	__int64 v114; // r8
-	__int64 v115; // r9
-	unsigned __int8 v116; // cl
-	__int64 v117; // rbp
-	__int64 v118; // r14
+	uint64_t v113; // r10
+	int64_t v114; // r8
+	int64_t v115; // r9
+	uint8_t v116; // cl
+	int64_t v117; // rbp
+	int64_t v118; // r14
 	__m128i v119; // xmm2
 	__m128i v120; // xmm1
 	int v121; // er10
-	__int64 v122; // r8
-	unsigned __int64 v123; // r9
-	__int64 v124; // rdx
-	__int64 v125; // r8
+	int64_t v122; // r8
+	uint64_t v123; // r9
+	int64_t v124; // rdx
+	int64_t v125; // r8
 	__m128i v126; // xmm1
 	__m128i v127; // xmm3
 	__m128i v128; // xmm4
@@ -1546,28 +1572,28 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 	__m128i v132; // xmm1
 	int v133; // er9
 	int v134; // er15
-	__int64 v135; // r11
+	int64_t v135; // r11
 	int v136; // eax
-	__int64 v137; // rdi
-	unsigned __int64 v138; // rbp
-	unsigned __int64 v139; // r9
-	__int64 v140; // rdx
-	__int64 v141; // r10
-	__int64 v142; // rdx
+	int64_t v137; // rdi
+	uint64_t v138; // rbp
+	uint64_t v139; // r9
+	int64_t v140; // rdx
+	int64_t v141; // r10
+	int64_t v142; // rdx
 	__m128i v143; // xmm1
 	__m128i v144; // xmm0
 	unsigned int v145; // er8
-	__int64 v146; // r11
+	int64_t v146; // r11
 	__m128i v147; // xmm3
 	int v148; // eax
-	__int64 v149; // r10
-	__int64 v150; // r8
-	unsigned __int64 v151; // r9
-	__int64 v152; // rdx
-	__int64 v153; // r8
+	int64_t v149; // r10
+	int64_t v150; // r8
+	uint64_t v151; // r9
+	int64_t v152; // rdx
+	int64_t v153; // r8
 	__m128i v154; // xmm0
 	__m128i v155; // xmm4
-	__int64 v156; // r15
+	int64_t v156; // r15
 	__m128i v157; // xmm3
 	char v158; // bp
 	__m128i v159; // xmm1
@@ -1575,37 +1601,37 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 	__m128i v161; // xmm0
 	__m128i v162; // xmm1
 	int v163; // er10
-	__int64 v164; // r13
-	__int64 v165; // r9
+	int64_t v164; // r13
+	int64_t v165; // r9
 	int v166; // eax
-	__int64 v167; // rdi
-	unsigned __int64 v168; // r10
-	unsigned __int64 v169; // r9
-	__int64 v170; // rdx
-	__int64 v171; // r11
-	__int64 v172; // rdx
+	int64_t v167; // rdi
+	uint64_t v168; // r10
+	uint64_t v169; // r9
+	int64_t v170; // rdx
+	int64_t v171; // r11
+	int64_t v172; // rdx
 	__m128i v173; // xmm0
 	__m128i v174; // xmm1
-	unsigned __int64 v175; // r10
+	uint64_t v175; // r10
 	int v176; // er11
-	__int64 v177; // r8
-	__int64 v178; // r9
-	unsigned __int8 v179; // cl
+	int64_t v177; // r8
+	int64_t v178; // r9
+	uint8_t v179; // cl
 	__m128i v180; // xmm1
-	__int64 v181; // rcx
-	__int64 v182; // rdx
-	__int64 v183; // r10
-	__int64 v184; // r9
+	int64_t v181; // rcx
+	int64_t v182; // rdx
+	int64_t v183; // r10
+	int64_t v184; // r9
 	unsigned int v185; // eax
 	unsigned int v186; // eax
 	int v187; // edx
-	__int64 v188; // rdx
-	unsigned __int64 v189; // rax
-	__int64 v190; // r8
+	int64_t v188; // rdx
+	uint64_t v189; // rax
+	int64_t v190; // r8
 	unsigned int v191; // [rsp+20h] [rbp-F8h]
 	int v192; // [rsp+20h] [rbp-F8h]
-	unsigned __int64 v193; // [rsp+28h] [rbp-F0h]
-	signed __int64 v195; // [rsp+38h] [rbp-E0h] BYREF
+	uint64_t v193; // [rsp+28h] [rbp-F0h]
+	int64_t v195; // [rsp+38h] [rbp-E0h] BYREF
 
 	__m128i m1 = _mm_set_epi32(0x1000100, 0x1000100, 0x1000100, 0x1000100);
 	__m128i m2 = _mm_set_epi32(0x3f003b1, 0x3720333, 0x2f402b5, 0x2760237);
@@ -1673,13 +1699,13 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 				v8 = sub_7FF7FC23B960(param_buffer, *(uint32_t*)(param_buffer + 149132));
 				v191 = sub_7FF7FC23B960(param_buffer, 5u) | 0x20;
 				v195 = sub_7FF7FC23B960(param_buffer, v191);
-				_bittestandset64(&v195, v191);
+				BitTestAndSet64Compat(&v195, v191);
 				v16 = sub_7FF7FC23B960(param_buffer, 5u);
 				LOBYTE(v191) = v16 | 0x20;
 				v17 = sub_7FF7FC23B960(param_buffer, v16 | 0x20u);
 				*(uint64_t*)param_buffer = v195;
 				*(uint64_t*)(param_buffer + 24) = *(uint64_t*)(param_buffer + 149184);
-				*(uint64_t*)(param_buffer + 8) = v17 | (1i64 << v191);
+				*(uint64_t*)(param_buffer + 8) = v17 | (1 << v191);
 				*(uint64_t*)(param_buffer + 16) = *(uint64_t*)(param_buffer + 149168);
 				*(uint64_t*)(param_buffer + 32) = *(uint64_t*)(param_buffer + 149192);
 				if (v8)
@@ -1691,7 +1717,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 				v187 = *(uint32_t*)(param_buffer + 149152) - *(uint32_t*)(param_buffer + 149208);
 				if (v187 != 8)
 				{
-					sub_7FF7FC23CD20((unsigned __int8*)param_buffer, v187 - 8);
+					sub_7FF7FC23CD20((uint8_t*)param_buffer, v187 - 8);
 					v10 = _mm_load_si128(&m1);
 					v11 = _mm_load_si128(&m2);
 					v12 = _mm_load_si128(&m3);
@@ -1699,7 +1725,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 					v14 = _mm_load_si128(&m5);
 				}
 				*(uint32_t*)(*(uint64_t*)(param_buffer + 149208) + *(uint64_t*)(param_buffer + 149200)) = *(uint32_t*)(param_buffer + 8);
-				*(uint32_t*)(*(uint64_t*)(param_buffer + 149208) + *(uint64_t*)(param_buffer + 149200) + 4i64) = *(uint32_t*)param_buffer;
+				*(uint32_t*)(*(uint64_t*)(param_buffer + 149208) + *(uint64_t*)(param_buffer + 149200) + 4) = *(uint32_t*)param_buffer;
 				v188 = *(uint64_t*)(param_buffer + 149152);
 				v189 = *(uint64_t*)(param_buffer + 149144);
 				v9 = v188 + *(unsigned int*)(param_buffer + 149136);
@@ -1731,17 +1757,17 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 				v23 = _mm_shuffle_epi8(_mm_cvtsi32_si128(*(uint32_t*)param_buffer & 0x7FFF), v10);
 				v24 = _mm_cmpgt_epi16(v21, v23);
 				v25 = _mm_cmpgt_epi16(v22, v23);
-				v26 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v24, v25)));
+				v26 = std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v24, v25)));
 				v27 = 16 - v26;
 				v195 = 16 - v26;
-				v28 = *(unsigned __int16*)(param_buffer + 2 * v195 + 48);
+				v28 = *(uint16_t*)(param_buffer + 2 * v195 + 48);
 				v29 = (v20 & 0x7FFF)
-					+ (v20 >> 15) * (*(unsigned __int16*)(param_buffer + 2i64 * (17 - v26) + 48) - (unsigned int)v28)
+					+ (v20 >> 15) * (*(uint16_t*)(param_buffer + 2 * (17 - v26) + 48) - (unsigned int)v28)
 					- v28;
-				if (v29 < 0x100000000i64)
+				if (v29 < 0x100000000)
 				{
 					v30 = v19 & *(uint64_t*)(param_buffer + 32);
-					v19 += 4i64;
+					v19 += 4;
 					v29 = *(unsigned int*)(v30 + *(uint64_t*)(param_buffer + 16)) | (v29 << 32);
 					*(uint64_t*)(param_buffer + 24) = v19;
 				}
@@ -1764,14 +1790,14 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 				{
 					v32 = _mm_loadu_si128((const __m128i*)(param_buffer + 104));
 					v33 = _mm_cmpgt_epi16(v32, _mm_shuffle_epi8(_mm_cvtsi32_si128(v31 & 0x7FFF), v10));
-					v34 = (int)__popcnt(_mm_movemask_epi8(v33)) / 2;
+					v34 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v33)) / 2;
 					v35 = 7 - v34;
-					v36 = *(unsigned __int16*)(param_buffer + 2i64 * (unsigned int)(7 - v34) + 104);
+					v36 = *(uint16_t*)(param_buffer + 2 * (unsigned int)(7 - v34) + 104);
 					v37 = (v31 & 0x7FFF)
 						+ (v31 >> 15)
-						* (*(unsigned __int16*)(param_buffer + 2i64 * (unsigned int)(8 - v34) + 104) - (unsigned int)v36)
+						* (*(uint16_t*)(param_buffer + 2 * (unsigned int)(8 - v34) + 104) - (unsigned int)v36)
 						- v36;
-					if (v37 < 0x100000000i64)
+					if (v37 < 0x100000000)
 					{
 						v38 = *(unsigned int*)((*(uint64_t*)(param_buffer + 32) & v19) + *(uint64_t*)(param_buffer + 16));
 						*(uint64_t*)(param_buffer + 24) = v19 + 4;
@@ -1784,15 +1810,15 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 					*(__m128i*)(param_buffer + 104) = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(v40, v32), 5u), v32);
 					v41 = _mm_loadu_si128((const __m128i*)(param_buffer + 86));
 					v42 = _mm_cmpgt_epi16(v41, _mm_shuffle_epi8(_mm_cvtsi32_si128(v39 & 0x3FFF), v10));
-					v43 = (int)__popcnt(_mm_movemask_epi8(v42)) / 2;
+					v43 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v42)) / 2;
 					v44 = 8 - v43;
 					v195 = (unsigned int)(8 - v43);
-					v45 = *(unsigned __int16*)(param_buffer + 2 * v195 + 84);
+					v45 = *(uint16_t*)(param_buffer + 2 * v195 + 84);
 					v46 = (v39 & 0x3FFF)
 						+ (v39 >> 14)
-						* (*(unsigned __int16*)(param_buffer + 2i64 * (unsigned int)(9 - v43) + 84) - (unsigned int)v45)
+						* (*(uint16_t*)(param_buffer + 2 * (unsigned int)(9 - v43) + 84) - (unsigned int)v45)
 						- v45;
-					if (v46 < 0x100000000i64)
+					if (v46 < 0x100000000)
 					{
 						v47 = *(uint64_t*)(param_buffer + 24);
 						v48 = *(unsigned int*)((v47 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1815,7 +1841,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 						if (v44 == 16)
 						{
 							v52 = v49 >> 3;
-							if (v49 >> 3 < 0x100000000i64)
+							if (v49 >> 3 < 0x100000000)
 							{
 								v53 = *(uint64_t*)(param_buffer + 24);
 								v54 = *(unsigned int*)((v53 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1834,8 +1860,8 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 						{
 							v55 = v195;
 						}
-						v56 = v51 >> ((unsigned __int8)v44 - 3);
-						if (v56 < 0x100000000i64)
+						v56 = v51 >> ((uint8_t)v44 - 3);
+						if (v56 < 0x100000000)
 						{
 							v57 = *(uint64_t*)(param_buffer + 24);
 							v58 = *(unsigned int*)((v57 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1852,7 +1878,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 				{
 					v59 = v195;
 				}
-				sub_7FF7FC23CD20((unsigned __int8*)param_buffer, v59);
+				sub_7FF7FC23CD20((uint8_t*)param_buffer, v59);
 				v10 = _mm_load_si128((const __m128i*) & m1);
 				v11 = _mm_load_si128((const __m128i*) & m2);
 				v12 = _mm_load_si128((const __m128i*) & m3);
@@ -1866,14 +1892,14 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 					v62 = _mm_shuffle_epi8(_mm_cvtsi32_si128(*(uint32_t*)param_buffer & 0x7FFF), v10);
 					v63 = _mm_cmpgt_epi16(v60, v62);
 					v64 = _mm_cmpgt_epi16(v61, v62);
-					v65 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v63, v64)));
+					v65 = std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v63, v64)));
 					v66 = 16 - v65;
-					v67 = *(unsigned __int16*)(param_buffer + 2i64 * (16 - v65) + 122);
-					v68 = (*(uint64_t*)param_buffer & 0x7FFFi64)
+					v67 = *(uint16_t*)(param_buffer + 2 * (16 - v65) + 122);
+					v68 = (*(uint64_t*)param_buffer & 0x7FFF)
 						+ (*(uint64_t*)param_buffer >> 15)
-						* (*(unsigned __int16*)(param_buffer + 2i64 * (17 - v65) + 122) - (unsigned int)v67)
+						* (*(uint16_t*)(param_buffer + 2 * (17 - v65) + 122) - (unsigned int)v67)
 						- v67;
-					if (v68 < 0x100000000i64)
+					if (v68 < 0x100000000)
 					{
 						v69 = *(uint64_t*)(param_buffer + 24);
 						v70 = *(unsigned int*)((v69 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1906,12 +1932,12 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							v77 = _mm_shuffle_epi8(_mm_cvtsi32_si128(v71 & 0x3FFF), v10);
 							v78 = _mm_cmpgt_epi16(v75, v77);
 							v79 = _mm_cmpgt_epi16(v76, v77);
-							v80 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v78, v79)));
-							v81 = *(unsigned __int16*)(param_buffer + 2i64 * (16 - v80) + 158);
+							v80 = (int)std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v78, v79)));
+							v81 = *(uint16_t*)(param_buffer + 2 * (16 - v80) + 158);
 							v82 = (v71 & 0x3FFF)
-								+ (v71 >> 14) * (*(unsigned __int16*)(param_buffer + 2i64 * (17 - v80) + 158) - (unsigned int)v81)
+								+ (v71 >> 14) * (*(uint16_t*)(param_buffer + 2 * (17 - v80) + 158) - (unsigned int)v81)
 								- v81;
-							if (v82 < 0x100000000i64)
+							if (v82 < 0x100000000)
 							{
 								v83 = *(uint64_t*)(param_buffer + 24);
 								v84 = *(unsigned int*)((v83 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1955,26 +1981,26 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							v95 = _mm_unpacklo_epi16(v94, v94);
 							v96 = _mm_cmpgt_epi16(v88, v95);
 							v97 = _mm_cmpgt_epi16(v89, v95);
-							v98 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v92, v93)));
-							v99 = __popcnt(_mm_movemask_epi8(_mm_packs_epi16(v96, v97)));
+							v98 = (int)std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v92, v93)));
+							v99 = (int)std::popcount((uint32_t)_mm_movemask_epi8(_mm_packs_epi16(v96, v97)));
 							v100 = 16 - v98;
-							v101 = *(unsigned __int16*)(param_buffer + 2i64 * (16 - v98) + 194);
+							v101 = *(uint16_t*)(param_buffer + 2 * (16 - v98) + 194);
 							v102 = 15 - v99;
-							v103 = *(unsigned __int16*)(param_buffer + 2 * v102 + 230);
+							v103 = *(uint16_t*)(param_buffer + 2 * v102 + 230);
 							v104 = (v71 & 0x7FFF)
-								+ (v71 >> 15) * (*(unsigned __int16*)(param_buffer + 2i64 * (17 - v98) + 194) - (unsigned int)v101)
+								+ (v71 >> 15) * (*(uint16_t*)(param_buffer + 2 * (17 - v98) + 194) - (unsigned int)v101)
 								- v101;
 							v105 = (v68 & 0x3FFF)
-								+ (v68 >> 14) * (*(unsigned __int16*)(param_buffer + 2i64 * (16 - v99) + 230) - (unsigned int)v103)
+								+ (v68 >> 14) * (*(uint16_t*)(param_buffer + 2 * (16 - v99) + 230) - (unsigned int)v103)
 								- v103;
-							if (v104 < 0x100000000i64)
+							if (v104 < 0x100000000)
 							{
 								v106 = *(uint64_t*)(param_buffer + 24);
 								v107 = *(unsigned int*)((v106 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
 								*(uint64_t*)(param_buffer + 24) = v106 + 4;
 								v104 = v107 | (v104 << 32);
 							}
-							if (v105 < 0x100000000i64)
+							if (v105 < 0x100000000)
 							{
 								v108 = *(uint64_t*)(param_buffer + 24);
 								v109 = *(unsigned int*)((v108 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -1996,12 +2022,12 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 									_mm_sub_epi16(_mm_add_epi16(_mm_and_si128(v93, v12), v11), v87),
 									6u),
 								v87);
-							v113 = v104 >> (17 - (unsigned __int8)v98);
+							v113 = v104 >> (17 - (uint8_t)v98);
 							*(__m128i*)(param_buffer + 230) = _mm_add_epi16(
 								_mm_srai_epi16(_mm_sub_epi16(_mm_add_epi16(v110, v72), v88), 6u),
 								v88);
 							*(__m128i*)(param_buffer + 246) = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(v111, v89), 6u), v89);
-							if (v113 < 0x100000000i64)
+							if (v113 < 0x100000000)
 							{
 								v114 = *(uint64_t*)(param_buffer + 24);
 								v115 = *(unsigned int*)((v114 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -2010,7 +2036,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							}
 							v74 = *(uint64_t*)(param_buffer + 8);
 							*(uint64_t*)(param_buffer + 8) = v113;
-							v73 = v102 | (unsigned int)(16 * v112) | (unsigned __int64)(unsigned int)(32 << v100);
+							v73 = v102 | (unsigned int)(16 * v112) | (uint64_t)(unsigned int)(32 << v100);
 						}
 						LOWORD(v71) = v74;
 						*(uint64_t*)param_buffer = v74;
@@ -2018,17 +2044,17 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 					v116 = 3;
 					if ((unsigned int)(v73 - 3) < 3)
 						v116 = v73 - 3;
-					v117 = 218i64 * v116;
+					v117 = 218 * v116;
 					v118 = param_buffer + v117;
 					v119 = _mm_loadu_si128((const __m128i*)(param_buffer + v117 + 264));
 					v120 = _mm_cmpgt_epi16(v119, _mm_shuffle_epi8(_mm_cvtsi32_si128(v71 & 0xFFF), v10));
-					v121 = (int)__popcnt(_mm_movemask_epi8(v120)) / 2;
-					v122 = *(unsigned __int16*)(param_buffer + 2i64 * (unsigned int)(7 - v121) + v117 + 264);
+					v121 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v120)) / 2;
+					v122 = *(uint16_t*)(param_buffer + 2 * (unsigned int)(7 - v121) + v117 + 264);
 					v123 = (v74 & 0xFFF)
 						+ (v74 >> 12)
-						* (*(unsigned __int16*)(param_buffer + 2i64 * (unsigned int)(8 - v121) + v117 + 264) - (unsigned int)v122)
+						* (*(uint16_t*)(param_buffer + 2 * (unsigned int)(8 - v121) + v117 + 264) - (unsigned int)v122)
 						- v122;
-					if (v123 < 0x100000000i64)
+					if (v123 < 0x100000000)
 					{
 						v124 = *(uint64_t*)(param_buffer + 24);
 						v125 = *(unsigned int*)((v124 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -2042,27 +2068,27 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 					if ((unsigned int)(7 - v121) > 1)
 					{
 						v155 = _mm_loadu_si128((const __m128i*)(v118 + 368));
-						v156 = v117 + param_buffer + 16i64 * (unsigned int)(5 - v121);
+						v156 = v117 + param_buffer + 16 * (unsigned int)(5 - v121);
 						v157 = _mm_loadu_si128((const __m128i*)(v156 + 386));
 						v158 = 3 * (7 - v121);
 						v159 = _mm_shufflelo_epi16(_mm_cvtsi32_si128(*(uint32_t*)param_buffer & 0x1FFF), 0);
 						v160 = _mm_shufflelo_epi16(_mm_cvtsi32_si128(*(uint32_t*)(param_buffer + 8) & 0x7FFF), 0);
 						v161 = _mm_cmpgt_epi16(v157, _mm_unpacklo_epi16(v159, v159));
 						v162 = _mm_cmpgt_epi16(v155, _mm_unpacklo_epi16(v160, v160));
-						v163 = (int)__popcnt(_mm_movemask_epi8(v161)) / 2;
+						v163 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v161)) / 2;
 						v164 = (unsigned int)(7 - v163);
-						v165 = *(unsigned __int16*)(v156 + 2 * v164 + 386);
-						v166 = (int)__popcnt(_mm_movemask_epi8(v162)) / 2;
-						v167 = *(unsigned __int16*)(v118 + 2i64 * (unsigned int)(7 - v166) + 368);
-						v168 = (*(uint64_t*)param_buffer & 0x1FFFi64)
+						v165 = *(uint16_t*)(v156 + 2 * v164 + 386);
+						v166 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v162)) / 2;
+						v167 = *(uint16_t*)(v118 + 2 * (unsigned int)(7 - v166) + 368);
+						v168 = (*(uint64_t*)param_buffer & 0x1FFF)
 							+ (*(uint64_t*)param_buffer >> 13)
-							* (*(unsigned __int16*)(v156 + 2i64 * (8 - v163) + 386) - (unsigned int)v165)
+							* (*(uint16_t*)(v156 + 2 * (8 - v163) + 386) - (unsigned int)v165)
 							- v165;
-						v169 = (*(uint64_t*)(param_buffer + 8) & 0x7FFFi64)
+						v169 = (*(uint64_t*)(param_buffer + 8) & 0x7FFF)
 							+ (*(uint64_t*)(param_buffer + 8) >> 15)
-							* (*(unsigned __int16*)(v118 + 2i64 * (8 - v166) + 368) - (unsigned int)v167)
+							* (*(uint16_t*)(v118 + 2 * (8 - v166) + 368) - (unsigned int)v167)
 							- v167;
-						if (v168 >= 0x100000000i64)
+						if (v168 >= 0x100000000)
 						{
 							v171 = *(uint64_t*)(param_buffer + 24);
 						}
@@ -2073,7 +2099,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							v168 = *(unsigned int*)((v170 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16)) | (v168 << 32);
 							*(uint64_t*)(param_buffer + 24) = v170 + 4;
 						}
-						if (v169 < 0x100000000i64)
+						if (v169 < 0x100000000)
 						{
 							v172 = *(unsigned int*)((v171 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
 							*(uint64_t*)(param_buffer + 24) = v171 + 4;
@@ -2087,7 +2113,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 						*(__m128i*)(v118 + 368) = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(v174, v155), 6u), v155);
 						v175 = *(uint64_t*)param_buffer >> (v158 - 3);
 						v176 = *(uint32_t*)param_buffer & ((1 << (v158 - 3)) - 1);
-						if (v175 < 0x100000000i64)
+						if (v175 < 0x100000000)
 						{
 							v177 = *(uint64_t*)(param_buffer + 24);
 							v178 = *(unsigned int*)((v177 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -2114,20 +2140,20 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							v130 = _mm_shufflelo_epi16(_mm_cvtsi32_si128(*(uint32_t*)(param_buffer + 8) & 0x7FFF), 0);
 							v131 = _mm_cmpgt_epi16(v127, _mm_unpacklo_epi16(v129, v129));
 							v132 = _mm_cmpgt_epi16(v128, _mm_unpacklo_epi16(v130, v130));
-							v133 = (int)__popcnt(_mm_movemask_epi8(v131)) / 2;
+							v133 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v131)) / 2;
 							v134 = 7 - v133;
-							v135 = *(unsigned __int16*)(v118 + 2i64 * (unsigned int)(7 - v133) + 332);
-							v136 = (int)__popcnt(_mm_movemask_epi8(v132)) / 2;
-							v137 = *(unsigned __int16*)(v118 + 2i64 * (unsigned int)(7 - v136) + 350);
-							v138 = (*(uint64_t*)param_buffer & 0x7FFFi64)
+							v135 = *(uint16_t*)(v118 + 2 * (unsigned int)(7 - v133) + 332);
+							v136 = (int)std::popcount((uint32_t)_mm_movemask_epi8(v132)) / 2;
+							v137 = *(uint16_t*)(v118 + 2 * (unsigned int)(7 - v136) + 350);
+							v138 = (*(uint64_t*)param_buffer & 0x7FFF)
 								+ (*(uint64_t*)param_buffer >> 15)
-								* (*(unsigned __int16*)(v118 + 2i64 * (unsigned int)(8 - v133) + 332) - (unsigned int)v135)
+								* (*(uint16_t*)(v118 + 2 * (unsigned int)(8 - v133) + 332) - (unsigned int)v135)
 								- v135;
-							v139 = (*(uint64_t*)(param_buffer + 8) & 0x7FFFi64)
+							v139 = (*(uint64_t*)(param_buffer + 8) & 0x7FFF)
 								+ (*(uint64_t*)(param_buffer + 8) >> 15)
-								* (*(unsigned __int16*)(v118 + 2i64 * (unsigned int)(8 - v136) + 350) - (unsigned int)v137)
+								* (*(uint16_t*)(v118 + 2 * (unsigned int)(8 - v136) + 350) - (unsigned int)v137)
 								- v137;
-							if (v138 >= 0x100000000i64)
+							if (v138 >= 0x100000000)
 							{
 								v141 = *(uint64_t*)(param_buffer + 24);
 							}
@@ -2138,7 +2164,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 								v138 = *(unsigned int*)((v140 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16)) | (v138 << 32);
 								*(uint64_t*)(param_buffer + 24) = v140 + 4;
 							}
-							if (v139 < 0x100000000i64)
+							if (v139 < 0x100000000)
 							{
 								v142 = *(unsigned int*)((*(uint64_t*)(param_buffer + 32) & v141) + *(uint64_t*)(param_buffer + 16));
 								*(uint64_t*)(param_buffer + 24) = v141 + 4;
@@ -2155,21 +2181,21 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 							*(__m128i*)(v118 + 350) = _mm_add_epi16(_mm_srai_epi16(_mm_sub_epi16(v143, v128), 5u), v128);
 							goto LABEL_73;
 						}
-						v146 = v117 + param_buffer + 10i64 * *(unsigned __int8*)(param_buffer + 1139);
+						v146 = v117 + param_buffer + 10 * *(uint8_t*)(param_buffer + 1139);
 						v147 = _mm_loadl_epi64((const __m128i*)(v146 + 282));
-						v148 = (int)__popcnt(
-							_mm_movemask_epi8(
+						v148 = (int)std::popcount(
+							(uint32_t)_mm_movemask_epi8(
 								_mm_cmpgt_epi16(
 									v147,
 									_mm_shufflelo_epi16(_mm_cvtsi32_si128(*(uint32_t*)param_buffer & 0x3FFF), 0))))
 							/ 2;
 						v149 = (unsigned int)(3 - v148);
-						v150 = *(unsigned __int16*)(v146 + 2 * v149 + 282);
-						v151 = (*(uint64_t*)param_buffer & 0x3FFFi64)
+						v150 = *(uint16_t*)(v146 + 2 * v149 + 282);
+						v151 = (*(uint64_t*)param_buffer & 0x3FFF)
 							+ (*(uint64_t*)param_buffer >> 14)
-							* (*(unsigned __int16*)(v146 + 2i64 * (unsigned int)(4 - v148) + 282) - (unsigned int)v150)
+							* (*(uint16_t*)(v146 + 2 * (unsigned int)(4 - v148) + 282) - (unsigned int)v150)
 							- v150;
-						if (v151 < 0x100000000i64)
+						if (v151 < 0x100000000)
 						{
 							v152 = *(uint64_t*)(param_buffer + 24);
 							v153 = *(unsigned int*)((v152 & *(uint64_t*)(param_buffer + 32)) + *(uint64_t*)(param_buffer + 16));
@@ -2196,7 +2222,7 @@ bool RTech::DecompressSnowflake(int64_t param_buffer, uint64_t data_size, uint64
 
 					}
 					v181 = *(uint64_t*)(param_buffer + 149208);
-					v182 = 0i64;
+					v182 = 0;
 					v183 = v181 + *(uint64_t*)(param_buffer + 149200);
 					v184 = v183 - v145;
 					*(uint64_t*)(param_buffer + 149208) = v181 + v73;
@@ -2264,8 +2290,8 @@ std::unique_ptr<char[]> RTech::DecompressStreamedBuffer(std::unique_ptr<char[]> 
 		std::unique_ptr<char[]> decompState = std::make_unique<char[]>(0x25000);
 		InitSnowflakeDecompState((long long)&decompState.get()[0], reinterpret_cast<int64_t>(buf.get()), bufSize);
 
-		__int64* editDecompState = (__int64*)&decompState.get()[0];
-		__int64 decodeSize = editDecompState[0x48D3];
+		int64_t* editDecompState = (int64_t*)&decompState.get()[0];
+		int64_t decodeSize = editDecompState[0x48D3];
 
 		unsigned int v15 = *((unsigned int*)editDecompState + 0x91A4); // decomp pos?
 		*((uint32_t*)editDecompState + 0x91A2) = 0;
@@ -2275,7 +2301,7 @@ std::unique_ptr<char[]> RTech::DecompressStreamedBuffer(std::unique_ptr<char[]> 
 		std::unique_ptr<char[]> outBuf = std::make_unique<char[]>(decodeSize);
 
 		editDecompState[0x48D4] = decodeSize;
-		editDecompState[0x48DA] = (__int64)outBuf.get(); // output buffer.
+		editDecompState[0x48DA] = (int64_t)outBuf.get(); // output buffer.
 		editDecompState[0x48DB] = 0;
 
 		DecompressSnowflake((long long)&decompState.get()[0], bufSize, decodeSize);
@@ -2331,7 +2357,7 @@ unsigned char byte_18002D840[] =
 
 #pragma warning( push, 0 )
 #pragma warning( disable: 6297 )
-__int64 PakPatch_DecodeData(char* buffer, int arrayBitDepth, char* out_1, char* out_2)
+int64_t PakPatch_DecodeData(char* buffer, int arrayBitDepth, char* out_1, char* out_2)
 {
     int v5; // er14
     int v8; // eax
@@ -2343,7 +2369,7 @@ __int64 PakPatch_DecodeData(char* buffer, int arrayBitDepth, char* out_1, char* 
     int v17; // er9
     char i; // r8 MAPDST
     char v20; // r13
-    __int64 j; // rax
+    int64_t j; // rax
 
     // in_data - PES (patch edit stream) buffer
     // arrayBitDepth - number of bits used for array indexes
@@ -2353,7 +2379,7 @@ __int64 PakPatch_DecodeData(char* buffer, int arrayBitDepth, char* out_1, char* 
     // out_1 - output array
     // out_2 - output array
     v5 = 0;
-    if (!_BitScanReverse((unsigned long*)&v8, arrayBitDepth - 2))
+    if (!BitScanReverseCompat((unsigned long*)&v8, arrayBitDepth - 2))
         v11 = 0;
     else
         v11 = v8 + 1;
@@ -2369,7 +2395,7 @@ __int64 PakPatch_DecodeData(char* buffer, int arrayBitDepth, char* out_1, char* 
         for (j = byte_18002D840[v5 << (8 - i)]; j < arraySize; j = ((1 << i) + j))
         {
             --v17;
-            out_1[j] = ((unsigned __int8)buffer[offset] >> v11);
+            out_1[j] = ((uint8_t)buffer[offset] >> v11);
             out_2[j] = i;
         }
         offset++;
@@ -2417,16 +2443,16 @@ static uint64_t Pak_StringToGuidAligned(const char* string)
 			} while (v10 >= 0x100);
 		}
 		v11 = 0x633D5F1 * v1;
-		v12 = (0xFB8C4D96501i64 * (uint64_t)(((v5 & *(uint32_t*)string) - 45 * (v8 >> 7)) & 0xDFDFDFDF)) >> 24;
+		v12 = (0xFB8C4D96501 * (uint64_t)(((v5 & *(uint32_t*)string) - 45 * (v8 >> 7)) & 0xDFDFDFDF)) >> 24;
 		if (v4)
 			break;
 		string += 4;
 		v1 = ((v11 + v12) >> 61) ^ (v11 + v12);
 	}
 	v13 = -1;
-	if (_BitScanReverse((unsigned long*)&v15, v5))
+	if (BitScanReverseCompat((unsigned long*)&v15, v5))
 		v13 = v15;
-	return v12 + v11 - 0xAE502812AA7333i64 * (uint32_t)(i + v13 / 8);
+	return v12 + v11 - 0xAE502812AA7333 * (uint32_t)(i + v13 / 8);
 }
 
 static uint64_t Pak_StringToGuidUnaligned(const char* string)
@@ -2486,26 +2512,26 @@ static uint64_t Pak_StringToGuidUnaligned(const char* string)
 			} while (v11 >= 0x100);
 		}
 		v12 = 0x633D5F1 * v1;
-		v13 = (0xFB8C4D96501i64 * (uint64_t)((v7 - 45 * (v9 >> 7)) & 0xDFDFDFDF)) >> 24;
+		v13 = (0xFB8C4D96501 * (uint64_t)((v7 - 45 * (v9 >> 7)) & 0xDFDFDFDF)) >> 24;
 		if (v5)
 			break;
-		v2 += 4i64;
+		v2 += 4;
 		v1 = ((v12 + v13) >> 61) ^ (v12 + v13);
 	}
 	v14 = -1;
-	if (_BitScanReverse((unsigned long*)&v16, v6))
+	if (BitScanReverseCompat((unsigned long*)&v16, v6))
 		v14 = v16;
-	return v13 + v12 - 0xAE502812AA7333i64 * (uint32_t)(i + v14 / 8);
+	return v13 + v12 - 0xAE502812AA7333 * (uint32_t)(i + v14 / 8);
 }
 
-uint64_t __fastcall RTech::StringToGuid(const char* str)
+uint64_t RTech::StringToGuid(const char* str)
 {
 	return ((uintptr_t)str & 3)
 		? Pak_StringToGuidUnaligned(str)
 		: Pak_StringToGuidAligned(str);
 }
 
-uint32_t __fastcall RTech::StringToUIMGHash(const char* str)
+uint32_t RTech::StringToUIMGHash(const char* str)
 {
     std::uint64_t r = StringToGuid(str);
     unsigned int l = (r & 0xFFFFFFFF);

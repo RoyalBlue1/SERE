@@ -191,6 +191,7 @@ void RuiExportPrototype::GenerateCode() {
 
 	codeLines.push_back(std::format("funcs->executeTransform(inst,{});",transformData.size()));
 	codeLines.push_back("}");
+	
 
 }
 
@@ -459,6 +460,7 @@ bool RuiExportPrototype::GenerateCodeStruct() {
 
 	}
 	codeLines.push_back("};");
+	return true;
 }
 
 void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render) {

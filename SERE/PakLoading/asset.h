@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <map>
 #include <unordered_map>
+#include <format>
+#include <vector>
 #include "PakLoading/utils.h"
 
 typedef unsigned long       DWORD;

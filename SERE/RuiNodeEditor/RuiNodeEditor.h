@@ -5,7 +5,7 @@
 #include <map>
 #include <filesystem>
 
-#include "imgui/ImNodeFlow.h"
+#include "Imgui/ImNodeFlow.h"
 #include "RuiRendering/RenderManager.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"
@@ -22,7 +22,6 @@ class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
 	RenderInstance& render;
-	
 
 	std::map<std::string,NodeCategory> nodeTypes;
 public:
@@ -33,9 +32,11 @@ public:
 	void Draw();
 	void Serialize();
 	void Deserialize();
+	void DeserializeFromPath(const fs::path& path);
 	void Export();
+	void ExportToPath(const fs::path& path);
 	void Clear();
-
+	std::optional<std::filesystem::path> currentFilePath;
 	template<class T> void AddNodeType() {
 		
 		

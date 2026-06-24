@@ -1,6 +1,11 @@
 #pragma once
-#include <intrin.h>
+#include <immintrin.h>
 #include <random>
+#include <format>
+
+#ifdef _MSC_VER
+typedef int16_t __int16_t;
+#endif
 
 struct Vector2 {
 	float x;
@@ -53,3 +58,55 @@ inline uint64_t randomInt64() {
 	static std::uniform_int_distribution<uint64_t> dis;
 	return dis(gen);
 }
+
+static inline unsigned char BitScanForwardCompat(unsigned long* index, unsigned long mask)
+{
+#if defined(_MSC_VER)
+    return _BitScanForward(index, mask);
+#else
+    if (mask == 0)
+        return 0;
+
+    *index = static_cast<unsigned long>(__builtin_ctzl(mask));
+    return 1;
+#endif
+}
+
+static inline unsigned char BitScanForward64Compat(unsigned long* index, uint64_t mask)
+{
+#if defined(_MSC_VER)
+    return _BitScanForward64(index, mask);
+#else
+    if (mask == 0)
+        return 0;
+
+    *index = static_cast<unsigned long>(__builtin_ctzll(mask));
+    return 1;
+#endif
+}
+
+static inline unsigned char BitScanReverseCompat(unsigned long* index, unsigned long mask)
+{
+#if defined(_MSC_VER)
+    return _BitScanReverse(index, mask);
+#else
+    if (mask == 0)
+        return 0;
+
+    *index = static_cast<unsigned long>(31u - __builtin_clz(mask));
+    return 1;
+#endif
+}
+
+static inline unsigned char BitTestAndSet64Compat(int64_t* base, long bit)
+{
+#if defined(_MSC_VER)
+    return _bittestandset64(base, bit);
+#else
+    uint64_t mask = 1ULL << bit;
+    unsigned char oldBit = ((*reinterpret_cast<uint64_t*>(base) & mask) != 0);
+    *reinterpret_cast<uint64_t*>(base) |= mask;
+    return oldBit;
+#endif
+}
+

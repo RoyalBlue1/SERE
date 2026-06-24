@@ -3,12 +3,62 @@
 #pragma once
 #include <array>
 #include <cinttypes>
+#include <cstring>
 #include <string>
 #include <memory>
 #include <filesystem>
 #include <sstream>
+#include "../Util.h"
 
 #define IALIGN(a, b) (((a)+((b)-1)) & ~((b)-1))
+#if defined(_MSC_VER)
+    #define MEMCPY_S(dest, destsz, src, count) memcpy_s((dest), (destsz), (src), (count))
+#else
+    inline int MEMCPY_S(void* dest, size_t destsz, const void* src, size_t count)
+    {
+        if (count > destsz)
+            return 1;
+
+        std::memcpy(dest, src, count);
+        return 0;
+    }
+#endif
+
+
+#if defined(_MSC_VER)
+    #include <malloc.h>
+
+    static inline void* aligned_malloc_compat(std::size_t size, std::size_t alignment)
+    {
+        return _aligned_malloc(size, alignment);
+    }
+
+    static inline void aligned_free_compat(void* ptr)
+    {
+        _aligned_free(ptr);
+    }
+#else
+    static inline void* aligned_malloc_compat(std::size_t size, std::size_t alignment)
+    {
+        void* ptr = nullptr;
+
+        if (alignment < sizeof(void*))
+            alignment = sizeof(void*);
+
+        if (posix_memalign(&ptr, alignment, size) != 0)
+            return nullptr;
+
+        return ptr;
+    }
+
+    static inline void aligned_free_compat(void* ptr)
+    {
+        std::free(ptr);
+    }
+#endif
+
+
+
 
 namespace
 {
@@ -149,7 +199,7 @@ namespace
     };
 }
 
-#define PAK_DECODE_MASK 0xFFFFFFFFFFFFFFFFui64
+#define PAK_DECODE_MASK 0xFFFFFFFFFFFFFFFF
 
 enum eCompressionType : uint8_t
 {
@@ -195,15 +245,15 @@ public:
 
     // UNK functions for snowflake.
     static int64_t sub_7FF7FC23BA70(int64_t param_buffer, int64_t a2);
-    static __int64 sub_7FF7FC23C680(__int64 a1, unsigned __int64* a2, unsigned __int8 a3, unsigned int a4, void* a5);
+    static int64_t sub_7FF7FC23C680(int64_t a1, uint64_t* a2, uint8_t a3, uint32_t a4, void* a5);
     static int64_t sub_7FF7FC23B960(int64_t param_buffer, uint32_t unk1);
     static int64_t sub_7FF7FC23C880(int64_t param_buffer, uint8_t a2, int64_t a3);
-    static __int64 sub_7FF7FC23CD20(unsigned __int8* param_buffer, unsigned int a2);
+    static int64_t sub_7FF7FC23CD20(uint8_t* param_buffer, uint32_t a2);
 
     static std::unique_ptr<char[]> DecompressStreamedBuffer(std::unique_ptr<char[]> buf, uint64_t& bufSize, const eCompressionType compType);
 
-    static uint64_t __fastcall StringToGuid(const char* str);
-    static uint32_t __fastcall StringToUIMGHash(const char* str);
+    static uint64_t StringToGuid(const char* str);
+    static uint32_t StringToUIMGHash(const char* str);
 };
 
 inline const std::string fourCCToString(int32_t n)
@@ -230,7 +280,7 @@ inline std::string GetIndentation(const size_t level)
 
 struct RBitRead
 {
-	unsigned __int64 m_dataBuf;
+	uint64_t m_dataBuf;
 	uint32_t m_bitsUnoccupied; // number of bits that do not contain data
 
 	RBitRead() : m_dataBuf(0), m_bitsUnoccupied(64) {};
@@ -238,7 +288,7 @@ struct RBitRead
 	// get number of "free" bits in the buffer
 	inline uint32_t BitsAvailable() const { return m_bitsUnoccupied; };
 
-	inline void ConsumeData(unsigned __int64 input, unsigned int numBits = 64)
+	inline void ConsumeData(uint64_t input, uint32_t numBits = 64)
 	{
 		if (numBits > BitsAvailable()) //UNLIKELY
 		{
@@ -249,7 +299,7 @@ struct RBitRead
 		m_dataBuf |= input << (64 - numBits);
 	}
 
-	inline void ConsumeData(void* input, unsigned int numBits = 64)
+	inline void ConsumeData(void* input, uint32_t numBits = 64)
 	{
 		if (numBits > BitsAvailable()) //UNLIKELY
 		{
@@ -257,17 +307,17 @@ struct RBitRead
 			return;
 		}
 
-		m_dataBuf |= *reinterpret_cast<unsigned __int64*>(input) << (64 - numBits);
+		m_dataBuf |= *reinterpret_cast<uint64_t*>(input) << (64 - numBits);
 	}
 
 
-	inline unsigned __int64 ReadBits(unsigned int numBits)
+	inline uint64_t ReadBits(uint32_t numBits)
 	{
 		//assert(numBits <= 64 && "RBitRead::ReadBits: numBits must be less than or equal to 64.");
 		return m_dataBuf & ((1ull << numBits) - 1);
 	}
 
-	inline void DiscardBits(unsigned int numBits)
+	inline void DiscardBits(uint32_t numBits)
 	{
 		//assert(numBits <= 64 && "RBitRead::DiscardBits: numBits must be less than or equal to 64.");
 		this->m_dataBuf >>= numBits;

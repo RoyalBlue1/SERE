@@ -14,13 +14,17 @@
 // maximum number of "segments" that can be present in a pak
 #define PAK_MAX_SEGMENTS 20
 
+#ifndef _MSC_VER
+    typedef long long __int64;
+#endif
+
 // maximum number of segment "collections"
 #define PAK_MAX_SEGMENT_COLLECTIONS 4
 
 struct PakPatchFileHdr_t
 {
-    __int64 cmpSize;
-    __int64 dcmpSize;
+    int64_t cmpSize;
+    int64_t dcmpSize;
 };
 
 struct PakPatchDataHdr_t
@@ -47,7 +51,7 @@ struct PakSegmentHdr_t
     uint32_t align;
     int64_t size;
 
-    inline const __int8 GetType() const
+    inline const int8_t GetType() const
     {
         return flags & SF_TYPE_MASK;
     }
@@ -122,7 +126,7 @@ struct PakAsset_v6_t
     // if the pointer has failed to resolve, this won't help
     bool HasValidDataPagePointer() const { return dataPagePtr.ptr != 0; };
 
-    __int64 starpakOffset;
+    int64_t starpakOffset;
 
     uint16_t pageEnd;
 
@@ -163,8 +167,8 @@ struct PakAsset_v8_t
     // if the pointer has failed to resolve, this won't help
     bool HasValidDataPagePointer() const { return dataPagePtr.ptr != 0; };
 
-    __int64 starpakOffset;
-    __int64 optStarpakOffset;
+    int64_t starpakOffset;
+    int64_t optStarpakOffset;
 
     uint16_t pageEnd;
 
@@ -220,8 +224,8 @@ struct PakAsset_t
     // if the pointer has failed to resolve, this won't help
     bool HasValidDataPagePointer() const { return dataPagePtr.ptr != 0; };
 
-    __int64 starpakOffset;
-    __int64 optStarpakOffset;
+    int64_t starpakOffset;
+    int64_t optStarpakOffset;
 
     uint16_t pageEnd;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderFrameWork.h"
+#include "RenderFramework.h"
 #include <d3d11.h>
 #include <SDL3/SDL.h>
 
@@ -111,6 +111,8 @@ public:
 
 	void* GetTextureView(size_t id);
 	void* GetRuiView();
+
+	void* GetWindow();
 
 private:
 	ID3D11Device*            g_pd3dDevice = nullptr;

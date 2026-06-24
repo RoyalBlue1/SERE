@@ -6,7 +6,8 @@
 #include <mutex>
 
 #include "ThirdParty/rapidjson/document.h"
-#include "Thirdparty/DDSTextureLoader11.h"
+
+// #include "ThirdParty/DDSTextureLoader11.h"
 
 
 #undef GetObject
@@ -19,7 +20,8 @@ std::vector<ImageAtlas> imageAtlases{};
 std::mutex atlasMutex{};
 
 void loadImageAtlases() {
-	fs::path folderPath = ".\\Assets\\Atlases";
+	fs::path folderPath = fs::path(".") / "Assets" / "Atlases";
+	if (!std::filesystem::exists(folderPath)) return;
 
 	for (const auto& dirEntry : fs::recursive_directory_iterator(folderPath)) {
 		if(!dirEntry.is_regular_file())continue;
@@ -41,7 +43,7 @@ void loadImageAtlasFromRpak(UIImageAtlasAssetHeader_v10_t* hdr, ShaderSizeData_t
 	atlasMutex.unlock();
 }
 
-unsigned __int64 calculateRpakHash(const char* a1a) {
+uint64_t calculateRpakHash(const char* a1a) {
 
 	uint32_t* v1; // r8
 	uint64_t         v2; // r10
@@ -57,7 +59,7 @@ unsigned __int64 calculateRpakHash(const char* a1a) {
 	uint32_t* a1 = (uint32_t*)a1a;
 
 	v1 = a1;
-	v2 = 0i64;
+	v2 = 0;
 	v3 = 0;
 	v4 = (*a1 - 45 * ((~(*a1 ^ 0x5C5C5C5Cu) >> 7) & (((*a1 ^ 0x5C5C5C5Cu) - 0x1010101) >> 7) & 0x1010101)) & 0xDFDFDFDF;
 	for (i = ~*a1 & (*a1 - 0x1010101) & 0x80808080; !i; i = v8 & 0x80808080)
@@ -66,7 +68,7 @@ unsigned __int64 calculateRpakHash(const char* a1a) {
 		v7 = v1[1];
 		++v1;
 		v3 += 4;
-		v2 = ((((uint64_t)(0xFB8C4D96501i64 * v6) >> 24) + 0x633D5F1 * v2) >> 61) ^ (((uint64_t)(0xFB8C4D96501i64 * v6) >> 24)
+		v2 = ((((uint64_t)(0xFB8C4D96501 * v6) >> 24) + 0x633D5F1 * v2) >> 61) ^ (((uint64_t)(0xFB8C4D96501 * v6) >> 24)
 			+ 0x633D5F1 * v2);
 		v8 = ~v7 & (v7 - 0x1010101);
 		v12 = 45 * ((~(v7 ^ 0x5C5C5C5Cu) >> 7) & (((v7 ^ 0x5C5C5C5Cu) - 0x1010101) >> 7) & 0x1010101);
@@ -75,11 +77,11 @@ unsigned __int64 calculateRpakHash(const char* a1a) {
 	}
 	v9 = -1;
 	v10 = (i & -(signed)i) - 1;
-	if (_BitScanReverse((unsigned long*)&v12, v10))
+	if (BitScanReverseCompat((unsigned long*)&v12, v10))
 	{
 		v9 = v12;
 	}
-	return 0x633D5F1 * v2 + ((0xFB8C4D96501i64 * (uint64_t)(v4 & v10)) >> 24) - 0xAE502812AA7333i64 * (uint32_t)(v3 + v9 / 8);
+	return 0x633D5F1 * v2 + ((0xFB8C4D96501 * (uint64_t)(v4 & v10)) >> 24) - 0xAE502812AA7333 * (uint32_t)(v3 + v9 / 8);
 
 }
 
@@ -157,14 +159,26 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, size_t atlasIndex):
 
 
 		textureOffset offset;
-		offset.m128_0.m128_f32[0] = texOff["f0"].GetFloat();
-		offset.m128_0.m128_f32[1] = texOff["f1"].GetFloat();
-		offset.m128_0.m128_f32[2] = texOff["endX"].GetFloat();
-		offset.m128_0.m128_f32[3] = texOff["endY"].GetFloat();
-		offset.m128_10.m128_f32[0] = texOff["startX"].GetFloat();
-		offset.m128_10.m128_f32[1] = texOff["startY"].GetFloat();
-		offset.m128_10.m128_f32[2] = texOff["unkX"].GetFloat();
-		offset.m128_10.m128_f32[3] = texOff["unkY"].GetFloat();
+		// offset.m128_0.m128_f32[0] = texOff["f0"].GetFloat();
+		// offset.m128_0.m128_f32[1] = texOff["f1"].GetFloat();
+		// offset.m128_0.m128_f32[2] = texOff["endX"].GetFloat();
+		// offset.m128_0.m128_f32[3] = texOff["endY"].GetFloat();
+		offset.m128_0 = _mm_set_ps(
+			texOff["endY"].GetFloat(),
+			texOff["endX"].GetFloat(),
+			texOff["f1"].GetFloat(),
+			texOff["f0"].GetFloat()
+		);
+		// offset.m128_10.m128_f32[0] = texOff["startX"].GetFloat();
+		// offset.m128_10.m128_f32[1] = texOff["startY"].GetFloat();
+		// offset.m128_10.m128_f32[2] = texOff["unkX"].GetFloat();
+		// offset.m128_10.m128_f32[3] = texOff["unkY"].GetFloat();
+		offset.m128_10 = _mm_setr_ps(
+			texOff["startX"].GetFloat(),
+			texOff["startY"].GetFloat(),
+			texOff["unkX"].GetFloat(),
+			texOff["unkY"].GetFloat()
+		);
 		offsets.push_back(offset);
 	}
 
@@ -218,14 +232,20 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, size_t atlasIndex):
 
 
 		uiImageAtlasUnk offset;
-		offset.m128_0.m128_f32[0] = renderOff["f0"].GetFloat();
-		offset.m128_0.m128_f32[1] = renderOff["f1"].GetFloat();
-		offset.m128_0.m128_f32[2] = renderOff["endX"].GetFloat();
-		offset.m128_0.m128_f32[3] = renderOff["endY"].GetFloat();
-		offset.m128_10.m128_f32[0] = renderOff["startX"].GetFloat();
-		offset.m128_10.m128_f32[1] = renderOff["startY"].GetFloat();
-		offset.m128_10.m128_f32[2] = renderOff["unkX"].GetFloat();
-		offset.m128_10.m128_f32[3] = renderOff["unkY"].GetFloat();
+		offset.m128_0 = _mm_set_ps(
+			renderOff["endY"].GetFloat(),
+			renderOff["endX"].GetFloat(),
+			renderOff["f1"].GetFloat(),
+			renderOff["f0"].GetFloat()
+		);
+	
+		offset.m128_10 = _mm_setr_ps(
+			renderOff["startX"].GetFloat(),
+			renderOff["startY"].GetFloat(),
+			renderOff["unkX"].GetFloat(),
+			renderOff["unkY"].GetFloat()
+		);
+	
 
 		renderOffsets.push_back(offset);
 	}

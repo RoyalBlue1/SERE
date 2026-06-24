@@ -1,11 +1,10 @@
 #version 450
 
-in vec4       texcoord0;  // TEXCOORD
-in vec4       texcoord1;  // TEXCOORD1
-flat in ivec4 texcoord2;  // TEXCOORD2 (flat = no interp)
+layout(location = 0) in vec4       texcoord0;  // TEXCOORD
+layout(location = 1) in vec4       texcoord1;  // TEXCOORD1
+layout(location = 2) flat in ivec4 texcoord2;  // TEXCOORD2
 
-
-out vec4 out_color;
+layout(location = 0) out vec4 out_color;
 
 struct g_fontBounds_t
 {

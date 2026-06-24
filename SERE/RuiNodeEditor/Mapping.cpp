@@ -1,5 +1,5 @@
 #include "Mapping.h"
-
+#include <cstdint>
 
 float Mapping::MapVar(float xVal) {
 

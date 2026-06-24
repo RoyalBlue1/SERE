@@ -17,10 +17,10 @@ std::string Variable::GetFormattedName(RuiExportPrototype& proto) const {
 }
 
 FloatVariable RuiBaseNode::getInNumeric(const char* id) {
-	float val;
-	if(inPin(id)->isConnected()&&inPin(id)->getLink().lock()->left()->getDataType() == typeid(IntVariable))
+	bool isConnected = inPin(id)->isConnected();
+	if(isConnected&&inPin(id)->getLink().lock()->left()->getDataType() == typeid(IntVariable))
 	{
-		IntVariable val = getInVal<IntVariable>(id).value;
+		IntVariable val = getInVal<IntVariable>(id);
 		return FloatVariable(val.value,val.name);
 	}
 	else
