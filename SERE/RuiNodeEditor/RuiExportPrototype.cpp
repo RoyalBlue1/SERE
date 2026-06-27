@@ -24,6 +24,12 @@ void RuiExportPrototype::AddTransformData(uint8_t* data, size_t size) {
 	}
 }
 
+void RuiExportPrototype::AddMappingData(uint8_t* data, size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		mappingData.push_back(data[i]);
+	}
+}
+
 void RuiExportPrototype::AddRenderJobData(uint8_t* data, size_t size) {
 	for (size_t i = 0; i < size; i++) {
 		renderJobData.push_back(data[i]);
@@ -142,6 +148,7 @@ uint16_t RuiExportPrototype::GetStringConstantOffset(std::string s) {
 	assert(stringConstants.contains(s) && "Float not found in Float Constants");
 	return stringConstants[s];
 }
+
 
 void RuiExportPrototype::GenerateCode() {
 	std::set<std::string> existingVariables;
@@ -500,7 +507,7 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 	pkgHdr.transformDataSize = (uint16_t)transformData.size();
 	pkgHdr.rpakPointersInDefaltDataCount = (uint16_t)rpakPointersInDefaultValues.size();
 	pkgHdr.mappingCount = (uint16_t)mappings.size();
-	pkgHdr.mappingSize = 0;
+	pkgHdr.mappingSize = (uint16_t)mappingData.size();
 	pkgHdr.renderJobCount = renderJobCount;
 	pkgHdr.argClusterCount = 1;
 	pkgHdr.argCount = cluster.argCount;
@@ -547,6 +554,9 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 
 	pkgHdr.argClusterOffset = file.tellp();
 	file.write((char*)&cluster,sizeof(cluster));
+
+	pkgHdr.mappingOffset = file.tellp();
+	file.write((char*)mappingData.data(),mappingData.size());
 
 	file.seekp(0);
 	file.write((char*) &pkgHdr, sizeof(pkgHdr));

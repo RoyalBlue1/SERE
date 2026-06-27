@@ -171,6 +171,7 @@ struct RuiExportPrototype {
 	std::vector<uint8_t> transformData;
 	std::vector<uint8_t> renderJobData;
 	std::vector<uint8_t> defaultValues;
+	std::vector<uint8_t> mappingData;
 	std::vector<uint16_t> rpakPointersInDefaultValues;
 	std::stringstream defaultStrings;
 	uint16_t renderJobCount;
@@ -183,6 +184,7 @@ struct RuiExportPrototype {
 	void AddConstant(std::string s);
 
 	void AddTransformData(uint8_t* data, size_t size);
+	void AddMappingData(uint8_t* data, size_t size);
 
 	void AddRenderJobData(uint8_t* data, size_t size);
 

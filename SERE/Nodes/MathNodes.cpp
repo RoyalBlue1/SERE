@@ -521,7 +521,46 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 			proto.codeLines.push_back(std::format("{} = funcs->map_v1(inst,{},{});",out.GetFormattedName(proto),mappingIndex,a.GetFormattedName(proto)));
 		else
 			proto.codeLines.push_back(std::format("float {} = funcs->map_v1(inst,{},{});",out.GetFormattedName(proto),mappingIndex,a.GetFormattedName(proto)));
+
 	};
+
+
+	struct MappingFileStruct {
+		uint32_t dataCount;
+		uint16_t nestedMappingCount;
+		uint16_t isCublicSpline;
+		float* data;
+	};
+
+	MappingFileStruct mappingFileStruct{};
+	auto& mapping = proto.mappings[mappingIndex];
+	mappingFileStruct.isCublicSpline = proto.mappings[mappingIndex].cubicSpline;
+	mappingFileStruct.dataCount = mapping.controlPoints.size();
+	mappingFileStruct.nestedMappingCount = 1;
+
+	mappingFileStruct.data = new float[mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2)];
+	if (mappingFileStruct.isCublicSpline) {
+		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
+			mappingFileStruct.data[i] = (float)mapping.controlPoints[i].x;
+		}
+
+		// y,spline
+		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
+			mappingFileStruct.data[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
+			mappingFileStruct.data[i + mappingFileStruct.dataCount * 2] = (float)mapping.controlPoints[i].dir;
+		}
+
+	}
+	else {
+		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
+			mappingFileStruct.data[i] = mapping.controlPoints[i].x;
+			mappingFileStruct.data[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
+		}
+	}
+
+
+
+	proto.AddMappingData((uint8_t*)&mappingFileStruct, sizeof(mappingFileStruct) + mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2) * sizeof(float));
 	proto.codeElements.push_back(ele);
 }
 
@@ -1042,7 +1081,7 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<AbsoluteNode>();
 	editor.AddNodeType<SineNode>();
 	editor.AddNodeType<ExponentNode>();
-	//editor.AddNodeType<MappingNode>();
+	editor.AddNodeType<MappingNode>();
 	editor.AddNodeType<TangentNode>();
 	editor.AddNodeType<CosineNode>();
 	editor.AddNodeType<SquareRootNode>();
