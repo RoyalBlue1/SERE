@@ -568,7 +568,7 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 	//mappingFileStruct.isCublicSpline = proto.mappings[mappingIndex].cubicSpline;
 	proto.mappings[mappingIndex].cubicSpline ? mappingFileStruct.isCublicSpline = 1 : mappingFileStruct.isCublicSpline = 0;
 	mappingFileStruct.dataCount = mapping.controlPoints.size();
-	mappingFileStruct.nestedMappingCount = 1;
+	mappingFileStruct.nestedMappingCount = mapping.controlPoints.size();
 
 	const size_t mappingFloatCount = mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2);
 	std::vector<float> mappingFloatData(mappingFloatCount);
@@ -584,7 +584,9 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 	else {
 		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
 			mappingFloatData[i] = mapping.controlPoints[i].x;
-			mappingFloatData[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
+		}
+		for (int i = 0; i < mappingFileStruct.nestedMappingCount; i++) {
+			mappingFloatData[mappingFileStruct.dataCount + i] = mapping.controlPoints[i].y;
 		}
 	}
 
