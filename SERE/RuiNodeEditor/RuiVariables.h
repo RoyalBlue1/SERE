@@ -2,6 +2,7 @@
 
 #include <string>
 #include <format>
+#include <variant>
 #include "Util.h"
 #include "ImageAtlas.h"
 
@@ -33,6 +34,7 @@ struct BoolVariable;
 struct FloatVariable;
 struct Float2Variable;
 struct Float3Variable;
+struct MathVariable;
 struct ColorVariable;
 struct StringVariable;
 struct AssetVariable;
@@ -115,6 +117,41 @@ struct Float3Variable :Variable {
 
 	std::string Literal() const override {
 		return std::format("Vector3({},{},{})", value.x, value.y, value.z);
+	}
+};
+
+enum class MathVariableType {
+	FLOAT,
+	FLOAT2,
+	FLOAT3
+};
+
+struct MathVariable {
+	std::variant<FloatVariable, Float2Variable, Float3Variable> value;
+
+	MathVariable() :value(FloatVariable(0.f)) {}
+	MathVariable(const FloatVariable& val) :value(val) {}
+	MathVariable(const Float2Variable& val) :value(val) {}
+	MathVariable(const Float3Variable& val) :value(val) {}
+
+	MathVariableType Type() const {
+		if (std::holds_alternative<FloatVariable>(value))
+			return MathVariableType::FLOAT;
+		if (std::holds_alternative<Float2Variable>(value))
+			return MathVariableType::FLOAT2;
+		return MathVariableType::FLOAT3;
+	}
+
+	bool IsConstant() const {
+		return std::visit([](const auto& val) { return val.IsConstant(); }, value);
+	}
+
+	std::string Name() const {
+		return std::visit([](const auto& val) { return val.name; }, value);
+	}
+
+	std::string GetFormattedName(RuiExportPrototype& proto) const {
+		return std::visit([&proto](const auto& val) { return val.GetFormattedName(proto); }, value);
 	}
 };
 

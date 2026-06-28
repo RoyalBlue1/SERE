@@ -384,6 +384,9 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 		typeid(Float3Variable).name(),	
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,247,200,255),0,4.f,4.67f,3.7f,1.f));
 	styles.AddPinStlye(
+		typeid(MathVariable).name(),
+		std::make_shared<ImFlow::PinStyle>(IM_COL32(202,247,113,255),0,4.f,4.67f,3.7f,1.f));
+	styles.AddPinStlye(
 		typeid(ColorVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,178,247,255),0,4.f,4.67f,3.7f,1.f));
 	styles.AddPinStlye(
@@ -425,4 +428,3 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	errorNodeStyle->bg = IM_COL32(132,23,17,255);
 	styles.SetNodeErrorStyle(errorNodeStyle);
 }
-

@@ -12,6 +12,7 @@
 #include <functional>
 #include <unordered_map>
 #include <cstdint>
+#include <any>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_bezier_math.h"
@@ -1090,6 +1091,8 @@ namespace ImFlow
          */
         virtual void resolve() {}
 
+        virtual std::any valueAny() { return {}; }
+
         /**
          * @brief <BR>Custom render function to override Pin appearance
          * @param r Function or lambda expression with new ImGui rendering
@@ -1370,6 +1373,8 @@ namespace ImFlow
          * @return Const reference to the internal value of the pin
          */
         const T& val();
+
+        std::any valueAny() override { return val(); }
 
         /**
          * @brief <BR>Set logic to calculate output value
