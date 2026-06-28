@@ -529,38 +529,53 @@ void MappingNode::Export(RuiExportPrototype& proto) {
 		uint32_t dataCount;
 		uint16_t nestedMappingCount;
 		uint16_t isCublicSpline;
-		float* data;
 	};
 
 	MappingFileStruct mappingFileStruct{};
 	auto& mapping = proto.mappings[mappingIndex];
-	mappingFileStruct.isCublicSpline = proto.mappings[mappingIndex].cubicSpline;
+	//mappingFileStruct.isCublicSpline = proto.mappings[mappingIndex].cubicSpline;
+	proto.mappings[mappingIndex].cubicSpline ? mappingFileStruct.isCublicSpline = 1 : mappingFileStruct.isCublicSpline = 0;
 	mappingFileStruct.dataCount = mapping.controlPoints.size();
 	mappingFileStruct.nestedMappingCount = 1;
 
-	mappingFileStruct.data = new float[mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2)];
+	const size_t mappingFloatCount = mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2);
+	std::vector<float> mappingFloatData(mappingFloatCount);
 	if (mappingFileStruct.isCublicSpline) {
+		// x, y,spline
 		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
-			mappingFileStruct.data[i] = (float)mapping.controlPoints[i].x;
-		}
-
-		// y,spline
-		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
-			mappingFileStruct.data[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
-			mappingFileStruct.data[i + mappingFileStruct.dataCount * 2] = (float)mapping.controlPoints[i].dir;
+			mappingFloatData[i] = (float)mapping.controlPoints[i].x;
+			mappingFloatData[mappingFileStruct.dataCount + i * 2] = (float)mapping.controlPoints[i].y;
+			mappingFloatData[mappingFileStruct.dataCount + i * 2 + 1] = (float)mapping.controlPoints[i].dir;
 		}
 
 	}
 	else {
 		for (int i = 0; i < mappingFileStruct.dataCount; i++) {
-			mappingFileStruct.data[i] = mapping.controlPoints[i].x;
-			mappingFileStruct.data[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
+			mappingFloatData[i] = mapping.controlPoints[i].x;
+			mappingFloatData[i + mappingFileStruct.dataCount] = (float)mapping.controlPoints[i].y;
 		}
 	}
 
+	for (int i = 0; i < mappingFileStruct.dataCount; i++) {
+		float x = mappingFloatData[i];
+		float y = mappingFloatData[mappingFileStruct.dataCount + (mappingFileStruct.isCublicSpline ? i * 2 : i)];
+		std::printf("Mapping point %d: x=%f, y=%f", i, x, y);
+		if (mappingFileStruct.isCublicSpline) {
+			float dir = mappingFloatData[mappingFileStruct.dataCount + i * 2 + 1];
+			std::printf(", dir=%f", dir);
+		}
+		std::printf("\n");
+	}
+	std::vector<uint8_t> mappingData;
+	mappingData.reserve(sizeof(mappingFileStruct) + mappingFloatData.size() * sizeof(float));
 
+	const auto* mappingHeaderBytes = reinterpret_cast<const uint8_t*>(&mappingFileStruct);
+	mappingData.insert(mappingData.end(), mappingHeaderBytes, mappingHeaderBytes + sizeof(mappingFileStruct));
 
-	proto.AddMappingData((uint8_t*)&mappingFileStruct, sizeof(mappingFileStruct) + mappingFileStruct.dataCount * (mappingFileStruct.isCublicSpline ? 3 : 2) * sizeof(float));
+	const auto* mappingFloatBytes = reinterpret_cast<const uint8_t*>(mappingFloatData.data());
+	mappingData.insert(mappingData.end(), mappingFloatBytes, mappingFloatBytes + mappingFloatData.size() * sizeof(float));
+
+	proto.AddMappingData(mappingData.data(), mappingData.size());
 	proto.codeElements.push_back(ele);
 }
 
