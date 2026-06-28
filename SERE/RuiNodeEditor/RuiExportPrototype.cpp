@@ -231,6 +231,53 @@ void RuiExportPrototype::GenerateRenderJobData() {
 	}
 }
 
+void RuiExportPrototype::GenerateMappingData() {
+	mappingData.clear();
+
+	std::vector<RuiPackageMapping_v1_t> mappingHeaders;
+	std::vector<float> mappingValues;
+	mappingHeaders.reserve(mappings.size());
+
+	for (auto& mapping : mappings) {
+		mapping.Sort();
+
+		RuiPackageMapping_v1_t header{};
+		header.dataCount = (uint32_t)mapping.controlPoints.size();
+		header.nestedMappingCount = 1;
+		header.cublicSpline = mapping.cubicSpline ? 1 : 0;
+		mappingHeaders.push_back(header);
+
+		const size_t valueOffset = mappingValues.size();
+		const uint32_t valueStride = header.cublicSpline ? 2u : 1u;
+		const size_t keyOffset = valueOffset;
+		const size_t mappingValueOffset = keyOffset + header.dataCount;
+		const size_t valueCount = (size_t)header.dataCount * (1u + valueStride);
+		mappingValues.resize(valueOffset + valueCount);
+
+		for (uint32_t i = 0; i < header.dataCount; i++) {
+			mappingValues[keyOffset + i] = (float)mapping.controlPoints[i].x;
+			if (header.cublicSpline) {
+				const size_t pointOffset = mappingValueOffset + i * valueStride;
+				mappingValues[pointOffset] = (float)mapping.controlPoints[i].y;
+				mappingValues[pointOffset + 1] = (float)mapping.controlPoints[i].dir;
+			}
+			else {
+				mappingValues[mappingValueOffset + i] = (float)mapping.controlPoints[i].y;
+			}
+		}
+	}
+
+	if (!mappingHeaders.empty()) {
+		const auto* headerBytes = reinterpret_cast<const uint8_t*>(mappingHeaders.data());
+		mappingData.insert(mappingData.end(), headerBytes, headerBytes + mappingHeaders.size() * sizeof(RuiPackageMapping_v1_t));
+	}
+
+	if (!mappingValues.empty()) {
+		const auto* valueBytes = reinterpret_cast<const uint8_t*>(mappingValues.data());
+		mappingData.insert(mappingData.end(), valueBytes, valueBytes + mappingValues.size() * sizeof(float));
+	}
+}
+
 uint32_t calculateShortHash(const char* name, uint32_t mul, uint32_t add) {
 	uint32_t i = 0;
 	uint32_t hash = 0;
@@ -479,6 +526,7 @@ void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::share
 	GenerateVariables(render.arguments);
 	GenerateTransformData();
 	GenerateRenderJobData();
+	GenerateMappingData();
 	GenerateArguments();
 	GenerateCodeStruct();
 	GenerateCode();

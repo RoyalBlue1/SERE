@@ -139,6 +139,12 @@ struct ArgCluster_t
 	uint16_t renderJobCount;
 };
 
+struct RuiPackageMapping_v1_t {
+	uint32_t dataCount;
+	uint16_t nestedMappingCount;
+	uint16_t cublicSpline;
+};
+
 struct ExportRenderJob {
 	int layer;
 	std::function<void(RuiExportPrototype&)> func;
@@ -211,6 +217,7 @@ struct RuiExportPrototype {
 	void GenerateRenderJobData();
 	void GenerateVariables(std::map<std::string,std::any>& argValues);
 	void GenerateArguments();
+	void GenerateMappingData();
 	bool GenerateCodeStruct();
 	void Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render);
 

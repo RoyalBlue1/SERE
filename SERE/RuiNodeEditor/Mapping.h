@@ -8,7 +8,7 @@ class Mapping {
 	class MappingValue_t {
 	public:
 
-		MappingValue_t(float xVal,float yVal,float direction,int id):x(xVal),y(yVal),dir(direction),id_(id){}
+		MappingValue_t(float xVal, float yVal, float direction, int id) :x(xVal), y(yVal), dir(direction), id_(id) {}
 
 
 		void ShowPoint(bool cubicSpline) {
@@ -38,15 +38,13 @@ public:
 		id +=2;
 	}
 	void RemoveControlPoint() {
-		//cant be less than 3 values
-		if(controlPoints.size()<=3)
+		if(controlPoints.size()<=2)
 			return;
 		controlPoints.pop_back();
 	}
 	Mapping():cubicSpline(false),id(0) {
 		AddControlPoint(0.f,0.f);
 		AddControlPoint(1.f,1.f);
-		AddControlPoint(2.f,2.f);
 	}
 
 	float MapVar(float xVal);
