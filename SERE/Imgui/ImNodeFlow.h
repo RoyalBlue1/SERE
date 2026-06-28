@@ -1099,6 +1099,9 @@ namespace ImFlow
          */
         Pin* renderer(std::function<void(Pin* p)> r) { m_renderer = std::move(r); return this; }
 
+        Pin* visible(bool state) { m_visible = state; return this; }
+        [[nodiscard]] bool isVisible() const { return m_visible; }
+
         /**
          * @brief <BR>Create link between pins
          * @param other Pointer to the other pin
@@ -1192,7 +1195,7 @@ namespace ImFlow
          * @brief <BR>Calculate pin's width pre-rendering
          * @return The with of the pin once it will be rendered
          */
-        float calcWidth() { return ImGui::CalcTextSize(m_proto->name.c_str()).x; }
+        float calcWidth() { return m_visible ? ImGui::CalcTextSize(m_proto->name.c_str()).x : 0.f; }
 
         /**
          * @brief <BR>Set pin's position
@@ -1208,6 +1211,7 @@ namespace ImFlow
         ImNodeFlow** m_inf;
         std::shared_ptr<PinStyle> m_style;
         std::function<void(Pin* p)> m_renderer;
+        bool m_visible = true;
     };
 
     /**

@@ -335,6 +335,11 @@ namespace ImFlow
 
     inline void Pin::update()
     {
+        if (!m_visible) {
+            m_size = ImVec2(0.f, 0.f);
+            return;
+        }
+
         // Custom rendering
         if (m_renderer)
         {

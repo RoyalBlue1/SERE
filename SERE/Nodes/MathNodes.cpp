@@ -161,6 +161,28 @@ void DrawMathValue(const char* label, const MathVariable& value) {
 	}
 }
 
+bool CanUseMathOutput(MathVariableType resultType, MathVariableType outputType) {
+	if (resultType == MathVariableType::FLOAT)
+		return true;
+	return resultType == outputType;
+}
+
+void UpdateDynamicMathOutputVisibility(ImFlow::BaseNode* node, MathVariableType resultType, bool valid) {
+	ImFlow::Pin* scalar = node->outPin("Res");
+	ImFlow::Pin* vector2 = node->outPin("Vector2 Res");
+	ImFlow::Pin* vector3 = node->outPin("Vector3 Res");
+	bool allowScalar = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT);
+	bool allowVector2 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT2);
+	bool allowVector3 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT3);
+	bool hasSelectedOutput = (allowScalar && scalar->isConnected()) ||
+		(allowVector2 && vector2->isConnected()) ||
+		(allowVector3 && vector3->isConnected());
+
+	scalar->visible(allowScalar && (!hasSelectedOutput || scalar->isConnected()));
+	vector2->visible(allowVector2 && (!hasSelectedOutput || vector2->isConnected()));
+	vector3->visible(allowVector3 && (!hasSelectedOutput || vector3->isConnected()));
+}
+
 std::string ComponentExpression(const MathVariable& value, int index, RuiExportPrototype& proto) {
 	if (value.Type() == MathVariableType::FLOAT)
 		return value.GetFormattedName(proto);
@@ -244,8 +266,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BinaryMathPinInfo(float defaultB)
 	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("A", isPinMath, MathVariable(FloatVariable(0.f))));
 	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("B", isPinMath, MathVariable(FloatVariable(defaultB))));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
 	return info;
 }
 
@@ -325,8 +347,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("A", isPinMath, MathVariable(FloatVariable(0.f))));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
 	return info;
 }
 }
@@ -342,14 +364,14 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 			return AsFloatOutput(res); \
 		return FloatVariable(0.f); \
 	}); \
-	getOut<Float2Variable>("Vector2")->behaviour([this, outFloat2Name]() { \
+	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() { \
 		bool valid = false; \
 		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloat2Name, &valid); \
 		if (valid) \
 			return AsFloat2Output(res); \
 		return Float2Variable(0.f, 0.f); \
 	}); \
-	getOut<Float3Variable>("Vector3")->behaviour([this, outFloat3Name]() { \
+	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() { \
 		bool valid = false; \
 		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloat3Name, &valid); \
 		if (valid) \
@@ -363,6 +385,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	bool valid = false; \
 	bool divideByZero = false; \
 	MathVariable res = EvalBinary(OpName, a, b, "", &valid, &divideByZero); \
+	UpdateDynamicMathOutputVisibility(this, res.Type(), valid); \
 	DrawMathValue("A", a); \
 	DrawMathValue("B", b); \
 	if (!valid) { \
@@ -386,9 +409,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	EvalBinary(OpName, a, b, "", &valid); \
 	if (!valid) \
 		return; \
-	PushBinaryExport(proto, getOut<FloatVariable>("Res")->val(), MathVariableType::FLOAT, a, b, OpName); \
-	PushBinaryExport(proto, getOut<Float2Variable>("Vector2")->val(), MathVariableType::FLOAT2, a, b, OpName); \
-	PushBinaryExport(proto, getOut<Float3Variable>("Vector3")->val(), MathVariableType::FLOAT3, a, b, OpName);
+	MathVariable res = EvalBinary(OpName, a, b, ""); \
+	auto outFloat = getOut<FloatVariable>("Res"); \
+	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
+	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
+	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
+		PushBinaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, b, OpName); \
+	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
+		PushBinaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, b, OpName); \
+	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
+		PushBinaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, b, OpName);
 
 #define CONFIGURE_UNARY_NODE(OpName) \
 	std::string outFloatName = Variable::UniqueName(); \
@@ -398,11 +428,11 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloatName); \
 		return AsFloatOutput(res); \
 	}); \
-	getOut<Float2Variable>("Vector2")->behaviour([this, outFloat2Name]() { \
+	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() { \
 		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloat2Name); \
 		return AsFloat2Output(res); \
 	}); \
-	getOut<Float3Variable>("Vector3")->behaviour([this, outFloat3Name]() { \
+	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() { \
 		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloat3Name); \
 		return AsFloat3Output(res); \
 	});
@@ -410,15 +440,23 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 #define DRAW_UNARY_NODE(OpName) \
 	MathVariable a = getInMath("A"); \
 	MathVariable res = EvalUnary(OpName, a, ""); \
+	UpdateDynamicMathOutputVisibility(this, res.Type(), true); \
 	setStyle(styles.GetNodeStyle(category)); \
 	DrawMathValue("A", a); \
 	DrawMathValue("Res", res);
 
 #define EXPORT_UNARY_NODE(OpName) \
 	MathVariable a = getInMath("A"); \
-	PushUnaryExport(proto, getOut<FloatVariable>("Res")->val(), MathVariableType::FLOAT, a, OpName); \
-	PushUnaryExport(proto, getOut<Float2Variable>("Vector2")->val(), MathVariableType::FLOAT2, a, OpName); \
-	PushUnaryExport(proto, getOut<Float3Variable>("Vector3")->val(), MathVariableType::FLOAT3, a, OpName);
+	MathVariable res = EvalUnary(OpName, a, ""); \
+	auto outFloat = getOut<FloatVariable>("Res"); \
+	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
+	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
+	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
+		PushUnaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, OpName); \
+	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
+		PushUnaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, OpName); \
+	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
+		PushUnaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, OpName);
 
 MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	CONFIGURE_BINARY_NODE(MultiplyNode, MathBinaryOp::Multiply);
