@@ -20,6 +20,7 @@ private:
 
 
 	std::string titanfall2Path;
+	std::string customRpakPath;
 
 	int ruiWidth;
 	int ruiHeight;
@@ -34,6 +35,9 @@ public:
 
 	std::string GetTitanfall2Path() {
 		return titanfall2Path;
+	}
+	std::string GetCustomRpakPath() {
+		return customRpakPath;
 	}
 	bool HasChanged() {
 		bool ret = changed;
@@ -81,6 +85,32 @@ public:
 			);
 		}
 
+		ImGui::InputText("Custom Rpak Path", &customRpakPath);
+		ImGui::SameLine();
+		if (ImGui::Button("Browse##customRpak")) {
+			SDL_ShowOpenFolderDialog(
+				[](void* userdata, const char* const* filelist, int filter) {
+					auto* pathString = static_cast<std::string*>(userdata);
+
+					if (!filelist) {
+						SDL_Log("Folder dialog error: %s", SDL_GetError());
+						return;
+					}
+
+					if (!filelist[0]) {
+						SDL_Log("Folder selection cancelled");
+						return;
+					}
+
+					*pathString = filelist[0];
+				},
+				&customRpakPath,
+				static_cast<SDL_Window*>(g_renderFramework->GetWindow()),
+				customRpakPath.empty() ? nullptr : customRpakPath.c_str(),
+				false
+			);
+		}
+
 		ImGui::SeparatorText("Rui Size");
 
 		ImGui::InputInt("Width", &ruiWidth, 1, 50);
@@ -118,6 +148,9 @@ public:
 		if (root.HasMember("GamePath") && root["GamePath"].IsString()) {
 			titanfall2Path = root["GamePath"].GetString();
 		}
+		if (root.HasMember("CustomRpakPath") && root["CustomRpakPath"].IsString()) {
+			customRpakPath = root["CustomRpakPath"].GetString();
+		}
 		file.close();
 	}
 
@@ -136,6 +169,9 @@ public:
 
 		writer.Key("GamePath");
 		writer.String(titanfall2Path);
+
+		writer.Key("CustomRpakPath");
+		writer.String(customRpakPath);
 
 		writer.EndObject();
 
