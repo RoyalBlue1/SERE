@@ -485,7 +485,28 @@ MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 
 }
 
-MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){}
+MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){
+	if(obj.HasMember("CubicSpline")&&obj["CubicSpline"].IsBool())
+		map.cubicSpline = obj["CubicSpline"].GetBool();
+	if(obj.HasMember("ControlPoints")&&obj["ControlPoints"].IsArray()) {
+		auto points = obj["ControlPoints"].GetArray();
+		if(points.Size() >= 3) {
+			map.controlPoints.clear();
+			for (auto itr = points.Begin(); itr != points.End(); itr++) {
+				if(!itr->IsObject())continue;
+				auto point = itr->GetObject();
+				if(!(point.HasMember("X")&&point["X"].IsNumber()))continue;
+				if(!(point.HasMember("Y")&&point["Y"].IsNumber()))continue;
+				float dir = 0.f;
+				if(point.HasMember("Dir")&&point["Dir"].IsNumber())
+					dir = point["Dir"].GetFloat();
+				map.AddControlPoint(point["X"].GetFloat(), point["Y"].GetFloat(), dir);
+			}
+			if(map.controlPoints.size() < 3)
+				map = Mapping();
+		}
+	}
+}
 
 void MappingNode::draw() {
 	const FloatVariable& a = getInNumeric("A");
@@ -501,7 +522,18 @@ void MappingNode::draw() {
 void MappingNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
-	//TODO export mapping
+	obj.AddMember("CubicSpline",map.cubicSpline,allocator);
+	rapidjson::GenericValue<rapidjson::UTF8<>> controlPoints;
+	controlPoints.SetArray();
+	for(auto& point:map.controlPoints) {
+		rapidjson::GenericValue<rapidjson::UTF8<>> pointObj;
+		pointObj.SetObject();
+		pointObj.AddMember("X",point.x,allocator);
+		pointObj.AddMember("Y",point.y,allocator);
+		pointObj.AddMember("Dir",point.dir,allocator);
+		controlPoints.PushBack(pointObj,allocator);
+	}
+	obj.AddMember("ControlPoints",controlPoints,allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
