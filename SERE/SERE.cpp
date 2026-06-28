@@ -125,13 +125,19 @@ void ShowExampleAppDockSpace(bool* p_open)
     ImGui::End();
 }
 
-void ReloadAssets(std::string folderPath) {
+void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
 
     static std::string loadedPath = "";
+	static std::string loadedCustomPath = "";
     if(loadedPath == folderPath)
         return;
+	if (loadedCustomPath == customRpakPath)
+		return;
     loadedPath = folderPath;
+    loadedCustomPath = customRpakPath;
+
     clearImageAtlases();
+    clearFontAtlases();
 
     loadFonts();
     loadImageAtlases();
@@ -166,6 +172,15 @@ void ReloadAssets(std::string folderPath) {
     std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakFolder](std::string& pak) {
         LoadRpak(pakFolder/"r2/paks/Win64"/pak);
     });
+
+	fs::path customPakPath(customRpakPath);
+	if (fs::exists(customPakPath) && fs::is_directory(customPakPath)) {
+		for (const auto& entry : fs::directory_iterator(customPakPath)) {
+			if (entry.path().extension() == ".rpak") {
+				LoadRpak(entry.path());
+			}
+		}
+	}
 }
 
 // Main code
@@ -277,7 +292,7 @@ int main(int argc, char** argv)
         }
         settings.ShowSettingsWindow();
         if (settings.HasChanged()) {
-            ReloadAssets(settings.GetTitanfall2Path());
+            ReloadAssets(settings.GetTitanfall2Path(), settings.GetCustomRpakPath());
             auto size = settings.GetRuiSize();
             render.SetSize(size.width,size.height);
             g_renderFramework->RuiReCreatePipeline(size.width,size.height);
@@ -309,5 +324,4 @@ int main(int argc, char** argv)
     
     return 0;
 }
-
 
