@@ -34,6 +34,7 @@ struct BoolVariable;
 struct FloatVariable;
 struct Float2Variable;
 struct Float3Variable;
+struct TransformSize;
 struct MathVariable;
 struct ColorVariable;
 struct StringVariable;
@@ -120,26 +121,46 @@ struct Float3Variable :Variable {
 	}
 };
 
+struct TransformSize :Variable {
+
+	TransformSize() :Variable("") {
+		size = _mm_set1_ps(128.f);
+	}
+	TransformSize(__m128 size_, std::string name = "") :Variable(name) {
+		size = size_;
+	}
+	__m128 size;
+	std::string Literal() const override {
+		float sizef[4];
+		_mm_store_ps(sizef, size);
+		return std::format("_mm_set_ps({},{},{},{})", sizef[3], sizef[2], sizef[1], sizef[0]);
+	}
+};
+
 enum class MathVariableType {
 	FLOAT,
 	FLOAT2,
-	FLOAT3
+	FLOAT3,
+	SIZE
 };
 
 struct MathVariable {
-	std::variant<FloatVariable, Float2Variable, Float3Variable> value;
+	std::variant<FloatVariable, Float2Variable, Float3Variable, TransformSize> value;
 
 	MathVariable() :value(FloatVariable(0.f)) {}
 	MathVariable(const FloatVariable& val) :value(val) {}
 	MathVariable(const Float2Variable& val) :value(val) {}
 	MathVariable(const Float3Variable& val) :value(val) {}
+	MathVariable(const TransformSize& val) :value(val) {}
 
 	MathVariableType Type() const {
 		if (std::holds_alternative<FloatVariable>(value))
 			return MathVariableType::FLOAT;
 		if (std::holds_alternative<Float2Variable>(value))
 			return MathVariableType::FLOAT2;
-		return MathVariableType::FLOAT3;
+		if (std::holds_alternative<Float3Variable>(value))
+			return MathVariableType::FLOAT3;
+		return MathVariableType::SIZE;
 	}
 
 	bool IsConstant() const {
@@ -200,18 +221,3 @@ struct AssetVariable :Variable {
 	}
 };
 
-struct TransformSize :Variable {
-
-	TransformSize() :Variable("") {
-		size = _mm_set1_ps(128.f);
-	}
-	TransformSize(__m128 size_, std::string name = "") :Variable(name) {
-		size = size_;
-	}
-	__m128 size;
-	std::string Literal() const override {
-		float sizef[4];
-		_mm_store_ps(sizef, size);
-		return std::format("_mm_set_ps({},{},{},{})", sizef[3], sizef[2], sizef[1], sizef[0]);
-	}
-};

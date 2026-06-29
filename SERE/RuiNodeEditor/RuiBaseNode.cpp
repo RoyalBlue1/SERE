@@ -43,6 +43,8 @@ MathVariable RuiBaseNode::getInMath(const char* id) {
 		return MathVariable(std::any_cast<Float2Variable>(value));
 	if (value.type() == typeid(Float3Variable))
 		return MathVariable(std::any_cast<Float3Variable>(value));
+	if (value.type() == typeid(TransformSize))
+		return MathVariable(std::any_cast<TransformSize>(value));
 	if (value.type() == typeid(MathVariable))
 		return std::any_cast<MathVariable>(value);
 	return getInVal<MathVariable>(id);
@@ -57,5 +59,6 @@ bool isPinMath(const std::type_info& out, const std::type_info& in) {
 		out == typeid(FloatVariable) ||
 		out == typeid(Float2Variable) ||
 		out == typeid(Float3Variable) ||
+		out == typeid(TransformSize) ||
 		out == typeid(MathVariable);
 }

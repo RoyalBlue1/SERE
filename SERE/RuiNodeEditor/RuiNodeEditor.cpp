@@ -170,6 +170,7 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 	doc.ParseStream(wrap);
 	if (doc.HasParseError()) {
 		printf("Error in JSON File %s\n", path.string().c_str());
+		printf("Parse Error: %d\n", doc.GetParseError());
 		return;
 	}
 	rapidjson::GenericObject root = doc.GetObject();

@@ -39,6 +39,7 @@ int ComponentCount(MathVariableType type) {
 	case MathVariableType::FLOAT: return 1;
 	case MathVariableType::FLOAT2: return 2;
 	case MathVariableType::FLOAT3: return 3;
+	case MathVariableType::SIZE: return 4;
 	}
 	return 1;
 }
@@ -50,12 +51,18 @@ float ComponentAt(const MathVariable& value, int index) {
 		const Vector2& val = std::get<Float2Variable>(value.value).value;
 		return index == 0 ? val.x : val.y;
 	}
-	const Vector3& val = std::get<Float3Variable>(value.value).value;
-	if (index == 0)
-		return val.x;
-	if (index == 1)
-		return val.y;
-	return val.z;
+	if (std::holds_alternative<Float3Variable>(value.value)) {
+		const Vector3& val = std::get<Float3Variable>(value.value).value;
+		if (index == 0)
+			return val.x;
+		if (index == 1)
+			return val.y;
+		return val.z;
+	}
+	const TransformSize& val = std::get<TransformSize>(value.value);
+	float size[4];
+	_mm_storeu_ps(size, val.size);
+	return size[index];
 }
 
 MathVariableType ResultType(const MathVariable& a, const MathVariable& b, bool& valid) {
@@ -95,7 +102,7 @@ MathVariable EvalBinary(MathBinaryOp op, const MathVariable& a, const MathVariab
 	int count = ComponentCount(type);
 	std::string name = (a.IsConstant() && b.IsConstant()) ? "" : outName;
 	bool hasZeroDivisor = false;
-	float result[3] = {};
+	float result[4] = {};
 	for (int i = 0; i < count; i++) {
 		float right = ComponentAt(b, ComponentCount(b.Type()) == 1 ? 0 : i);
 		hasZeroDivisor |= (op == MathBinaryOp::Divide || op == MathBinaryOp::Modulo) && right == 0.f;
@@ -111,6 +118,8 @@ MathVariable EvalBinary(MathBinaryOp op, const MathVariable& a, const MathVariab
 		return MathVariable(Float2Variable(result[0], result[1], name));
 	case MathVariableType::FLOAT3:
 		return MathVariable(Float3Variable(result[0], result[1], result[2], name));
+	case MathVariableType::SIZE:
+		return MathVariable(TransformSize(_mm_set_ps(result[3], result[2], result[1], result[0]), name));
 	}
 	return MathVariable(FloatVariable(0.f));
 }
@@ -141,6 +150,16 @@ Float3Variable AsFloat3Output(const MathVariable& value) {
 	return Float3Variable(0.f, 0.f, 0.f);
 }
 
+TransformSize AsSizeOutput(const MathVariable& value) {
+	if (std::holds_alternative<TransformSize>(value.value))
+		return std::get<TransformSize>(value.value);
+	if (std::holds_alternative<FloatVariable>(value.value)) {
+		const FloatVariable& scalar = std::get<FloatVariable>(value.value);
+		return TransformSize(_mm_set1_ps(scalar.value), scalar.name);
+	}
+	return TransformSize(_mm_setzero_ps());
+}
+
 void DrawMathValue(const char* label, const MathVariable& value) {
 	switch (value.Type()) {
 	case MathVariableType::FLOAT:
@@ -158,6 +177,13 @@ void DrawMathValue(const char* label, const MathVariable& value) {
 		ImGui::Text("%s %f, %f, %f", label, val.x, val.y, val.z);
 		break;
 	}
+	case MathVariableType::SIZE:
+	{
+		float size[4];
+		_mm_storeu_ps(size, std::get<TransformSize>(value.value).size);
+		ImGui::Text("%s %f, %f, %f, %f", label, size[0], size[1], size[2], size[3]);
+		break;
+	}
 	}
 }
 
@@ -171,16 +197,20 @@ void UpdateDynamicMathOutputVisibility(ImFlow::BaseNode* node, MathVariableType 
 	ImFlow::Pin* scalar = node->outPin("Res");
 	ImFlow::Pin* vector2 = node->outPin("Vector2 Res");
 	ImFlow::Pin* vector3 = node->outPin("Vector3 Res");
+	ImFlow::Pin* size = node->outPin("Size Res");
 	bool allowScalar = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT);
 	bool allowVector2 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT2);
 	bool allowVector3 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT3);
+	bool allowSize = valid && CanUseMathOutput(resultType, MathVariableType::SIZE);
 	bool hasSelectedOutput = (allowScalar && scalar->isConnected()) ||
 		(allowVector2 && vector2->isConnected()) ||
-		(allowVector3 && vector3->isConnected());
+		(allowVector3 && vector3->isConnected()) ||
+		(allowSize && size->isConnected());
 
 	scalar->visible(allowScalar && (!hasSelectedOutput || scalar->isConnected()));
 	vector2->visible(allowVector2 && (!hasSelectedOutput || vector2->isConnected()));
 	vector3->visible(allowVector3 && (!hasSelectedOutput || vector3->isConnected()));
+	size->visible(allowSize && (!hasSelectedOutput || size->isConnected()));
 }
 
 std::string ComponentExpression(const MathVariable& value, int index, RuiExportPrototype& proto) {
@@ -189,8 +219,21 @@ std::string ComponentExpression(const MathVariable& value, int index, RuiExportP
 	if (value.IsConstant())
 		return std::format("{}", ComponentAt(value, index));
 
+	if (value.Type() == MathVariableType::SIZE)
+		return std::format("{}.m128_f32[{}]", value.GetFormattedName(proto), index);
+
 	const char* component = index == 0 ? "x" : (index == 1 ? "y" : "z");
 	return std::format("{}.{}", value.GetFormattedName(proto), component);
+}
+
+const char* ExportTypeName(MathVariableType type) {
+	switch (type) {
+	case MathVariableType::FLOAT: return "float";
+	case MathVariableType::FLOAT2: return "Vector2";
+	case MathVariableType::FLOAT3: return "Vector3";
+	case MathVariableType::SIZE: return "__m128";
+	}
+	return "float";
 }
 
 std::string BuildComponentExpression(MathBinaryOp op, const std::string& a, const std::string& b) {
@@ -209,7 +252,7 @@ std::string BuildBinaryExpression(MathBinaryOp op, MathVariableType outType, con
 	if (count == 1)
 		return BuildComponentExpression(op, ComponentExpression(a, 0, proto), ComponentExpression(b, 0, proto));
 
-	std::string components[3];
+	std::string components[4];
 	for (int i = 0; i < count; i++) {
 		int aIndex = ComponentCount(a.Type()) == 1 ? 0 : i;
 		int bIndex = ComponentCount(b.Type()) == 1 ? 0 : i;
@@ -217,7 +260,9 @@ std::string BuildBinaryExpression(MathBinaryOp op, MathVariableType outType, con
 	}
 	if (outType == MathVariableType::FLOAT2)
 		return std::format("Vector2({}, {})", components[0], components[1]);
-	return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
+	if (outType == MathVariableType::FLOAT3)
+		return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
+	return std::format("_mm_set_ps({}, {}, {}, {})", components[3], components[2], components[1], components[0]);
 }
 
 std::string DivideByZeroGuard(const MathVariable& b, RuiExportPrototype& proto) {
@@ -243,7 +288,7 @@ void PushBinaryExport(RuiExportPrototype& proto, const T& out, MathVariableType 
 	ele.dependencys = { a.Name(), b.Name() };
 	ele.identifier = out.name;
 	ele.callback = [out, outType, a, b, op](RuiExportPrototype& proto) {
-		const char* typeName = outType == MathVariableType::FLOAT ? "float" : (outType == MathVariableType::FLOAT2 ? "Vector2" : "Vector3");
+		const char* typeName = ExportTypeName(outType);
 		std::string assignPrefix = proto.varsInDataStruct.contains(out.name) ? "" : std::format("{} ", typeName);
 		if (op == MathBinaryOp::Divide || op == MathBinaryOp::Modulo) {
 			proto.codeLines.push_back(std::format(
@@ -268,6 +313,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BinaryMathPinInfo(float defaultB)
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size Res"));
 	return info;
 }
 
@@ -310,13 +356,15 @@ MathVariable EvalUnary(MathUnaryOp op, const MathVariable& in, const std::string
 		return MathVariable(Float2Variable(ApplyUnary(op, ComponentAt(in, 0)), ApplyUnary(op, ComponentAt(in, 1)), name));
 	case MathVariableType::FLOAT3:
 		return MathVariable(Float3Variable(ApplyUnary(op, ComponentAt(in, 0)), ApplyUnary(op, ComponentAt(in, 1)), ApplyUnary(op, ComponentAt(in, 2)), name));
+	case MathVariableType::SIZE:
+		return MathVariable(TransformSize(_mm_set_ps(ApplyUnary(op, ComponentAt(in, 3)), ApplyUnary(op, ComponentAt(in, 2)), ApplyUnary(op, ComponentAt(in, 1)), ApplyUnary(op, ComponentAt(in, 0))), name));
 	}
 	return MathVariable(FloatVariable(0.f));
 }
 
 std::string BuildUnaryExpression(MathUnaryOp op, MathVariableType outType, const MathVariable& in, RuiExportPrototype& proto) {
 	int count = ComponentCount(outType);
-	std::string components[3];
+	std::string components[4];
 	for (int i = 0; i < count; i++)
 		components[i] = std::format("{}({})", UnaryFunctionName(op), ComponentExpression(in, i, proto));
 
@@ -324,7 +372,9 @@ std::string BuildUnaryExpression(MathUnaryOp op, MathVariableType outType, const
 		return components[0];
 	if (outType == MathVariableType::FLOAT2)
 		return std::format("Vector2({}, {})", components[0], components[1]);
-	return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
+	if (outType == MathVariableType::FLOAT3)
+		return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
+	return std::format("_mm_set_ps({}, {}, {}, {})", components[3], components[2], components[1], components[0]);
 }
 
 template<typename T>
@@ -336,7 +386,7 @@ void PushUnaryExport(RuiExportPrototype& proto, const T& out, MathVariableType o
 	ele.dependencys = { in.Name() };
 	ele.identifier = out.name;
 	ele.callback = [out, outType, in, op](RuiExportPrototype& proto) {
-		const char* typeName = outType == MathVariableType::FLOAT ? "float" : (outType == MathVariableType::FLOAT2 ? "Vector2" : "Vector3");
+		const char* typeName = ExportTypeName(outType);
 		std::string assignPrefix = proto.varsInDataStruct.contains(out.name) ? "" : std::format("{} ", typeName);
 		proto.codeLines.push_back(std::format("{}{} = {};", assignPrefix, out.GetFormattedName(proto), BuildUnaryExpression(op, outType, in, proto)));
 	};
@@ -349,6 +399,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size Res"));
 	return info;
 }
 }
@@ -357,6 +408,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	std::string outFloatName = Variable::UniqueName(); \
 	std::string outFloat2Name = Variable::UniqueName(); \
 	std::string outFloat3Name = Variable::UniqueName(); \
+	std::string outSizeName = Variable::UniqueName(); \
 	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() { \
 		bool valid = false; \
 		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloatName, &valid); \
@@ -377,6 +429,13 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 		if (valid) \
 			return AsFloat3Output(res); \
 		return Float3Variable(0.f, 0.f, 0.f); \
+	}); \
+	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() { \
+		bool valid = false; \
+		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outSizeName, &valid); \
+		if (valid) \
+			return AsSizeOutput(res); \
+		return TransformSize(_mm_setzero_ps()); \
 	});
 
 #define DRAW_BINARY_NODE(OpName) \
@@ -413,17 +472,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	auto outFloat = getOut<FloatVariable>("Res"); \
 	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
 	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
+	auto outSize = getOut<TransformSize>("Size Res"); \
 	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
 		PushBinaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, b, OpName); \
 	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
 		PushBinaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, b, OpName); \
 	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
-		PushBinaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, b, OpName);
+		PushBinaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, b, OpName); \
+	if (outSize->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::SIZE)) \
+		PushBinaryExport(proto, outSize->val(), MathVariableType::SIZE, a, b, OpName);
 
 #define CONFIGURE_UNARY_NODE(OpName) \
 	std::string outFloatName = Variable::UniqueName(); \
 	std::string outFloat2Name = Variable::UniqueName(); \
 	std::string outFloat3Name = Variable::UniqueName(); \
+	std::string outSizeName = Variable::UniqueName(); \
 	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() { \
 		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloatName); \
 		return AsFloatOutput(res); \
@@ -435,6 +498,10 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() { \
 		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloat3Name); \
 		return AsFloat3Output(res); \
+	}); \
+	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() { \
+		MathVariable res = EvalUnary(OpName, getInMath("A"), outSizeName); \
+		return AsSizeOutput(res); \
 	});
 
 #define DRAW_UNARY_NODE(OpName) \
@@ -451,12 +518,15 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	auto outFloat = getOut<FloatVariable>("Res"); \
 	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
 	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
+	auto outSize = getOut<TransformSize>("Size Res"); \
 	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
 		PushUnaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, OpName); \
 	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
 		PushUnaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, OpName); \
 	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
-		PushUnaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, OpName);
+		PushUnaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, OpName); \
+	if (outSize->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::SIZE)) \
+		PushUnaryExport(proto, outSize->val(), MathVariableType::SIZE, a, OpName);
 
 MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	CONFIGURE_BINARY_NODE(MultiplyNode, MathBinaryOp::Multiply);
