@@ -4,6 +4,7 @@
 #include <fstream>
 #include <streambuf>
 #include <execution>
+#include <system_error>
 
 #include "SERE.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -29,6 +30,23 @@
 #include "PakLoading/cpakfile.h"
 
 
+static bool IsExistingDirectory(const fs::path& path)
+{
+    if (path.empty())
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_directory(path, error);
+}
+
+static bool IsExistingRpakFile(const fs::path& path)
+{
+    if (path.empty() || path.extension() != ".rpak")
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_regular_file(path, error);
+}
 
 static void ShowDockingDisabledMessage()
 {
@@ -125,14 +143,14 @@ void ShowExampleAppDockSpace(bool* p_open)
     ImGui::End();
 }
 
-void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
+void ReloadAssets(const std::string& folderPath, const std::string& customRpakPath = "") {
 
+    static bool hasLoadedAssets = false;
     static std::string loadedPath = "";
 	static std::string loadedCustomPath = "";
-    if(loadedPath == folderPath)
-        return;
-	if (loadedCustomPath == customRpakPath)
+    if(hasLoadedAssets && loadedPath == folderPath && loadedCustomPath == customRpakPath)
 		return;
+    hasLoadedAssets = true;
     loadedPath = folderPath;
     loadedCustomPath = customRpakPath;
 
@@ -168,19 +186,30 @@ void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
         "mp_angel_city(11).rpak"
     };
 
-    fs::path pakFolder(folderPath);
-    std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakFolder](std::string& pak) {
-        LoadRpak(pakFolder/"r2/paks/Win64"/pak);
-    });
+    const fs::path pakFolder(folderPath);
+    const fs::path pakRoot = pakFolder/"r2/paks/Win64";
+    if (IsExistingDirectory(pakRoot)) {
+        std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakRoot](std::string& pak) {
+            const fs::path pakPath = pakRoot/pak;
+            if (IsExistingRpakFile(pakPath))
+                LoadRpak(pakPath);
+        });
+    }
 
-	fs::path customPakPath(customRpakPath);
-	if (fs::exists(customPakPath) && fs::is_directory(customPakPath)) {
-		for (const auto& entry : fs::directory_iterator(customPakPath)) {
-			if (entry.path().extension() == ".rpak") {
-				LoadRpak(entry.path());
-			}
-		}
-	}
+	const fs::path customPakPath(customRpakPath);
+	if (!IsExistingDirectory(customPakPath))
+		return;
+
+    std::error_code directoryError;
+    fs::directory_iterator entry(customPakPath, directoryError);
+    const fs::directory_iterator end;
+    while (!directoryError && entry != end) {
+        const fs::path entryPath = entry->path();
+        if (IsExistingRpakFile(entryPath))
+            LoadRpak(entryPath);
+
+        entry.increment(directoryError);
+    }
 }
 
 // Main code
