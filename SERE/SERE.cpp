@@ -173,14 +173,14 @@ void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
         LoadRpak(pakFolder/"r2/paks/Win64"/pak);
     });
 
-	fs::path customPakPath(customRpakPath);
-	if (fs::exists(customPakPath) && fs::is_directory(customPakPath)) {
-		for (const auto& entry : fs::directory_iterator(customPakPath)) {
-			if (entry.path().extension() == ".rpak") {
-				LoadRpak(entry.path());
-			}
-		}
-	}
+	// fs::path customPakPath(customRpakPath);
+	// if (fs::exists(customPakPath) && fs::is_directory(customPakPath)) {
+	// 	for (const auto& entry : fs::directory_iterator(customPakPath)) {
+	// 		if (entry.path().extension() == ".rpak") {
+	// 			LoadRpak(entry.path());
+	// 		}
+	// 	}
+	// }
 }
 
 // Main code
