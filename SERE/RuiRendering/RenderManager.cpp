@@ -28,10 +28,10 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 		// ruiVertex.float_18[1] = a.m128_f32[1];
 		// ruiVertex.float_18[2] = a.m128_f32[2];
 		// ruiVertex.float_18[3] = a.m128_f32[3];
-		_mm_store_ps(ruiVertex.float_18,a);
+		_mm_storeu_ps(ruiVertex.float_18,a);
 		__m128 b = quad.m128_50;
 		float bStore[4];
-		_mm_store_ps(bStore, b);
+		_mm_storeu_ps(bStore, b);
 		ruiVertex.float_28[0] = bStore[0];
 		ruiVertex.float_28[1] = bStore[1];
 		ruiVertex.assetIndex = quad.assetIndex;
@@ -188,8 +188,8 @@ void RenderInstance::generateDrawTriangle(RenderQuad* v180,bool v24,__m128 a8,__
 		v32 = _mm_shuffle_ps(v32,v32, _MM_SHUFFLE(1,0,3,2));
 	}
 
-	*(__m128 *)&v180->vert[0][0] = v33;
-	*(__m128 *)&v180->vert[2][0] = v32;
+	_mm_storeu_ps(&v180->vert[0][0], v33);
+	_mm_storeu_ps(&v180->vert[2][0], v32);
 }
 
 __m128 xmmword_12A146A0a = _mm_castsi128_ps(_mm_set_epi32(0,0,0xFFFFFFFF,0));
@@ -288,9 +288,7 @@ void RenderInstance::sub_F9B80_rev(
 	__m128 v107; // xmm2
 	__m128 v108; // xmm3
 	__m128 *v109; // r9
-	__m128 v110; // xmm5
 	__m128 v112; // xmm0
-	__m128 v113; // xmm0
 	__m128 v114; // xmm5
 	__m128 v115; // xmm0
 	__m128 v119; // xmm3
@@ -358,7 +356,9 @@ void RenderInstance::sub_F9B80_rev(
 
 
 	v38 = _mm_mul_ps(_mm_set_ps(0,0,1,1),ruiSize);
-	v39 = _mm_xor_ps(v35->m128_0, _mm_set_ps(-0.0,-0.0,0,0));
+	
+	v39 = _mm_xor_ps(v35->m128_0, _mm_set_ps(-0.0f, -0.0f, 0.f, 0.f));
+
 	v40 = _mm_and_ps(v35->m128_0, (__m128)xmmword_12A14650a);
 	v41 = _mm_add_ps(_mm_shuffle_ps(v35->m128_0,v35->m128_0, _MM_SHUFFLE(3,2,3,2)), v39);
 	v42 = _mm_sub_ps(_mm_set1_ps(1), v41);
@@ -374,26 +374,26 @@ void RenderInstance::sub_F9B80_rev(
 		_mm_shuffle_ps(v35->m128_10,v35->m128_10,_MM_SHUFFLE(3,2,3,2)));
 	v47 = _mm_sub_ps(v46, v41);
 	v50 = _mm_movelh_ps(v46, _mm_set1_ps(1));
-	v51 = _mm_mul_ps(v50, a4.yUvVector);
-	v52 = _mm_mul_ps(v50, a4.xUvVector);
+	v51 = _mm_mul_ps(v50, a4.UvBase);
+	v52 = _mm_mul_ps(v50, a4.yUvVector);
 	v184[0] = _mm_add_ps(_mm_sub_ps(_mm_set1_ps(1), v50), v51);
 	v53 = NRReciprocal(v47);
 	v54 = _mm_movelh_ps(_mm_mul_ps(_mm_mul_ps(v42, v46), v53), _mm_set1_ps(1));
-	v55 = _mm_mul_ps(v54, a4.UvBase);
+	v55 = _mm_mul_ps(v54, a4.xUvVector);
 	v56 = _mm_mul_ps(
 		_mm_sub_ps(_mm_add_ps(_mm_mul_ps((__m128)_mm_shuffle_ps(v53,v53, _MM_SHUFFLE(3,2,3,2)), v39), _mm_set_ps(1,1,0,0)), texMin),
 		texSizeRcp);
-	v57 = _mm_mul_ps(v50, a4.UvBase);
-	v58 = _mm_mul_ps(v54, a4.xUvVector);
+	v57 = _mm_mul_ps(v50, a4.xUvVector);
+	v58 = _mm_mul_ps(v54, a4.yUvVector);
 	v59 = _mm_sub_ps(v40, _mm_mul_ps(_mm_mul_ps(v40, v42), (__m128)v53));
 	v60 = _mm_shuffle_ps(v56,v56, _MM_SHUFFLE(3,1,2,0));
 	v61 = _mm_shuffle_ps(a8,a8, _MM_SHUFFLE(3,1,2,0));
 	v62 = _mm_unpackhi_ps(v61, v60);
 	v63 = _mm_unpacklo_ps(v61, v60);
-	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.yUvVector));
-	v65 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(v56, _mm_set_ps(-0.0,-0.0,0,0))));
+	v64 = _mm_add_ps(v59, _mm_mul_ps(v54, a4.UvBase));
+	v65 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(v56, _mm_set_ps(0,0,-0.0,-0.0))));
 
-	v187 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(_mm_shuffle_ps(v56,v56, _MM_SHUFFLE(1,0,3,2)),_mm_set_ps(-0.0,-0.0,0,0))));
+	v187 = _mm_movemask_ps(_mm_cmple_ps(a9, _mm_xor_ps(_mm_shuffle_ps(v56,v56, _MM_SHUFFLE(1,0,3,2)),_mm_set_ps(0,0,-0.0,-0.0))));
 	if ( (v65 & 3) == 0 )
 	{
 
@@ -411,8 +411,8 @@ void RenderInstance::sub_F9B80_rev(
 		v75 = _mm_unpacklo_ps(v178.a, v178.b);
 		if ( a6 == 2 )
 		{
-			v75 = _mm_shuffle_ps(v75,v75, 78);
-			v74 = _mm_shuffle_ps(v75,v75, 78);
+			v75 = _mm_shuffle_ps(v75,v75, _MM_SHUFFLE(1, 0, 3, 2));
+			v74 = _mm_shuffle_ps(v74,v74, _MM_SHUFFLE(1, 0, 3, 2));
 		}
 		//v76 = *(_QWORD *)&a4->assetIndex;
 
@@ -426,8 +426,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128 *)&quad.vert[0][0] = v75;
-		*(__m128 *)&quad.vert[2][0] = v74;
+		_mm_storeu_ps(&quad.vert[0][0], v75);
+		_mm_storeu_ps(&quad.vert[2][0], v74);
 
 		AddQuad(quad);
 
@@ -463,8 +463,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128*)& quad.vert[0][0] = v87;
-		*(__m128*)& quad.vert[2][0] = v86;
+		_mm_storeu_ps(&quad.vert[0][0], v87);
+		_mm_storeu_ps(&quad.vert[2][0], v86);
 		AddQuad(quad);
 	}
 
@@ -485,8 +485,8 @@ void RenderInstance::sub_F9B80_rev(
 		v100 = _mm_unpacklo_ps(v178.a, v178.b);
 		if ( a6 == 2 )
 		{
-			v100 = _mm_shuffle_ps(v100,v100, 78);
-			v99 = _mm_shuffle_ps(v99,v99, 78);
+			v100 = _mm_shuffle_ps(v100,v100, _MM_SHUFFLE(1, 0, 3, 2));
+			v99 = _mm_shuffle_ps(v99,v99, _MM_SHUFFLE(1, 0, 3, 2));
 		}
 
 
@@ -503,8 +503,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128 *)&quad.vert[0][0] = v100;
-		*(__m128 *)&quad.vert[2][0] = v99;
+		_mm_storeu_ps(&quad.vert[0][0], v100);
+		_mm_storeu_ps(&quad.vert[2][0], v99);
 
 
 		AddQuad(quad);
@@ -525,7 +525,6 @@ void RenderInstance::sub_F9B80_rev(
 			sub_FEF30(a3a, v109, tri);
 
 		}
-		v113 = v110;
 		v114 = _mm_unpackhi_ps(tri.a, tri.b);
 		v115 = _mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
@@ -546,8 +545,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.UvBase = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v51), _mm_and_ps(v64, (__m128)xmmword_12A146A0a));
 		quad.xUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v57), _mm_and_ps(v55, (__m128)xmmword_12A146A0a));
 		quad.yUvVector = _mm_or_ps(_mm_andnot_ps((__m128)xmmword_12A146A0a, v52), _mm_and_ps(v58, (__m128)xmmword_12A146A0a));
-		*(__m128*)& quad.vert[0][0] = v115;
-		*(__m128*)& quad.vert[2][0] = v114;
+		_mm_storeu_ps(&quad.vert[0][0], v115);
+		_mm_storeu_ps(&quad.vert[2][0], v114);
 		AddQuad(quad);
 	}
 
@@ -558,12 +557,12 @@ void RenderInstance::sub_F9B80_rev(
 		TriData tri = a5.GenTri(v119,v120);
 		v123 = _mm_unpacklo_ps(tri.a, tri.b);
 		v124 = _mm_unpackhi_ps(tri.a, tri.b);
+		
 		if (a6 == 2)
 		{
 			v123 = _mm_shuffle_ps(v123, v123, 78);
 			v124 = _mm_shuffle_ps(v124, v124, 78);
 		}
-
 
 
 		quad.UvBase = v64;
@@ -576,8 +575,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128*)& quad.vert[2][0] = v124;
-		*(__m128*)& quad.vert[0][0] = v123;
+		_mm_storeu_ps(&quad.vert[2][0], v124);
+		_mm_storeu_ps(&quad.vert[0][0], v123);
 		AddQuad(quad);
 	}
 	if ( (v182 | v65 & 4)==0 )
@@ -595,8 +594,8 @@ void RenderInstance::sub_F9B80_rev(
 		v136 = (__m128)_mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
-			v136 = _mm_shuffle_ps(v136, v136, 78);
-			v135 = _mm_shuffle_ps(v135, v135, 78);
+			v136 = _mm_shuffle_ps(v136, v136, _MM_SHUFFLE(1, 0, 3, 2));
+			v135 = _mm_shuffle_ps(v135, v135, _MM_SHUFFLE(1, 0, 3, 2));
 		}
 
 		quad.UvBase = _mm_or_ps(
@@ -616,8 +615,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
 
-		*(__m128*)& quad.vert[0][0] = v136;
-		*(__m128*)& quad.vert[2][0] = v135;
+		_mm_storeu_ps(&quad.vert[0][0], v136);
+		_mm_storeu_ps(&quad.vert[2][0], v135);
 		AddQuad(quad);
 	}
 
@@ -664,8 +663,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128 *)&quad.vert[0][0] = v149;
-		*(__m128 *)&quad.vert[2][0] = v148;
+		_mm_storeu_ps(&quad.vert[0][0], v149);
+		_mm_storeu_ps(&quad.vert[2][0], v148);
 		AddQuad(quad);
 		v139 = v65;
 	}
@@ -686,8 +685,8 @@ void RenderInstance::sub_F9B80_rev(
 		v163 = _mm_unpacklo_ps(tri.a, tri.b);
 		if (a6 == 2)
 		{
-			v163 = _mm_shuffle_ps(v163, v163, 78);
-			v162 = _mm_shuffle_ps(v162, v162, 78);
+			v163 = _mm_shuffle_ps(v163, v163, _MM_SHUFFLE(1, 0, 3, 2));
+			v162 = _mm_shuffle_ps(v162, v162, _MM_SHUFFLE(1, 0, 3, 2));
 		}
 
 		quad.UvBase = _mm_or_ps(
@@ -708,8 +707,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.flags = a4.flags;
 
 
-		*(__m128*)& quad.vert[0][0] = v163;
-		*(__m128*)& quad.vert[2][0] = v162;
+		_mm_storeu_ps(&quad.vert[0][0], v163);
+		_mm_storeu_ps(&quad.vert[2][0], v162);
 		AddQuad(quad);
 	}
 
@@ -744,8 +743,8 @@ void RenderInstance::sub_F9B80_rev(
 		quad.assetIndex2 = a4.assetIndex2;
 		quad.styleDescriptorIndex = a4.styleDescriptorIndex;
 		quad.flags = a4.flags;
-		*(__m128 *)&quad.vert[0][0] = v175;
-		*(__m128 *)&quad.vert[2][0] = v174;
+		_mm_storeu_ps(&quad.vert[0][0], v175);
+		_mm_storeu_ps(&quad.vert[2][0], v174);
 		AddQuad(quad);
 	}
 }

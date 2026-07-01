@@ -95,9 +95,9 @@ struct TransformResult {
 
 struct RenderQuad
 {
+    __m128 UvBase;
     __m128 xUvVector;
     __m128 yUvVector;
-    __m128 UvBase;
     __m128 m128_30;
     __m128 m128_40;
     __m128 m128_50;
