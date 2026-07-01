@@ -24,6 +24,12 @@ void RuiExportPrototype::AddTransformData(uint8_t* data, size_t size) {
 	}
 }
 
+void RuiExportPrototype::AddMappingData(uint8_t* data, size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		mappingData.push_back(data[i]);
+	}
+}
+
 void RuiExportPrototype::AddRenderJobData(uint8_t* data, size_t size) {
 	for (size_t i = 0; i < size; i++) {
 		renderJobData.push_back(data[i]);
@@ -143,6 +149,7 @@ uint16_t RuiExportPrototype::GetStringConstantOffset(std::string s) {
 	return stringConstants[s];
 }
 
+
 void RuiExportPrototype::GenerateCode() {
 	std::set<std::string> existingVariables;
 	for (auto& [arg, _] : arguments) {
@@ -221,6 +228,53 @@ void RuiExportPrototype::GenerateRenderJobData() {
 	});
 	for (auto& job : renderJobs) {
 		job.func(*this);
+	}
+}
+
+void RuiExportPrototype::GenerateMappingData() {
+	mappingData.clear();
+
+	std::vector<RuiPackageMapping_v1_t> mappingHeaders;
+	std::vector<float> mappingValues;
+	mappingHeaders.reserve(mappings.size());
+
+	for (auto& mapping : mappings) {
+		mapping.Sort();
+
+		RuiPackageMapping_v1_t header{};
+		header.dataCount = (uint32_t)mapping.controlPoints.size();
+		header.nestedMappingCount = 1;
+		header.cublicSpline = mapping.cubicSpline ? 1 : 0;
+		mappingHeaders.push_back(header);
+
+		const size_t valueOffset = mappingValues.size();
+		const uint32_t valueStride = header.cublicSpline ? 2u : 1u;
+		const size_t keyOffset = valueOffset;
+		const size_t mappingValueOffset = keyOffset + header.dataCount;
+		const size_t valueCount = (size_t)header.dataCount * (1u + valueStride);
+		mappingValues.resize(valueOffset + valueCount);
+
+		for (uint32_t i = 0; i < header.dataCount; i++) {
+			mappingValues[keyOffset + i] = (float)mapping.controlPoints[i].x;
+			if (header.cublicSpline) {
+				const size_t pointOffset = mappingValueOffset + i * valueStride;
+				mappingValues[pointOffset] = (float)mapping.controlPoints[i].y;
+				mappingValues[pointOffset + 1] = (float)mapping.controlPoints[i].dir;
+			}
+			else {
+				mappingValues[mappingValueOffset + i] = (float)mapping.controlPoints[i].y;
+			}
+		}
+	}
+
+	if (!mappingHeaders.empty()) {
+		const auto* headerBytes = reinterpret_cast<const uint8_t*>(mappingHeaders.data());
+		mappingData.insert(mappingData.end(), headerBytes, headerBytes + mappingHeaders.size() * sizeof(RuiPackageMapping_v1_t));
+	}
+
+	if (!mappingValues.empty()) {
+		const auto* valueBytes = reinterpret_cast<const uint8_t*>(mappingValues.data());
+		mappingData.insert(mappingData.end(), valueBytes, valueBytes + mappingValues.size() * sizeof(float));
 	}
 }
 
@@ -472,6 +526,7 @@ void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::share
 	GenerateVariables(render.arguments);
 	GenerateTransformData();
 	GenerateRenderJobData();
+	GenerateMappingData();
 	GenerateArguments();
 	GenerateCodeStruct();
 	GenerateCode();
@@ -500,7 +555,7 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 	pkgHdr.transformDataSize = (uint16_t)transformData.size();
 	pkgHdr.rpakPointersInDefaltDataCount = (uint16_t)rpakPointersInDefaultValues.size();
 	pkgHdr.mappingCount = (uint16_t)mappings.size();
-	pkgHdr.mappingSize = 0;
+	pkgHdr.mappingSize = (uint16_t)mappingData.size();
 	pkgHdr.renderJobCount = renderJobCount;
 	pkgHdr.argClusterCount = 1;
 	pkgHdr.argCount = cluster.argCount;
@@ -547,6 +602,9 @@ void RuiExportPrototype::WriteToFile(fs::path path) {
 
 	pkgHdr.argClusterOffset = file.tellp();
 	file.write((char*)&cluster,sizeof(cluster));
+
+	pkgHdr.mappingOffset = file.tellp();
+	file.write((char*)mappingData.data(),mappingData.size());
 
 	file.seekp(0);
 	file.write((char*) &pkgHdr, sizeof(pkgHdr));

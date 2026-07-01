@@ -305,7 +305,11 @@ void loadFonts() {
 #undef max
 void loadRpakFont(UIFontAtlasAssetHeader_v6_t* fontAtlasHdr, size_t textureId) {
    fontMutex.lock();
+   size_t atlasIndex = fonts.size();
    fonts.emplace_back(fontAtlasHdr,textureId);
+   for (auto& fnt : fonts.back().fonts) {
+       fontAtlasIndices.emplace(fnt.first, atlasIndex);
+   }
    fontMutex.unlock();
 }
 
