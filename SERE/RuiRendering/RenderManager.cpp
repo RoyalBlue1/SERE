@@ -46,102 +46,110 @@ void RenderInstance::AddQuad(RenderQuad& quad) {
 
 void RenderInstance::sub_FEF30( __m128 *a3, __m128 *a4, TriData& a5)
 {
+	const __m128 v10 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_10);
+	const __m128 v11 = _mm_set1_ps(drawInfo.ruiUnk3[0].screenHeight);
+	const __m128 v12 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_18);
+	const __m128 v13 = _mm_set1_ps(drawInfo.ruiUnk3[0].screenWidth);
+	const __m128 v14 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_4);
+	const __m128 v15 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_8);
+	const __m128 v16 = _mm_add_ps(
+		_mm_add_ps(_mm_set1_ps(drawInfo.float_10), _mm_mul_ps(v13, a5.a)),
+		_mm_mul_ps(v10, a5.b));
+	const __m128 v17 = _mm_add_ps(
+		_mm_add_ps(_mm_set1_ps(drawInfo.float_14), _mm_mul_ps(v14, a5.a)),
+		_mm_mul_ps(v11, a5.b));
+	const __m128 v72 = _mm_add_ps(
+		_mm_add_ps(_mm_set1_ps(drawInfo.float_18), _mm_mul_ps(v15, a5.a)),
+		_mm_mul_ps(v12, a5.b));
 
+	const __m128 v19 = _mm_shuffle_ps(*a4, *a4, _MM_SHUFFLE(1, 1, 0, 0));
+	const __m128 v20 = _mm_shuffle_ps(*a4, *a4, _MM_SHUFFLE(2, 3, 3, 2));
+	const __m128 v84 = a3[0];
+	const __m128 v82 = a3[2];
+	const __m128 v25 = _mm_add_ps(_mm_mul_ps(v84, v19), _mm_mul_ps(v82, v20));
+	const __m128 v26 = _mm_mul_ps(a3[1], v19);
+	const __m128 v30 = _mm_mul_ps(a3[3], v20);
+	const __m128 v32 = _mm_add_ps(v26, v30);
+	const __m128 v33 = _mm_mul_ps(v12, v32);
+	const __m128 v77 = _mm_add_ps(_mm_mul_ps(v13, v25), _mm_mul_ps(v10, v32));
+	const __m128 v73 = _mm_add_ps(_mm_mul_ps(v15, v25), v33);
+	const __m128 v36 = _mm_mul_ps(v11, v32);
+	const __m128 v37 = _mm_mul_ps(v14, v25);
+	const __m128 v74 = _mm_add_ps(v37, v36);
 
-	__m128 unk3Float_10; // xmm10
-	__m128 unk3screenHeight; // xmm11
-	__m128 unk3Float_18; // xmm13
-	__m128 unk3ScreenWidth; // xmm7
-	__m128 unk3Float_4; // xmm8
-	__m128 unk3Float_8; // xmm9
-	__m128 v16;
-	__m128 v17;
-	__m128 v72;
-	__m128 v19;
-	__m128 v20;
-	__m128 v25;
-	__m128 v26;
-	__m128 v30;
-	__m128 v32;
-	__m128 v33;
-	__m128 v77;
-	__m128 v73;
-	__m128 v36;
-	__m128 v37;
-	__m128 v65;
-	__m128 v66;
-	__m128 v67;
-	__m128 v68;
-	__m128 v69;
-	__m128 v70;
-	__m128 v71;
+	const __m128 v27 = _mm_setzero_ps();
+	const __m128 v40 = _mm_setzero_ps();
+	const __m128 v41 = _mm_setzero_ps();
+	const __m128 v47 = _mm_add_ps(
+		_mm_add_ps(_mm_add_ps(_mm_mul_ps(v17, v41), _mm_mul_ps(v16, v40)), _mm_mul_ps(v72, v27)),
+		_mm_set1_ps(1.0f));
+	const __m128 v52 = _mm_add_ps(_mm_add_ps(_mm_mul_ps(v74, v41), _mm_mul_ps(v77, v40)), _mm_mul_ps(v73, v27));
 
+	const __m128 v24 = _mm_set1_ps(-1.0f);
+	const __m128 v28 = _mm_setzero_ps();
+	const __m128 v48 = _mm_setzero_ps();
+	const __m128 v51 = _mm_set1_ps(2.0f);
+	const __m128 v53 = _mm_mul_ps(
+		_mm_sub_ps(
+			_mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(v28, v74), _mm_mul_ps(v51, v77)), _mm_mul_ps(v48, v73)), v47),
+			_mm_mul_ps(
+				_mm_add_ps(
+					_mm_add_ps(_mm_add_ps(_mm_mul_ps(v51, v16), _mm_mul_ps(v28, v17)), _mm_mul_ps(v48, v72)),
+					v24),
+				v52)),
+		_mm_set1_ps(globals.screenWidth != 0.f ? globals.screenWidth : elementWidth));
 
+	const __m128 v39 = _mm_set1_ps(1.0f);
+	const __m128 v49 = _mm_set1_ps(-2.0f);
+	const __m128 v50 = _mm_setzero_ps();
+	const __m128 v83 = _mm_setzero_ps();
+	const __m128 v54 = _mm_mul_ps(
+		_mm_sub_ps(
+			_mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(v83, v74), _mm_mul_ps(v49, v77)), _mm_mul_ps(v50, v73)), v47),
+			_mm_mul_ps(
+				_mm_add_ps(
+					_mm_add_ps(_mm_add_ps(_mm_mul_ps(v49, v16), _mm_mul_ps(v83, v17)), _mm_mul_ps(v50, v72)),
+					v39),
+				v52)),
+		_mm_set1_ps(globals.screenHeight != 0.f ? globals.screenHeight : elementHeight));
 
+	const __m128 v42 = _mm_set1_ps(2.0f);
+	const __m128 v46 = _mm_mul_ps(v42, v42);
+	const __m128 v55 = _mm_mul_ps(
+		_mm_mul_ps(_mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_mul_ps(v20, v19), a3[4]), v46), v46), v47),
+		v47);
+	const __m128 v56 = _mm_mul_ps(_mm_mul_ps(v55, v52), v52);
+	const __m128 v57 = _mm_mul_ps(v55, v47);
+	const __m128 v58 = _mm_sub_ps(_mm_add_ps(_mm_mul_ps(v54, v54), _mm_mul_ps(v53, v53)), v56);
+	const __m128 v59 = _mm_max_ps(_mm_set1_ps(1.1754944e-38f), v58);
+	const __m128 v60 = _mm_cmplt_ps(_mm_setzero_ps(), v58);
+	const __m128 v61 = _mm_mul_ps(v57, v52);
+	const __m128 v62 = _mm_rcp_ps(v59);
+	const __m128 v63 = _mm_sub_ps(_mm_set1_ps(1.0f), _mm_mul_ps(v62, v59));
+	const __m128 v64 = _mm_mul_ps(
+		_mm_and_ps(
+			_mm_add_ps(
+				_mm_sqrt_ps(_mm_and_ps(_mm_add_ps(_mm_mul_ps(_mm_mul_ps(v57, v47), v58), _mm_mul_ps(v61, v61)), v60)),
+				v61),
+			v60),
+		_mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(v63, v63), v63), v62), v62));
 
-
-
-
-	unk3Float_10 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_10);
-	unk3screenHeight = _mm_set1_ps(drawInfo.ruiUnk3[0].screenHeight);
-	unk3Float_18 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_18);
-	unk3ScreenWidth = _mm_set1_ps(drawInfo.ruiUnk3[0].screenWidth);
-	unk3Float_4 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_4);
-	unk3Float_8 = _mm_set1_ps(drawInfo.ruiUnk3[0].float_8);
-	v16 = _mm_add_ps(
-		_mm_add_ps(
-			_mm_set1_ps(drawInfo.float_10),
-			_mm_mul_ps(unk3ScreenWidth, a5.a)),
-		_mm_mul_ps(unk3Float_10, a5.b));
-	v17 = _mm_add_ps(
-		_mm_add_ps(
-			_mm_set1_ps(drawInfo.float_14),
-			_mm_mul_ps(unk3Float_4, a5.a)),
-		_mm_mul_ps(unk3screenHeight, a5.b));
-	v72 = _mm_add_ps(
-		_mm_add_ps(
-			_mm_set1_ps(drawInfo.float_18),
-			_mm_mul_ps(unk3Float_8, a5.a)),
-		_mm_mul_ps(unk3Float_18, a5.b));
-
-	v19 = (__m128)_mm_shuffle_ps(*a4,*a4, _MM_SHUFFLE(1,1,0,0));
-	v20 = (__m128)_mm_shuffle_ps(*a4,*a4, _MM_SHUFFLE(2,3,3,2));
-
-
-
-	v25 = _mm_add_ps(_mm_mul_ps(a3[0], v19), _mm_mul_ps(a3[2], v20));
-	v26 = _mm_mul_ps(a3[1], v19);
-
-	v30 = _mm_mul_ps(a3[3], v20);
-
-	v32 = _mm_add_ps(v26, v30);
-
-	v33 = _mm_mul_ps(unk3Float_18, v32);
-	v77 = _mm_add_ps(_mm_mul_ps(unk3ScreenWidth, v25), _mm_mul_ps(unk3Float_10, v32));
-
-	v73 = _mm_add_ps(_mm_mul_ps(unk3Float_8, v25), v33);
-	v36 = _mm_mul_ps(unk3screenHeight, v32);
-	v37 = _mm_mul_ps(unk3Float_4, v25);
-
-
-	//v33.m128_f32[0] = 1 * 2.0;
-
-
-	v65 = a5.b;
-	v66 = a5.a;
-	v67 = _mm_shuffle_ps(v65,v65, _MM_SHUFFLE(0,3,2,1));
-	v68 = _mm_sub_ps(v67, (__m128)v65);
-	v69 = _mm_shuffle_ps(v66,v66, _MM_SHUFFLE(0,3,2,1));
-	v70 = _mm_sub_ps(v69, (__m128)v66);
-	v71 = _mm_cmple_ps(
+	const __m128 v65 = _mm_add_ps(_mm_mul_ps(v64, v32), a5.b);
+	const __m128 v66 = _mm_add_ps(_mm_mul_ps(v64, v25), a5.a);
+	const __m128 v67 = _mm_shuffle_ps(v65, v65, _MM_SHUFFLE(0, 3, 2, 1));
+	const __m128 v68 = _mm_sub_ps(v67, v65);
+	const __m128 v69 = _mm_shuffle_ps(v66, v66, _MM_SHUFFLE(0, 3, 2, 1));
+	const __m128 v70 = _mm_sub_ps(v69, v66);
+	const __m128 v71 = _mm_cmple_ps(
 		_mm_mul_ps(
 			_mm_sub_ps(
-				_mm_mul_ps((__m128)_mm_shuffle_ps(v68,v68, _MM_SHUFFLE(2,1,0,3)), (__m128)v70),
-				_mm_mul_ps((__m128)_mm_shuffle_ps(v70,v70, _MM_SHUFFLE(2,1,0,3)), (__m128)v68)),
-			_mm_sub_ps(_mm_mul_ps(a3[3], a3[0]), _mm_mul_ps(a3[1], a3[2]))),
+				_mm_mul_ps(_mm_shuffle_ps(v68, v68, _MM_SHUFFLE(2, 1, 0, 3)), v70),
+				_mm_mul_ps(_mm_shuffle_ps(v70, v70, _MM_SHUFFLE(2, 1, 0, 3)), v68)),
+			_mm_sub_ps(_mm_mul_ps(a3[3], v84), _mm_mul_ps(a3[1], v82))),
 		_mm_setzero_ps());
-	a5.a = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v66), _mm_and_ps(v71, v69));
-	a5.b = _mm_or_ps(_mm_andnot_ps(v71, (__m128)v65), _mm_and_ps(v71, v67));
+
+	a5.a = _mm_or_ps(_mm_andnot_ps(v71, v66), _mm_and_ps(v71, v69));
+	a5.b = _mm_or_ps(_mm_andnot_ps(v71, v65), _mm_and_ps(v71, v67));
 }
 
 void RenderInstance::sub_FFAE0(__m128 a1,__m128 a2, __m128* a3)
