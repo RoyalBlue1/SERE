@@ -2,6 +2,7 @@
 
 
 #include <fstream>
+#include <algorithm>
 #include <map>
 #include <string>
 #include <any>
@@ -95,9 +96,9 @@ struct TransformResult {
 
 struct RenderQuad
 {
+    __m128 UvBase;
     __m128 xUvVector;
     __m128 yUvVector;
-    __m128 UvBase;
     __m128 m128_30;
     __m128 m128_40;
     __m128 m128_50;
@@ -146,6 +147,7 @@ public:
     float elementHeight;
     float elementWidthRpc;
     float elementHeightRpc;
+    float previewZoom = 1.0f;
 
     void AddImageAtlasSegment(ImageAtlas* atlas) {
         if (segments.size() == 0) {
@@ -235,6 +237,7 @@ public:
         drawInfo.ruiUnk3[0].float_24 = 0.f;
         drawInfo.ruiUnk3[0].float_28 = 0.f;
         drawInfo.ruiUnk3[0].float_2C = 1.f;
+        previewZoom = 1.0f;
     }
 
     RenderInstance(float width, float height) {
@@ -243,9 +246,26 @@ public:
 
     void DrawImage() {
         ImGui::Begin("Render Image");
+
+        constexpr float minZoom = 1.0f;
+        constexpr float maxZoom = 16.0f;
+
+        if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseWheel != 0.0f) {
+            previewZoom = std::clamp(previewZoom + ImGui::GetIO().MouseWheel * 0.25f, minZoom, maxZoom);
+        }
+
         float width = ImGui::GetWindowWidth();
         width -= 10; //margin
+        width *= previewZoom;
         ImGui::Image(g_renderFramework->GetRuiView(), ImVec2(width, elementHeight / elementWidth * width), ImVec2(0, 0), ImVec2(1, 1));
+        if (previewZoom > minZoom &&
+            ImGui::IsItemHovered() &&
+            (ImGui::IsMouseDragging(ImGuiMouseButton_Left) || ImGui::IsMouseDragging(ImGuiMouseButton_Middle))) {
+            const ImVec2 dragDelta = ImGui::GetIO().MouseDelta;
+            ImGui::SetScrollX(ImGui::GetScrollX() - dragDelta.x);
+            ImGui::SetScrollY(ImGui::GetScrollY() - dragDelta.y);
+        }
+
         ImGui::End();
     }
 };

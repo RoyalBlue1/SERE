@@ -144,6 +144,9 @@ public:
     void* GetRuiView();
     void* GetWindow();
 private:
+    GLuint GetRuiRenderFramebuffer() const;
+    void ResolveRuiFramebuffer();
+
     std::vector<Buffer> buffers;
     std::vector<Texture> textures;
     const char* vertexSource;
@@ -157,6 +160,11 @@ private:
     GLuint fbo;
     GLuint colorTexture;
     GLuint depthStencilTexture;
+    GLuint msaaFbo;
+    GLuint msaaColorTexture;
+    GLuint msaaDepthStencilTexture;
+    GLsizei msaaSamples;
+    bool shouldUpdateMsaa;
     GLuint vao;
     GLuint shaderProgram;
     GLuint vertexBuffer;

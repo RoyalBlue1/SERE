@@ -4,6 +4,7 @@
 #include <fstream>
 #include <streambuf>
 #include <execution>
+#include <system_error>
 
 #include "SERE.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -29,6 +30,23 @@
 #include "PakLoading/cpakfile.h"
 
 
+static bool IsExistingDirectory(const fs::path& path)
+{
+    if (path.empty())
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_directory(path, error);
+}
+
+static bool IsExistingRpakFile(const fs::path& path)
+{
+    if (path.empty() || path.extension() != ".rpak")
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_regular_file(path, error);
+}
 
 static void ShowDockingDisabledMessage()
 {

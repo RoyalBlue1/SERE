@@ -170,6 +170,7 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 	doc.ParseStream(wrap);
 	if (doc.HasParseError()) {
 		printf("Error in JSON File %s\n", path.string().c_str());
+		printf("Parse Error: %d\n", doc.GetParseError());
 		return;
 	}
 	rapidjson::GenericObject root = doc.GetObject();
@@ -216,6 +217,17 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 		if (!mINF.getNodes().contains(rightId))continue;
 		auto left = mINF.getNodes()[leftId];
 		auto right = mINF.getNodes()[rightId];
+		auto hasOutPin = [](const std::shared_ptr<ImFlow::BaseNode>& node, const std::string& name) {
+			for (auto& pin : node->getOuts()) {
+				if (pin->getName() == name)
+					return true;
+			}
+			return false;
+		};
+		if (leftPinName == "Vector2" && hasOutPin(left, "Vector2 Res"))
+			leftPinName = "Vector2 Res";
+		if (leftPinName == "Vector3" && hasOutPin(left, "Vector3 Res"))
+			leftPinName = "Vector3 Res";
 
 		left->outPin(leftPinName)->createLink(right->inPin(rightPinName));
 
@@ -384,6 +396,9 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 		typeid(Float3Variable).name(),	
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,247,200,255),0,4.f,4.67f,3.7f,1.f));
 	styles.AddPinStlye(
+		typeid(MathVariable).name(),
+		std::make_shared<ImFlow::PinStyle>(IM_COL32(202,247,113,255),0,4.f,4.67f,3.7f,1.f));
+	styles.AddPinStlye(
 		typeid(ColorVariable).name(),
 		std::make_shared<ImFlow::PinStyle>(IM_COL32(113,178,247,255),0,4.f,4.67f,3.7f,1.f));
 	styles.AddPinStlye(
@@ -425,4 +440,3 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	errorNodeStyle->bg = IM_COL32(132,23,17,255);
 	styles.SetNodeErrorStyle(errorNodeStyle);
 }
-
