@@ -59,7 +59,7 @@ jobs:
                     libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
                     libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
                     libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                    libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                    libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev patchelf
 
             - name: Configure CMake
               # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -155,8 +155,13 @@ jobs:
                   rpath_output="$(readelf -d "$package_dir/SERE" | grep -E 'RPATH|RUNPATH' || true)"
                   printf '%s\n' "$rpath_output"
                   if ! grep -q '\$ORIGIN' <<< "$rpath_output"; then
-                    echo 'Packaged SERE is missing a $ORIGIN runtime library path'
-                    exit 1
+                    patchelf --set-rpath '$ORIGIN' "$package_dir/SERE"
+                    rpath_output="$(readelf -d "$package_dir/SERE" | grep -E 'RPATH|RUNPATH' || true)"
+                    printf '%s\n' "$rpath_output"
+                    if ! grep -q '\$ORIGIN' <<< "$rpath_output"; then
+                      echo 'Packaged SERE is missing a $ORIGIN runtime library path'
+                      exit 1
+                    fi
                   fi
 
                   ldd_output="$(ldd "$package_dir/SERE")"
