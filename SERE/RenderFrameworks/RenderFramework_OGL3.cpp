@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 
 uint32_t WinResizeWidth = 0, WinResizeHeight = 0;
 
@@ -50,10 +52,20 @@ static GLsizei GetSupportedRuiMsaaSamples()
     return 1;
 }
 
+static void ThrowSdlError(const char* message)
+{
+    const char* error = SDL_GetError();
+    std::string fullMessage = std::string(message) + ": " + (error && *error ? error : "unknown SDL error");
+    SDL_Log("%s", fullMessage.c_str());
+    throw std::runtime_error(fullMessage);
+}
+
 
 RenderFramework_OGL3::RenderFramework_OGL3()
 {
 
+    window = nullptr;
+    glContext = nullptr;
     fbo = 0;
     depthStencilTexture = 0;
     colorTexture = 0;
@@ -64,11 +76,11 @@ RenderFramework_OGL3::RenderFramework_OGL3()
     shouldUpdateMsaa = false;
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        ThrowSdlError("Unable to initialize SDL");
     }
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_OPENGL;
 	if(!SDL_GL_LoadLibrary(nullptr)) { // Load the default OpenGL library
-        SDL_Log("Failed to load OpenGL library: %s", SDL_GetError());
+        ThrowSdlError("Failed to load OpenGL library");
     }
 	const char* glsl_version = "#version 450 core";
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -79,19 +91,28 @@ RenderFramework_OGL3::RenderFramework_OGL3()
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 
 	window = SDL_CreateWindow("SERE", 1280, 800, window_flags);
+    if (window == nullptr) {
+        ThrowSdlError("Failed to create SDL window");
+    }
+
 	glContext = SDL_GL_CreateContext(window);
 	if (glContext == nullptr) {
-		SDL_Log("Failed to create OpenGL context: %s", SDL_GetError());
-		SDL_Quit();
-		return;
+		ThrowSdlError("Failed to create OpenGL context");
 	}
+    if (!SDL_GL_MakeCurrent(window, glContext)) {
+        ThrowSdlError("Failed to make OpenGL context current");
+    }
+
+    glewExperimental = GL_TRUE;
     GLenum glewError = glewInit();
     if (glewError != GLEW_OK)
     {
-        SDL_Log("Error initializing GLEW! %s\n", glewGetErrorString(glewError));
+        const char* error = reinterpret_cast<const char*>(glewGetErrorString(glewError));
+        std::string message = std::string("Error initializing GLEW: ") + (error ? error : "unknown GLEW error");
+        SDL_Log("%s", message.c_str());
+        throw std::runtime_error(message);
     }
 	SDL_PropertiesID props = SDL_GetWindowProperties(window);
-    SDL_GL_MakeCurrent(window, glContext);
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
     SDL_StartTextInput(window);
@@ -108,8 +129,12 @@ RenderFramework_OGL3::RenderFramework_OGL3()
 
 RenderFramework_OGL3::~RenderFramework_OGL3()
 {
-	SDL_GL_DestroyContext(glContext);
-	SDL_DestroyWindow(window);
+    if (glContext) {
+        SDL_GL_DestroyContext(glContext);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
 }
 
 bool RenderFramework_OGL3::ShouldMainLoopRun()
