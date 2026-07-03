@@ -47,14 +47,14 @@ jobs:
               id: strings
               shell: bash
               run: |
-                  echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-                  echo "package-output-dir=${{ github.workspace }}/build-package" >> "$GITHUB_OUTPUT"
+                  echo "build-output-dir=${{ github.workspace }}/build-ci/cmake" >> "$GITHUB_OUTPUT"
+                  echo "package-output-dir=${{ github.workspace }}/build-ci/package" >> "$GITHUB_OUTPUT"
 
             - name: Setup linux deps
               if: matrix.os == 'ubuntu-latest'
               run: |
                   sudo apt-get update
-                  sudo apt-get install build-essential git make \
+                  sudo apt-get install -y build-essential git make \
                     pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
                     libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
                     libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
