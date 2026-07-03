@@ -152,6 +152,20 @@ jobs:
                     cp -L "$lib" "$package_dir/$(basename "$lib")"
                   done
 
+                  rpath_output="$(readelf -d "$package_dir/SERE" | grep -E 'RPATH|RUNPATH' || true)"
+                  printf '%s\n' "$rpath_output"
+                  if ! grep -q '\$ORIGIN' <<< "$rpath_output"; then
+                    echo 'Packaged SERE is missing a $ORIGIN runtime library path'
+                    exit 1
+                  fi
+
+                  ldd_output="$(ldd "$package_dir/SERE")"
+                  printf '%s\n' "$ldd_output"
+                  if grep -q 'not found' <<< "$ldd_output"; then
+                    echo "Packaged SERE has unresolved shared libraries"
+                    exit 1
+                  fi
+
                   find "$package_dir" -type f -print | sort
 
             - name: Upload Build Artifact
