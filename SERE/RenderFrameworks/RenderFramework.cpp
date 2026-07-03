@@ -22,6 +22,8 @@ void CreateRenderFramework(char** argv, int argc) {
 	// else auto detect default to dx11 on windows and ogl on other platforms
 #ifdef _WIN32
 	g_renderFramework = std::make_unique<RenderFramework_Dx11>();
+	//g_renderFramework = std::make_unique<RenderFramework_OGL3>();
+
 #else
 	g_renderFramework = std::make_unique< RenderFramework_OGL3>();
 #endif
