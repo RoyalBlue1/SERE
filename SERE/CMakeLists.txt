@@ -74,6 +74,12 @@ target_link_libraries(SERE PRIVATE SDL3::SDL3)
 target_link_libraries(SERE PRIVATE libglew_static)
 target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
 
+if(UNIX AND NOT APPLE)
+	set_target_properties(SERE PROPERTIES
+		BUILD_RPATH "\$ORIGIN"
+		INSTALL_RPATH "\$ORIGIN")
+endif()
+
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Assets ${CMAKE_CURRENT_BINARY_DIR}/Assets)
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/DroidSans.ttf ${CMAKE_CURRENT_BINARY_DIR}/imgui/DroidSans.ttf)
 
