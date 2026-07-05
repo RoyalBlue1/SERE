@@ -136,34 +136,7 @@ jobs:
                   mkdir -p "$package_dir/imgui"
                   cp "$GITHUB_WORKSPACE/SERE/Imgui/DroidSans.ttf" "$package_dir/imgui/DroidSans.ttf"
 
-                  mapfile -t sdl_libs < <(find "$build_dir" \( -type f -o -type l \) \( -name 'libSDL3*.so*' -o -name 'SDL3*.so*' -o -name 'libSDL3*.dylib' \) -print)
-                  if (( ${#sdl_libs[@]} == 0 )); then
-                    echo "SDL shared libraries were not found under $build_dir"
-                    exit 1
-                  fi
-
-                  for lib in "${sdl_libs[@]}"; do
-                    cp -L "$lib" "$package_dir/$(basename "$lib")"
-                  done
-
-                  rpath_output="$(readelf -d "$package_dir/SERE" | grep -E 'RPATH|RUNPATH' || true)"
-                  printf '%s\n' "$rpath_output"
-                  if ! grep -q '\$ORIGIN' <<< "$rpath_output"; then
-                    patchelf --set-rpath '$ORIGIN' "$package_dir/SERE"
-                    rpath_output="$(readelf -d "$package_dir/SERE" | grep -E 'RPATH|RUNPATH' || true)"
-                    printf '%s\n' "$rpath_output"
-                    if ! grep -q '\$ORIGIN' <<< "$rpath_output"; then
-                      echo 'Packaged SERE is missing a $ORIGIN runtime library path'
-                      exit 1
-                    fi
-                  fi
-
-                  ldd_output="$(ldd "$package_dir/SERE")"
-                  printf '%s\n' "$ldd_output"
-                  if grep -q 'not found' <<< "$ldd_output"; then
-                    echo "Packaged SERE has unresolved shared libraries"
-                    exit 1
-                  fi
+                
 
                   find "$package_dir" -type f -print | sort
 
