@@ -106,12 +106,6 @@ jobs:
                   New-Item -ItemType Directory -Force -Path $imguiDir | Out-Null
                   Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'SERE\Imgui\DroidSans.ttf') -Destination (Join-Path $imguiDir 'DroidSans.ttf') -Force
 
-                  $sdlLibs = Get-ChildItem -Path $buildDir -Filter 'SDL3.dll' -Recurse -File
-                  if (-not $sdlLibs) {
-                      throw "SDL3.dll was not found under $buildDir"
-                  }
-                  $sdlLibs | Copy-Item -Destination $packageDir -Force
-
                   Get-ChildItem -Path $packageDir -Recurse -File | ForEach-Object { $_.FullName }
 
             - name: Package build output (Linux)
