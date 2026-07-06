@@ -623,6 +623,8 @@ namespace ImFlow
          */
         virtual void draw() {}
 
+        virtual bool CanCreateLink(Pin* pin, Pin* other) { return true; }
+
         /**
          * @brief <BR>Add an Input to the node
          * @details Will add an Input pin to the node with the given name and data type.

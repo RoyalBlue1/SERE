@@ -3,10 +3,11 @@
 #
 
 # Add source to this project's executable.
+set(SDL_SHARED OFF)
+set(SDL_STATIC ON)
 
 add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(ThirdParty/glew)
-
 
 set(CMAKE_INCLUDE_CURRENT_DIR,ON)
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
@@ -75,6 +76,7 @@ target_link_libraries(SERE PRIVATE libglew_static)
 target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
 
 if(UNIX AND NOT APPLE)
+
 	set_target_properties(SERE PROPERTIES
 		BUILD_RPATH "$ORIGIN"
 		INSTALL_RPATH "$ORIGIN"
