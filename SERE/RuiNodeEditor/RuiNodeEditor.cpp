@@ -191,7 +191,7 @@ void NodeEditor::PasteNodes() {
 		nodeCopy.CopyFrom(*itr, pasteDoc.GetAllocator());
 		nodeCopy["Id"].SetUint64(static_cast<uint64_t>(newId));
 		nodeCopy["PosX"].SetFloat(node["PosX"].GetFloat() + 10.0f);
-		nodeCopy["PosY"].SetFloat(node["PosY"].GetFloat() + 10.0f);
+		nodeCopy["PosY"].SetFloat(node["PosY"].GetFloat() - 10.0f);
 
 		auto newnode = nodeTypes[category][name].RecreateNode(mINF, render, mINF.getStyleManager(), nodeCopy.GetObject());
 		if (!newnode)continue;
@@ -424,7 +424,9 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 			leftPinName = "Vector2 Res";
 		if (leftPinName == "Vector3" && hasOutPin(left, "Vector3 Res"))
 			leftPinName = "Vector3 Res";
-
+		ImFlow::Pin* leftPin = FindPinByName(left->getOuts(), leftPinName);
+		ImFlow::Pin* rightPin = FindPinByName(right->getIns(), rightPinName);
+		if (!leftPin || !rightPin)continue;
 		leftPin->createLink(rightPin);
 
 	}
