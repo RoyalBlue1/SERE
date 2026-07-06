@@ -544,9 +544,6 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
             printf("Shader compile error: %s\n", log);
             return 0;
         }
-        char log[512];
-        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-        printf("Shader compiled %s\n", log);
         return shader;
         };
 
