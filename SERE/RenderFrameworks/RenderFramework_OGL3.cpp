@@ -75,6 +75,7 @@ RenderFramework_OGL3::RenderFramework_OGL3()
     msaaSamples = 1;
     shouldUpdateMsaa = false;
 
+
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         ThrowSdlError("Unable to initialize SDL");
     }
@@ -82,14 +83,17 @@ RenderFramework_OGL3::RenderFramework_OGL3()
 	if(!SDL_GL_LoadLibrary(nullptr)) { // Load the default OpenGL library
         ThrowSdlError("Failed to load OpenGL library");
     }
+
+
+  
+
 	const char* glsl_version = "#version 450 core";
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
 	window = SDL_CreateWindow("SERE", 1280, 800, window_flags);
     if (window == nullptr) {
@@ -103,7 +107,6 @@ RenderFramework_OGL3::RenderFramework_OGL3()
     if (!SDL_GL_MakeCurrent(window, glContext)) {
         ThrowSdlError("Failed to make OpenGL context current");
     }
-
     glewExperimental = GL_TRUE;
     GLenum glewError = glewInit();
     if (glewError != GLEW_OK)
@@ -113,6 +116,9 @@ RenderFramework_OGL3::RenderFramework_OGL3()
         SDL_Log("%s", message.c_str());
         throw std::runtime_error(message);
     }
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GetSupportedRuiMsaaSamples());
+
+   
 	SDL_PropertiesID props = SDL_GetWindowProperties(window);
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
