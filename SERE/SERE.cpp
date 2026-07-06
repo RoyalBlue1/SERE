@@ -4,6 +4,7 @@
 #include <fstream>
 #include <streambuf>
 #include <execution>
+#include <system_error>
 
 #include "SERE.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -29,6 +30,23 @@
 #include "PakLoading/cpakfile.h"
 
 
+static bool IsExistingDirectory(const fs::path& path)
+{
+    if (path.empty())
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_directory(path, error);
+}
+
+static bool IsExistingRpakFile(const fs::path& path)
+{
+    if (path.empty() || path.extension() != ".rpak")
+        return false;
+
+    std::error_code error;
+    return fs::exists(path, error) && fs::is_regular_file(path, error);
+}
 
 static void ShowDockingDisabledMessage()
 {
@@ -144,13 +162,37 @@ void ShowExampleAppDockSpace(bool* p_open)
     ImGui::End();
 }
 
-void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
+bool ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
 
     static bool hasLoadedAssets = false;
     static std::string loadedPath = "";
     static std::string loadedCustomPath = "";
+    auto resetLoadedAssets = [&]() {
+        clearImageAtlases();
+        clearFontAtlases();
+        hasLoadedAssets = false;
+        loadedPath.clear();
+        loadedCustomPath.clear();
+    };
+    auto didLoadRequiredAtlases = []() {
+        return !imageAssetMap.empty() && !fonts.empty();
+    };
+
+    const fs::path pakFolder(folderPath);
+    const fs::path pakRoot = pakFolder / "r2/paks/Win64";
+    const fs::path customPakPath(customRpakPath);
+    const bool hasGamePakRoot = !folderPath.empty() && DoesDirExist(pakRoot);
+    const bool hasCustomPakRoot = !customRpakPath.empty() && DoesDirExist(customPakPath);
+
+    if (!hasGamePakRoot && !hasCustomPakRoot) {
+        if (hasLoadedAssets)
+            resetLoadedAssets();
+
+        return false;
+    }
+
     if (hasLoadedAssets && loadedPath == folderPath && loadedCustomPath == customRpakPath)
-        return;
+        return true;
     hasLoadedAssets = true;
     loadedPath = folderPath;
     loadedCustomPath = customRpakPath;
@@ -187,9 +229,7 @@ void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
         "mp_angel_city(11).rpak"
     };
 
-    const fs::path pakFolder(folderPath);
-    const fs::path pakRoot = pakFolder / "r2/paks/Win64";
-    if (DoesDirExist(pakRoot)) {
+    if (hasGamePakRoot) {
         std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakRoot](std::string& pak) {
             const fs::path pakPath = pakRoot / pak;
             if (DoesRpakExist(pakPath))
@@ -197,9 +237,14 @@ void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
             });
     }
 
-    const fs::path customPakPath(customRpakPath);
-    if (!DoesDirExist(customPakPath))
-        return;
+    if (!hasCustomPakRoot) {
+        if (!didLoadRequiredAtlases()) {
+            resetLoadedAssets();
+            return false;
+        }
+
+        return true;
+    }
 
     std::error_code directoryError;
     fs::directory_iterator entry(customPakPath, directoryError);
@@ -211,6 +256,13 @@ void ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
 
         entry.increment(directoryError);
     }
+
+    if (!didLoadRequiredAtlases()) {
+        resetLoadedAssets();
+        return false;
+    }
+
+    return true;
 }
 
 // Main code
@@ -256,6 +308,7 @@ int main(int argc, char** argv)
 
     bool use_docking_space = false;
     bool is_exporting = false;
+    bool assetsLoaded = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     RenderInstance render{(float)ruiSize.width,(float)ruiSize.height};
@@ -288,6 +341,7 @@ int main(int argc, char** argv)
         
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
+                ImGui::BeginDisabled(!assetsLoaded);
                 if (ImGui::MenuItem("New")) {
                    nodeEdit.Clear();
                 }
@@ -301,6 +355,7 @@ int main(int argc, char** argv)
                     nodeEdit.Export();
 					is_exporting = true;
                 }
+                ImGui::EndDisabled();
                 ImGui::EndMenu();
             }
             if(ImGui::MenuItem("Settings")) {
@@ -309,7 +364,7 @@ int main(int argc, char** argv)
             
             ImGui::EndMainMenuBar();
         }
-        if (nodeEdit.currentFilePath.has_value()) {
+        if (assetsLoaded && nodeEdit.currentFilePath.has_value()) {
             auto path = *nodeEdit.currentFilePath;
             nodeEdit.currentFilePath.reset();
             if (is_exporting) {
@@ -322,7 +377,9 @@ int main(int argc, char** argv)
         }
         settings.ShowSettingsWindow();
         if (settings.HasChanged()) {
-            ReloadAssets(settings.GetTitanfall2Path(), settings.GetCustomRpakPath());
+            assetsLoaded = ReloadAssets(settings.GetTitanfall2Path(), settings.GetCustomRpakPath());
+            if (!assetsLoaded)
+                settings.Open();
             auto size = settings.GetRuiSize();
             render.SetSize(size.width,size.height);
             g_renderFramework->RuiReCreatePipeline(size.width,size.height);
@@ -330,7 +387,14 @@ int main(int argc, char** argv)
         
 
         render.StartFrame(ImGui::GetCurrentContext()->Time);
-        nodeEdit.Draw();
+        if (assetsLoaded) {
+            nodeEdit.Draw();
+        }
+        else {
+            ImGui::Begin("Node Editor");
+            ImGui::TextUnformatted("Select a valid Titanfall 2 path in Settings to get started.");
+            ImGui::End();
+        }
         render.EndFrame();
         render.DrawImage();
         

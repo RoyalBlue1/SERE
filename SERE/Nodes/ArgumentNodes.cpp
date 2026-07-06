@@ -304,7 +304,7 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 
 	getOut<ColorVariable>("Value")->behaviour([this]() {
 		Color val(1.f,1.f,1.f,1.f);
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(int)))
+		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Color)))
 			val = std::any_cast<Color>(render.arguments[argName]);
 		return ColorVariable(
 			val,
@@ -322,8 +322,9 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 void ColorArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
+
 	std::any& any = render.arguments[argName];
-	Color val = Color(0.f,0.f,0.f,1.f);
+	Color val = Color(1.f,1.f,1.f,1.f);
 	if(any.type()==typeid(Color))
 		val = std::any_cast<Color>(any);
 	ImGui::ColorPicker4("Default Value",&val.red);
@@ -339,6 +340,8 @@ void ColorArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 }
 
 void ColorArgNode::Export(RuiExportPrototype& proto) {
+	if(!(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Color))))
+		render.arguments[argName] = Color(1.f,1.f,1.f,1.f);
 	proto.arguments.emplace(argName,VariableType::COLOR_ALPHA);
 }
 

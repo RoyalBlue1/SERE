@@ -7,6 +7,7 @@
 #include "ThirdParty/rapidjson/ostreamwrapper.h"
 #include "ThirdParty/rapidjson/istreamwrapper.h"
 #include <SDL3/SDL.h>
+#include <fstream>
 
 class Settings {
 	struct RuiSize_t {
@@ -27,9 +28,11 @@ private:
 
 public:
 
-	Settings():ruiWidth(1920),ruiHeight(1080),titanfall2Path(""),changed(true),visible(false) {
-		LoadFromFile();
-		if(!titanfall2Path.size())
+	Settings():visible(false),changed(false),titanfall2Path(""),customRpakPath(""),ruiWidth(1920),ruiHeight(1080) {
+		const bool loadedSettings = LoadFromFile();
+		const bool hasAssetPath = titanfall2Path.size() || customRpakPath.size();
+		changed = loadedSettings && hasAssetPath;
+		if(!hasAssetPath)
 			visible = true;
 	}
 
@@ -126,16 +129,16 @@ public:
 
 	}
 #undef GetObject
-	void LoadFromFile() {
+	bool LoadFromFile() {
 		std::ifstream file{"settings.json"};
 		if(!file.good())
-			return;
+			return false;
 		rapidjson::IStreamWrapper fileWrap(file);
 		rapidjson::Document doc;
 		doc.ParseStream(fileWrap);
-		if (!doc.IsObject()) {
+		if (doc.HasParseError() || !doc.IsObject()) {
 			file.close();
-			return;
+			return false;
 		}
 		rapidjson::GenericObject root = doc.GetObject();
 
@@ -152,6 +155,7 @@ public:
 			customRpakPath = root["CustomRpakPath"].GetString();
 		}
 		file.close();
+		return true;
 	}
 
 	void SaveToFile() {

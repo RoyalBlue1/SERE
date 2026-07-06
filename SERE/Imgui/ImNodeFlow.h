@@ -12,6 +12,7 @@
 #include <functional>
 #include <unordered_map>
 #include <cstdint>
+#include <any>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_bezier_math.h"
@@ -622,6 +623,8 @@ namespace ImFlow
          */
         virtual void draw() {}
 
+        virtual bool CanCreateLink(Pin* pin, Pin* other) { return true; }
+
         /**
          * @brief <BR>Add an Input to the node
          * @details Will add an Input pin to the node with the given name and data type.
@@ -1090,11 +1093,16 @@ namespace ImFlow
          */
         virtual void resolve() {}
 
+        virtual std::any valueAny() { return {}; }
+
         /**
          * @brief <BR>Custom render function to override Pin appearance
          * @param r Function or lambda expression with new ImGui rendering
          */
         Pin* renderer(std::function<void(Pin* p)> r) { m_renderer = std::move(r); return this; }
+
+        Pin* visible(bool state) { m_visible = state; return this; }
+        [[nodiscard]] bool isVisible() const { return m_visible; }
 
         /**
          * @brief <BR>Create link between pins
@@ -1189,7 +1197,7 @@ namespace ImFlow
          * @brief <BR>Calculate pin's width pre-rendering
          * @return The with of the pin once it will be rendered
          */
-        float calcWidth() { return ImGui::CalcTextSize(m_proto->name.c_str()).x; }
+        float calcWidth() { return m_visible ? ImGui::CalcTextSize(m_proto->name.c_str()).x : 0.f; }
 
         /**
          * @brief <BR>Set pin's position
@@ -1205,6 +1213,7 @@ namespace ImFlow
         ImNodeFlow** m_inf;
         std::shared_ptr<PinStyle> m_style;
         std::function<void(Pin* p)> m_renderer;
+        bool m_visible = true;
     };
 
     /**
@@ -1370,6 +1379,8 @@ namespace ImFlow
          * @return Const reference to the internal value of the pin
          */
         const T& val();
+
+        std::any valueAny() override { return val(); }
 
         /**
          * @brief <BR>Set logic to calculate output value

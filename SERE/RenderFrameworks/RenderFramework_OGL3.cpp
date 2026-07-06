@@ -3,41 +3,123 @@
 #include <Imgui/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 
 uint32_t WinResizeWidth = 0, WinResizeHeight = 0;
+
+#define MSAA_SAMPLES 16
+
+
+static bool IsMultisampleCountSupported(GLenum internalFormat, GLsizei samples)
+{
+    GLint sampleCountCount = 0;
+    glGetInternalformativ(GL_TEXTURE_2D_MULTISAMPLE, internalFormat, GL_NUM_SAMPLE_COUNTS, 1, &sampleCountCount);
+    if (sampleCountCount <= 0) {
+        return false;
+    }
+
+    std::vector<GLint> sampleCounts(sampleCountCount);
+    glGetInternalformativ(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        internalFormat,
+        GL_SAMPLES,
+        sampleCountCount,
+        sampleCounts.data()
+    );
+
+    for (GLint sampleCount : sampleCounts) {
+        if (sampleCount == samples) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static GLsizei GetSupportedRuiMsaaSamples()
+{
+    for (GLsizei samples = MSAA_SAMPLES; samples > 1; --samples) {
+        if (IsMultisampleCountSupported(GL_RGBA32F, samples) &&
+            IsMultisampleCountSupported(GL_DEPTH24_STENCIL8, samples)) {
+            return samples;
+        }
+    }
+
+    return 1;
+}
+
+static void ThrowSdlError(const char* message)
+{
+    const char* error = SDL_GetError();
+    std::string fullMessage = std::string(message) + ": " + (error && *error ? error : "unknown SDL error");
+    SDL_Log("%s", fullMessage.c_str());
+    throw std::runtime_error(fullMessage);
+}
 
 
 RenderFramework_OGL3::RenderFramework_OGL3()
 {
+
+    window = nullptr;
+    glContext = nullptr;
+    fbo = 0;
+    depthStencilTexture = 0;
+    colorTexture = 0;
+    msaaFbo = 0;
+    msaaColorTexture = 0;
+    msaaDepthStencilTexture = 0;
+    msaaSamples = 1;
+    shouldUpdateMsaa = false;
+
+
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        ThrowSdlError("Unable to initialize SDL");
     }
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_OPENGL;
 	if(!SDL_GL_LoadLibrary(nullptr)) { // Load the default OpenGL library
-        SDL_Log("Failed to load OpenGL library: %s", SDL_GetError());
+        ThrowSdlError("Failed to load OpenGL library");
     }
+
+
+  
+
 	const char* glsl_version = "#version 450 core";
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 
 	window = SDL_CreateWindow("SERE", 1280, 800, window_flags);
+    if (window == nullptr) {
+        ThrowSdlError("Failed to create SDL window");
+    }
+
 	glContext = SDL_GL_CreateContext(window);
 	if (glContext == nullptr) {
-		SDL_Log("Failed to create OpenGL context: %s", SDL_GetError());
-		SDL_Quit();
-		return;
+		ThrowSdlError("Failed to create OpenGL context");
 	}
+    if (!SDL_GL_MakeCurrent(window, glContext)) {
+        ThrowSdlError("Failed to make OpenGL context current");
+    }
+    glewExperimental = GL_TRUE;
     GLenum glewError = glewInit();
     if (glewError != GLEW_OK)
     {
-        SDL_Log("Error initializing GLEW! %s\n", glewGetErrorString(glewError));
+        const char* error = reinterpret_cast<const char*>(glewGetErrorString(glewError));
+        std::string message = std::string("Error initializing GLEW: ") + (error ? error : "unknown GLEW error");
+        SDL_Log("%s", message.c_str());
+        throw std::runtime_error(message);
     }
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GetSupportedRuiMsaaSamples());
+
+   
 	SDL_PropertiesID props = SDL_GetWindowProperties(window);
-    SDL_GL_MakeCurrent(window, glContext);
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
     SDL_StartTextInput(window);
@@ -49,17 +131,17 @@ RenderFramework_OGL3::RenderFramework_OGL3()
 		SDL_Log("Failed to initialize ImGui OpenGL3 backend");
 	}
 
-    fbo = 0;
-    depthStencilTexture = 0;
-    colorTexture = 0;
-
 	
 }
 
 RenderFramework_OGL3::~RenderFramework_OGL3()
 {
-	SDL_GL_DestroyContext(glContext);
-	SDL_DestroyWindow(window);
+    if (glContext) {
+        SDL_GL_DestroyContext(glContext);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
 }
 
 bool RenderFramework_OGL3::ShouldMainLoopRun()
@@ -119,12 +201,13 @@ void RenderFramework_OGL3::ImGuiDeInit()
 
 void RenderFramework_OGL3::RuiClearFrame()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, GetRuiRenderFramebuffer());
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClearDepth(1.0);
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    shouldUpdateMsaa = msaaFbo != 0;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, colorTexture);
 
@@ -163,11 +246,7 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
         }
     }
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, styleDescSSBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo); 
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D, colorTexture, 0
-    );
+    glBindFramebuffer(GL_FRAMEBUFFER, GetRuiRenderFramebuffer());
     if(glGetError() != GL_NO_ERROR)
         printf("OpenGL error occurred\n");
 
@@ -193,8 +272,8 @@ void RenderFramework_OGL3::DrawIndexed(uint32_t count, uint32_t start, size_t * 
     glUseProgram(shaderProgram);
 	glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_SHORT, (void*)(start * sizeof(uint16_t)));
     glBindVertexArray(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    shouldUpdateMsaa = msaaFbo != 0;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
 }
 
@@ -465,9 +544,6 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
             printf("Shader compile error: %s\n", log);
             return 0;
         }
-        char log[512];
-        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-        printf("Shader compiled %s\n", log);
         return shader;
         };
 
@@ -540,8 +616,50 @@ void RenderFramework_OGL3::RuiLoad(int width, int height)
     RuiReCreatePipeline(width, height);
 }
 
+GLuint RenderFramework_OGL3::GetRuiRenderFramebuffer() const
+{
+    return msaaFbo ? msaaFbo : fbo;
+}
+
+void RenderFramework_OGL3::ResolveRuiFramebuffer()
+{
+    if (!shouldUpdateMsaa || !msaaFbo || !fbo) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFbo);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glBlitFramebuffer(
+        0, 0, viewport.width, viewport.height,
+        0, 0, viewport.width, viewport.height,
+        GL_COLOR_BUFFER_BIT,
+        GL_NEAREST
+    );
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    shouldUpdateMsaa = false;
+}
+
 void RenderFramework_OGL3::RuiReCreatePipeline(int width, int height)
 {
+    msaaSamples = GetSupportedRuiMsaaSamples();
+    shouldUpdateMsaa = false;
+
+    if (msaaFbo) {
+        glDeleteFramebuffers(1, &msaaFbo);
+        msaaFbo = 0;
+    }
+    if (msaaColorTexture) {
+        glDeleteTextures(1, &msaaColorTexture);
+        msaaColorTexture = 0;
+    }
+    if (msaaDepthStencilTexture) {
+        glDeleteTextures(1, &msaaDepthStencilTexture);
+        msaaDepthStencilTexture = 0;
+    }
     if (fbo) {
         glDeleteFramebuffers(1, &fbo);
         fbo = 0;
@@ -590,9 +708,53 @@ void RenderFramework_OGL3::RuiReCreatePipeline(int width, int height)
         GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
         GL_TEXTURE_2D, depthStencilTexture, 0
     );
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (msaaSamples > 1) {
+        glGenTextures(1, &msaaColorTexture);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaColorTexture);
+        glTexImage2DMultisample(
+            GL_TEXTURE_2D_MULTISAMPLE,
+            msaaSamples,
+            GL_RGBA32F,
+            width,
+            height,
+            GL_TRUE
+        );
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+        glGenTextures(1, &msaaDepthStencilTexture);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaDepthStencilTexture);
+        glTexImage2DMultisample(
+            GL_TEXTURE_2D_MULTISAMPLE,
+            msaaSamples,
+            GL_DEPTH24_STENCIL8,
+            width,
+            height,
+            GL_TRUE
+        );
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+        glGenFramebuffers(1, &msaaFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, msaaFbo);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D_MULTISAMPLE, msaaColorTexture, 0
+        );
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+            GL_TEXTURE_2D_MULTISAMPLE, msaaDepthStencilTexture, 0
+        );
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+        assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 
 	viewport.x = 0;
 	viewport.y = 0;
@@ -634,12 +796,13 @@ void RenderFramework_OGL3::RuiReCreatePipeline(int width, int height)
 
 void* RenderFramework_OGL3::GetTextureView(size_t id)
 {
-	return (void*)textures[id].id;
+	return reinterpret_cast<void*>(static_cast<std::uintptr_t>(textures[id].id));
 }
 
 void* RenderFramework_OGL3::GetRuiView()
 {
-	return (void*)colorTexture;
+    ResolveRuiFramebuffer();
+	return reinterpret_cast<void*>(static_cast<std::uintptr_t>(colorTexture));
 }
 
 void* RenderFramework_OGL3::GetWindow()

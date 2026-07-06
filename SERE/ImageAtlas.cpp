@@ -245,7 +245,6 @@ ImageAtlas::ImageAtlas(fs::path& jsonName, size_t atlasIndex):
 			renderOff["unkX"].GetFloat(),
 			renderOff["unkY"].GetFloat()
 		);
-	
 
 		renderOffsets.push_back(offset);
 	}

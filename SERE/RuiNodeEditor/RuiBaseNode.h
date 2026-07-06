@@ -40,6 +40,7 @@ protected:
 		}
 	}
 	FloatVariable getInNumeric(const char* id);
+	MathVariable getInMath(const char* id);
 	
 };
 
@@ -84,3 +85,4 @@ template<class T> NodeType CreateNodeType() {
 
 
 bool isPinNumeric(const std::type_info& out, const std::type_info& in);
+bool isPinMath(const std::type_info& out, const std::type_info& in);

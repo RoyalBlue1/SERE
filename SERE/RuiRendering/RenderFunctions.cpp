@@ -22,8 +22,8 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	__m128 v13; // xmm11
 	uint32_t v14; // rcx
 	int16_t assetIndex2; // si
-	int64_t atlasIndex; // r11
-	int16_t assetIndex; // r15
+	size_t atlasIndex; // r11
+	uint16_t assetIndex; // r15
 	int16_t flags; // r10
 	Asset_t a7; // rdi
 	uint32_t v20; // rcx
@@ -95,18 +95,26 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	v14 = input.mainAsset.hash;
 	if(v14== INVALID_ASSET)
 		return false;
+	const auto primaryAssetIt = imageAssetMap.find(v14);
+	if (primaryAssetIt == imageAssetMap.end())
+		return false;
+	const Asset_t& primaryAsset = primaryAssetIt->second;
 	assetIndex2 = -1;
-	atlasIndex = imageAssetMap[v14].atlasIndex;//g_AssetIndexData[v14].atlasIndex;
-	assetIndex = imageAssetMap[v14].imageIndex;//g_AssetIndexData[v14].assetIndex;
-	flags = input.flags | (uint8_t)imageAssetMap[v14].flags;//(unsigned __int8)g_AssetIndexData[v14].byte7;
-	a7 = imageAssetMap[v14];
+	atlasIndex = primaryAsset.atlasIndex;//g_AssetIndexData[v14].atlasIndex;
+	assetIndex = static_cast<uint16_t>(primaryAsset.imageIndex);//g_AssetIndexData[v14].assetIndex;
+	flags = static_cast<uint16_t>(input.flags) | (uint8_t)primaryAsset.flags;//(unsigned __int8)g_AssetIndexData[v14].byte7;
+	a7 = primaryAsset;
 	v20 = input.maskAsset.hash;
 	if (v20 != INVALID_ASSET)
 	{
-		if (atlasIndex != imageAssetMap[v20].atlasIndex)//g_AssetIndexData[v20].atlasIndex)
+		const auto maskAssetIt = imageAssetMap.find(v20);
+		if (maskAssetIt == imageAssetMap.end())
+			return false;
+		const Asset_t& maskAsset = maskAssetIt->second;
+		if (atlasIndex != maskAsset.atlasIndex)//g_AssetIndexData[v20].atlasIndex)
 			return 0;
-		assetIndex2 = imageAssetMap[v20].imageIndex;//g_AssetIndexData[v20].assetIndex;
-		flags |= 4 * (uint8_t)imageAssetMap[v20].flags;//g_AssetIndexData[v20].byte7;
+		assetIndex2 = static_cast<int16_t>(static_cast<uint16_t>(maskAsset.imageIndex));//g_AssetIndexData[v20].assetIndex;
+		flags |= 4 * (uint8_t)maskAsset.flags;//g_AssetIndexData[v20].byte7;
 	}
 
 
@@ -137,7 +145,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 		return false;
 
 	//pixelBufferElementCount = a4->pixelBufferElementCount;
-	quad.assetIndex = assetIndex;
+	quad.assetIndex = static_cast<int16_t>(assetIndex);
 	quad.assetIndex2 = assetIndex2;
 	quad.flags = flags;
 	quad.styleDescriptorIndex = proto.styleDescriptor.size();// + pixelBufferElementCount;
@@ -166,6 +174,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	}
 	else
 	{
+		const uint16_t maskAssetIndex = static_cast<uint16_t>(assetIndex2);
 		maskRotation = _mm_set1_ps( input.maskRotation.value);
 
 		maskCenter = _mm_set_ps(0, 0, input.maskCenter.value.y,input.maskCenter.value.x);
@@ -181,7 +190,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 
 		maskSize = _mm_set_ps(0, 0, input.maskSize.value.y,input.maskSize.value.x);
 
-		v51 = _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[assetIndex].m128_10, imageAtlases[atlasIndex].offsets[assetIndex2].m128_10, _MM_SHUFFLE(3, 2, 3, 2));
+		v51 = _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[assetIndex].m128_10, imageAtlases[atlasIndex].offsets[maskAssetIndex].m128_10, _MM_SHUFFLE(3, 2, 3, 2));
 		v52 = _mm_sub_ps(v47, _mm_cvtepi32_ps(v48));
 		v53 = _mm_add_ps(_mm_mul_ps(_mm_movelh_ps(maskCenter, maskCenter), texSize), texMins);
 		v54 = _mm_mul_ps(v52, v52);
@@ -245,7 +254,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 			v51);
 
 
-		v59 = _mm_add_ps(v57, _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[assetIndex2].m128_10, _mm_setzero_ps(), _MM_SHUFFLE(1, 0, 1, 0)));
+		v59 = _mm_add_ps(v57, _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[maskAssetIndex].m128_10, _mm_setzero_ps(), _MM_SHUFFLE(1, 0, 1, 0)));
 	}
 
 	quad.xUvVector = _mm_movelh_ps(v42, v58);
@@ -553,7 +562,7 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 
 	assetIndex = imageAssetMap[assetHash].imageIndex;//g_AssetIndexData[v16].assetIndex;
 	//pixelBufferElementCount = a4->pixelBufferElementCount;
-	v22 = data.flags | imageAssetMap[assetHash].flags;
+	v22 = (uint16_t)data.flags | (uint8_t)imageAssetMap[assetHash].flags;
 	quad.assetIndex = assetIndex;
 	quad.flags = v22;
 	quad.styleDescriptorIndex = proto.styleDescriptor.size();// + pixelBufferElementCount;
@@ -659,8 +668,8 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 		v56 = _mm_shuffle_ps(v56,v56, _MM_SHUFFLE(1,0,3,2));
 		v57 = _mm_shuffle_ps(v57,v56, _MM_SHUFFLE(1,0,3,2));
 	}
-	*(__m128 *)&quad.vert[0][0] = v56;
-	*(__m128 *)&quad.vert[2][0] = v57;
+	_mm_storeu_ps(&quad.vert[0][0], v56);
+	_mm_storeu_ps(&quad.vert[2][0], v57);
 	proto.AddQuad(quad);
 	return true;
 }
@@ -1291,8 +1300,8 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 					v154 = _mm_shuffle_ps(v154, v154, _MM_SHUFFLE(1, 0, 3, 2));
 					v153 = _mm_shuffle_ps(v153, v153, _MM_SHUFFLE(1, 0, 3, 2));
 				}
-				*(__m128*)& quad.vert[0][0] = v154;
-				*(__m128*)& quad.vert[2][0] = v153;
+				_mm_storeu_ps(&quad.vert[0][0], v154);
+				_mm_storeu_ps(&quad.vert[2][0], v153);
 				proto.AddQuad(quad);
 				v101 = v183;
 				v112 = v139;
