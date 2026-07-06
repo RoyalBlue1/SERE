@@ -57,6 +57,25 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
+class ConditionalValueNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Conditional (Any)";
+	static inline std::string category = "Conditionals";
+private:
+
+
+public:
+	explicit ConditionalValueNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit ConditionalValueNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	bool CanCreateLink(ImFlow::Pin* pin, ImFlow::Pin* other) override;
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
 class EqualFloatNode : public RuiBaseNode
 {
 public:

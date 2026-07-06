@@ -393,6 +393,12 @@ namespace ImFlow
         if (!m_proto->CanCreateLink(other->getProto())) // Check Filter
             return;
 
+        if (!m_parent->CanCreateLink(this, other))
+            return;
+
+        if (!other->getParent()->CanCreateLink(other, this))
+            return;
+
         m_link = std::make_shared<Link>(other, this, (*m_inf));
         other->setLink(m_link);
         (*m_inf)->addLink(m_link);
@@ -418,6 +424,9 @@ namespace ImFlow
     void OutPin<T>::createLink(ImFlow::Pin *other)
     {
         if (other == this || other->getType() == PinType_Output)
+            return;
+
+        if (!m_parent->CanCreateLink(this, other))
             return;
 
         other->createLink(this);
