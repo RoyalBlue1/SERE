@@ -353,7 +353,7 @@ int main(int argc, char** argv)
                 }
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
-					is_exporting = true;
+					          is_exporting = true;
                 }
                 ImGui::EndDisabled();
                 ImGui::EndMenu();

@@ -413,14 +413,17 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 		if (!mINF.getNodes().contains(rightId))continue;
 		auto left = mINF.getNodes()[leftId];
 		auto right = mINF.getNodes()[rightId];
-		if (leftPinName == "Vector2" && FindPinByName(left->getOuts(), "Vector2 Res"))
+		auto hasOutPin = [](const std::shared_ptr<ImFlow::BaseNode>& node, const std::string& name) {
+			for (auto& pin : node->getOuts()) {
+				if (pin->getName() == name)
+					return true;
+			}
+			return false;
+		};
+		if (leftPinName == "Vector2" && hasOutPin(left, "Vector2 Res"))
 			leftPinName = "Vector2 Res";
-		if (leftPinName == "Vector3" && FindPinByName(left->getOuts(), "Vector3 Res"))
+		if (leftPinName == "Vector3" && hasOutPin(left, "Vector3 Res"))
 			leftPinName = "Vector3 Res";
-
-		ImFlow::Pin* leftPin = FindPinByName(left->getOuts(), leftPinName);
-		ImFlow::Pin* rightPin = FindPinByName(right->getIns(), rightPinName);
-		if (!leftPin || !rightPin)continue;
 
 		leftPin->createLink(rightPin);
 
