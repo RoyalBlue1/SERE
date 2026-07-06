@@ -353,9 +353,18 @@ int main(int argc, char** argv)
                 }
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
-					is_exporting = true;
+					          is_exporting = true;
                 }
                 ImGui::EndDisabled();
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Copy")) {
+                    nodeEdit.CopyNodes();
+                }
+                if (ImGui::MenuItem("Paste")) {
+                    nodeEdit.PasteNodes();
+                }
                 ImGui::EndMenu();
             }
             if(ImGui::MenuItem("Settings")) {
@@ -406,6 +415,20 @@ int main(int argc, char** argv)
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
+
+       // Copy/paste shortcuts
+      // https://github.com/ocornut/imgui/issues/456#issuecomment-2290384494
+       ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_C;
+       bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+       if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+           nodeEdit.CopyNodes();
+       }
+       chord = ImGuiMod_Ctrl | ImGuiKey_V;
+       isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
+       if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
+           nodeEdit.PasteNodes();
+       }
+
        g_renderFramework->ImGuiEndFrame();
     }
 
