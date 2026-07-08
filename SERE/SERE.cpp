@@ -406,6 +406,16 @@ int main(int argc, char** argv)
         }
         render.EndFrame();
         render.DrawImage();
+
+       const bool isEditingWidget = ImGui::GetIO().WantTextInput || ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused();
+       if (assetsLoaded && !isEditingWidget) {
+           if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_C, ImGuiInputFlags_RouteGlobal)) {
+               nodeEdit.CopyNodes();
+           }
+           if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_V, ImGuiInputFlags_RouteGlobal)) {
+               nodeEdit.PasteNodes();
+           }
+       }
         
        //ImPlot::ShowDemoWindow();
        // Rendering
@@ -415,19 +425,6 @@ int main(int argc, char** argv)
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-
-       // Copy/paste shortcuts
-      // https://github.com/ocornut/imgui/issues/456#issuecomment-2290384494
-       ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_C;
-       bool isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
-       if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
-           nodeEdit.CopyNodes();
-       }
-       chord = ImGuiMod_Ctrl | ImGuiKey_V;
-       isRouted = ImGui::GetShortcutRoutingData(chord)->RoutingCurr != ImGuiKeyOwner_NoOwner;
-       if (!isRouted && ImGui::IsKeyChordPressed(chord)) {
-           nodeEdit.PasteNodes();
-       }
 
        g_renderFramework->ImGuiEndFrame();
     }
