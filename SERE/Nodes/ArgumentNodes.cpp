@@ -424,14 +424,14 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 }
 
 void ColorArgNode::draw() {
-	ImGui::PushItemWidth(90);
+	ImGui::PushItemWidth(180);
 	ImGui::InputText("Name",&argName);
 
 	std::any& any = render.arguments[argName];
 	Color val = Color(1.f,1.f,1.f,1.f);
 	if(any.type()==typeid(Color))
 		val = std::any_cast<Color>(any);
-	ImGui::ColorPicker4("Default Value",&val.red);
+	ImGui::ColorEdit4("Default Value",&val.red);
 	render.arguments[argName] = val;
 	ImGui::PopItemWidth();
 }

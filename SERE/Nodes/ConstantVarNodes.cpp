@@ -291,8 +291,8 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 }
 
 void ColorVarNode::draw() {
-	ImGui::PushItemWidth(90);
-	ImGui::ColorPicker4("Value",value);
+	ImGui::PushItemWidth(180);
+	ImGui::ColorEdit4("Value", value);
 	ImGui::PopItemWidth();
 }
 
