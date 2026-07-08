@@ -4,6 +4,97 @@
 #include "CustomImGuiWidgets.h"
 
 
+namespace {
+
+template<typename T>
+T GetArgumentValue(RenderInstance& render, const std::string& argName, const T& fallback) {
+	if (render.arguments.contains(argName) && render.arguments[argName].type() == typeid(T))
+		return std::any_cast<T>(render.arguments[argName]);
+	return fallback;
+}
+
+void AddVector2Default(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator, const Vector2& val) {
+	rapidjson::Value defaultValue(rapidjson::kObjectType);
+	defaultValue.AddMember("X", val.x, allocator);
+	defaultValue.AddMember("Y", val.y, allocator);
+	
+	obj.AddMember("DefaultValue", defaultValue, allocator);
+}
+
+void AddVector3Default(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator, const Vector3& val) {
+	rapidjson::Value defaultValue(rapidjson::kObjectType);
+	defaultValue.AddMember("X", val.x, allocator);
+	defaultValue.AddMember("Y", val.y, allocator);
+	defaultValue.AddMember("Z", val.z, allocator);
+	obj.AddMember("DefaultValue", defaultValue, allocator);
+}
+
+void AddColorDefault(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator, const Color& val) {
+	rapidjson::Value defaultValue(rapidjson::kObjectType);
+	defaultValue.AddMember("Red", val.red, allocator);
+	defaultValue.AddMember("Green", val.green, allocator);
+	defaultValue.AddMember("Blue", val.blue, allocator);
+	defaultValue.AddMember("Alpha", val.alpha, allocator);
+	obj.AddMember("DefaultValue", defaultValue, allocator);
+}
+
+void RestoreIntDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsInt())
+		render.arguments[argName] = obj["DefaultValue"].GetInt();
+}
+
+void RestoreBoolDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (!obj.HasMember("DefaultValue"))
+		return;
+	if (obj["DefaultValue"].IsBool())
+		render.arguments[argName] = static_cast<int>(obj["DefaultValue"].GetBool());
+	else if (obj["DefaultValue"].IsInt())
+		render.arguments[argName] = obj["DefaultValue"].GetInt();
+}
+
+void RestoreFloatDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsNumber())
+		render.arguments[argName] = obj["DefaultValue"].GetFloat();
+}
+
+void RestoreStringDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsString())
+		render.arguments[argName] = std::string(obj["DefaultValue"].GetString());
+}
+
+void RestoreVector2Default(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
+		return;
+	const rapidjson::Value& val = obj["DefaultValue"];
+	if (val.HasMember("X") && val["X"].IsNumber() && val.HasMember("Y") && val["Y"].IsNumber())
+		render.arguments[argName] = Vector2(val["X"].GetFloat(), val["Y"].GetFloat());
+}
+
+void RestoreVector3Default(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
+		return;
+	const rapidjson::Value& val = obj["DefaultValue"];
+	if (val.HasMember("X") && val["X"].IsNumber() && val.HasMember("Y") && val["Y"].IsNumber() && val.HasMember("Z") && val["Z"].IsNumber())
+		render.arguments[argName] = Vector3(val["X"].GetFloat(), val["Y"].GetFloat(), val["Z"].GetFloat());
+}
+
+void RestoreColorDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
+		return;
+	const rapidjson::Value& val = obj["DefaultValue"];
+	if (val.HasMember("Red") && val["Red"].IsNumber() &&
+		val.HasMember("Green") && val["Green"].IsNumber() &&
+		val.HasMember("Blue") && val["Blue"].IsNumber() &&
+		val.HasMember("Alpha") && val["Alpha"].IsNumber()) {
+		render.arguments[argName] = Color(
+			val["Red"].GetFloat(),
+			val["Green"].GetFloat(),
+			val["Blue"].GetFloat(),
+			val["Alpha"].GetFloat());
+	}
+}
+}
+
 
 IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
@@ -20,6 +111,7 @@ IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjs
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreIntDefault(render, argName, obj);
 
 }
 
@@ -42,6 +134,7 @@ void IntArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapi
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<int>(render, argName, 0), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -69,6 +162,7 @@ BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapid
 	
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreBoolDefault(render, argName, obj);
 
 }
 
@@ -93,6 +187,7 @@ void BoolArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rap
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<int>(render, argName, 0) != 0, allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -120,6 +215,7 @@ FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreFloatDefault(render, argName, obj);
 
 }
 
@@ -141,6 +237,7 @@ void FloatArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<float>(render, argName, 0.f), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -168,6 +265,7 @@ GametimeArgNode::GametimeArgNode(RenderInstance& rend,ImFlow::StyleManager& styl
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreFloatDefault(render, argName, obj);
 
 }
 
@@ -189,6 +287,7 @@ void GametimeArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<float>(render, argName, 0.f), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -219,6 +318,7 @@ Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreVector2Default(render, argName, obj);
 
 }
 
@@ -238,6 +338,7 @@ void Float2ArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	AddVector2Default(obj, allocator, GetArgumentValue<Vector2>(render, argName, Vector2(0.f, 0.f)));
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -268,6 +369,7 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreVector3Default(render, argName, obj);
 
 }
 
@@ -287,6 +389,7 @@ void Float3ArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	AddVector3Default(obj, allocator, GetArgumentValue<Vector3>(render, argName, Vector3(0.f, 0.f, 0.f)));
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -316,6 +419,7 @@ ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreColorDefault(render, argName, obj);
 
 }
 
@@ -336,6 +440,7 @@ void ColorArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	AddColorDefault(obj, allocator, GetArgumentValue<Color>(render, argName, Color(1.f, 1.f, 1.f, 1.f)));
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -366,6 +471,7 @@ StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreStringDefault(render, argName, obj);
 }
 
 void StringArgNode::draw() {
@@ -384,6 +490,7 @@ void StringArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, r
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<std::string>(render, argName, ""), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -428,6 +535,7 @@ AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreStringDefault(render, argName, obj);
 
 }
 
@@ -451,6 +559,7 @@ void AssetArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<std::string>(render, argName, "white"), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
@@ -492,6 +601,7 @@ UiHandleArgNode::UiHandleArgNode(RenderInstance& rend,ImFlow::StyleManager& styl
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
+	RestoreStringDefault(render, argName, obj);
 
 }
 
@@ -515,6 +625,7 @@ void UiHandleArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	obj.AddMember("Name",name,allocator);
 	obj.AddMember("Category",category,allocator);
 	obj.AddMember("ArgName",argName,allocator);
+	obj.AddMember("DefaultValue", GetArgumentValue<std::string>(render, argName, "white"), allocator);
 	RuiBaseNode::Serialize(obj,allocator);
 }
 
