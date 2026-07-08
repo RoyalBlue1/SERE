@@ -114,7 +114,6 @@ RenderFramework_OGL3::RenderFramework_OGL3()
         const char* error = reinterpret_cast<const char*>(glewGetErrorString(glewError));
         std::string message = std::string("Error initializing GLEW: ") + (error ? error : "unknown GLEW error");
         SDL_Log("%s", message.c_str());
-        throw std::runtime_error(message);
     }
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GetSupportedRuiMsaaSamples());
 
