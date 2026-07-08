@@ -24,6 +24,7 @@ private:
 	RenderInstance& render;
 
 	std::map<std::string,NodeCategory> nodeTypes;
+	rapidjson::Document m_clipboard;
 public:
 	NodeEditor(RenderInstance& rend);
 	void SetStyles(ImFlow::StyleManager& styles);
@@ -36,6 +37,8 @@ public:
 	void Export();
 	void ExportToPath(const fs::path& path);
 	void Clear();
+	void CopyNodes();
+	void PasteNodes();
 	std::optional<std::filesystem::path> currentFilePath;
 	template<class T> void AddNodeType() {
 		

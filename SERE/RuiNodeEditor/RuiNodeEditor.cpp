@@ -19,10 +19,41 @@
 #include "ThirdParty/rapidjson/stringbuffer.h"
 #include <SDL3/SDL_dialog.h>
 #include <SDL3/SDL.h>
+#include <random>
+#include <set>
 
 #undef GetObject
 
+namespace {
+
+bool TryGetUint64(const rapidjson::Value& obj, const char* name, uint64_t& value) {
+	if (!obj.HasMember(name)) {
+		return false;
+	}
+	const rapidjson::Value& member = obj[name];
+	if (member.IsUint64()) {
+		value = member.GetUint64();
+		return true;
+	}
+	if (member.IsInt64() && member.GetInt64() >= 0) {
+		value = static_cast<uint64_t>(member.GetInt64());
+		return true;
+	}
+	return false;
+}
+
+ImFlow::Pin* FindPinByName(const std::vector<std::shared_ptr<ImFlow::Pin>>& pins, const std::string& name) {
+	for (const auto& pin : pins) {
+		if (pin->getName() == name) {
+			return pin.get();
+		}
+	}
+	return nullptr;
+}
+}
+
 NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
+	m_clipboard.SetObject();
 	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 		RightClickPopup(node);
 	});
@@ -49,6 +80,167 @@ void NodeEditor::Draw() {
 void NodeEditor::Clear() {
 	for (auto& [uid,node] : mINF.getNodes()) {
 		node->destroy();
+	}
+}
+void NodeEditor::CopyNodes() {
+	m_clipboard.SetObject();
+	auto& allocator = m_clipboard.GetAllocator();
+	rapidjson::Value copiedNodes(rapidjson::kArrayType);
+	rapidjson::Value copiedLinks(rapidjson::kArrayType);
+	std::set<ImFlow::NodeUID> selectedNodeIds;
+
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		if (nodePtr->isSelected()) {
+			selectedNodeIds.insert(nodeId);
+		}
+	}
+
+	// Serialize currently selected nodes
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		if (!selectedNodeIds.contains(nodeId)) {
+			continue;
+		}
+
+		std::shared_ptr<RuiBaseNode> baseNode = std::dynamic_pointer_cast<RuiBaseNode>(nodePtr);
+		if (!baseNode) {
+			continue;
+		}
+
+		// Convert node to JSON to preserve its internal state
+		rapidjson::GenericValue<rapidjson::UTF8<>> val;
+		val.SetObject();
+		baseNode->Serialize(val, allocator);
+
+		// Eventually rename arguments
+		if (val.HasMember("ArgName") && val["ArgName"].IsString()) {
+			val["ArgName"].SetString(std::format("{}(copy)", val["ArgName"].GetString()), allocator);
+		}
+
+		copiedNodes.PushBack(val, allocator);
+	}
+
+	for (auto& link : mINF.getLinks()) {
+		auto lnk = link.lock();
+		if (!lnk) {
+			continue;
+		}
+
+		const ImFlow::NodeUID leftNodeId = lnk->left()->getParent()->getUID();
+		const ImFlow::NodeUID rightNodeId = lnk->right()->getParent()->getUID();
+		if (!selectedNodeIds.contains(leftNodeId) || !selectedNodeIds.contains(rightNodeId)) {
+			continue;
+		}
+
+		rapidjson::GenericValue<rapidjson::UTF8<>> val;
+		val.SetObject();
+		val.AddMember("LeftNode", static_cast<uint64_t>(leftNodeId), allocator);
+		val.AddMember("LeftPin", lnk->left()->getName(), allocator);
+		val.AddMember("RightNode", static_cast<uint64_t>(rightNodeId), allocator);
+		val.AddMember("RightPin", lnk->right()->getName(), allocator);
+		copiedLinks.PushBack(val, allocator);
+	}
+
+	m_clipboard.AddMember("Nodes", copiedNodes, allocator);
+	m_clipboard.AddMember("Links", copiedLinks, allocator);
+}
+
+void NodeEditor::PasteNodes() {
+	if (!m_clipboard.IsObject() ||
+		!m_clipboard.HasMember("Nodes") || !m_clipboard["Nodes"].IsArray() ||
+		!m_clipboard.HasMember("Links") || !m_clipboard["Links"].IsArray() ||
+		m_clipboard["Nodes"].GetArray().Empty()) {
+		return;
+	}
+
+	std::random_device rd;
+	std::mt19937_64 gen(rd());
+	std::uniform_int_distribution<uint64_t> dis;
+	std::set<ImFlow::NodeUID> newNodeIds;
+	std::map<ImFlow::NodeUID, ImFlow::NodeUID> remappedNodeIds;
+
+	auto generateNodeId = [&]() {
+		ImFlow::NodeUID uid = static_cast<ImFlow::NodeUID>(dis(gen));
+		while (mINF.getNodes().contains(uid) || newNodeIds.contains(uid)) {
+			uid = static_cast<ImFlow::NodeUID>(dis(gen));
+		}
+		return uid;
+	};
+
+	for (auto itr = m_clipboard["Nodes"].Begin(); itr != m_clipboard["Nodes"].End(); itr++) {
+		if (!itr->IsObject()) {
+			continue;
+		}
+		rapidjson::GenericObject node = itr->GetObject();
+		if (!(node.HasMember("Name") && node["Name"].IsString()))continue;
+		if (!(node.HasMember("Category") && node["Category"].IsString()))continue;
+		if (!(node.HasMember("PosX") && node["PosX"].IsNumber()))continue;
+		if (!(node.HasMember("PosY") && node["PosY"].IsNumber()))continue;
+
+		uint64_t sourceId = 0;
+		if (!TryGetUint64(*itr, "Id", sourceId))continue;
+
+		std::string name = node["Name"].GetString();
+		std::string category = node["Category"].GetString();
+		if (!nodeTypes.contains(category))continue;
+		if (!nodeTypes[category].contains(name))continue;
+
+		const ImFlow::NodeUID newId = generateNodeId();
+		rapidjson::Document pasteDoc;
+		pasteDoc.SetObject();
+		rapidjson::Value nodeCopy;
+		nodeCopy.CopyFrom(*itr, pasteDoc.GetAllocator());
+		nodeCopy["Id"].SetUint64(static_cast<uint64_t>(newId));
+		nodeCopy["PosX"].SetFloat(node["PosX"].GetFloat() + 10.0f);
+		nodeCopy["PosY"].SetFloat(node["PosY"].GetFloat() - 10.0f);
+
+		auto newnode = nodeTypes[category][name].RecreateNode(mINF, render, mINF.getStyleManager(), nodeCopy.GetObject());
+		if (!newnode)continue;
+
+		ImVec2 pos;
+		pos.x = nodeCopy["PosX"].GetFloat();
+		pos.y = nodeCopy["PosY"].GetFloat();
+		newnode->setPos(pos);
+
+		remappedNodeIds[static_cast<ImFlow::NodeUID>(sourceId)] = newId;
+		newNodeIds.insert(newId);
+		node["PosX"].SetFloat(pos.x);
+		node["PosY"].SetFloat(pos.y);
+	}
+
+	for (auto itr = m_clipboard["Links"].Begin(); itr != m_clipboard["Links"].End(); itr++) {
+		if (!itr->IsObject()) {
+			continue;
+		}
+		rapidjson::GenericObject link = itr->GetObject();
+		if (!(link.HasMember("LeftPin") && link["LeftPin"].IsString()))continue;
+		if (!(link.HasMember("RightPin") && link["RightPin"].IsString()))continue;
+
+		uint64_t leftSourceId = 0;
+		uint64_t rightSourceId = 0;
+		if (!TryGetUint64(*itr, "LeftNode", leftSourceId))continue;
+		if (!TryGetUint64(*itr, "RightNode", rightSourceId))continue;
+		if (!remappedNodeIds.contains(static_cast<ImFlow::NodeUID>(leftSourceId)))continue;
+		if (!remappedNodeIds.contains(static_cast<ImFlow::NodeUID>(rightSourceId)))continue;
+
+		const ImFlow::NodeUID leftNodeId = remappedNodeIds[static_cast<ImFlow::NodeUID>(leftSourceId)];
+		const ImFlow::NodeUID rightNodeId = remappedNodeIds[static_cast<ImFlow::NodeUID>(rightSourceId)];
+		if (!mINF.getNodes().contains(leftNodeId))continue;
+		if (!mINF.getNodes().contains(rightNodeId))continue;
+
+		std::string leftPinName = link["LeftPin"].GetString();
+		std::string rightPinName = link["RightPin"].GetString();
+		auto left = mINF.getNodes()[leftNodeId];
+		auto right = mINF.getNodes()[rightNodeId];
+		ImFlow::Pin* leftPin = FindPinByName(left->getOuts(), leftPinName);
+		ImFlow::Pin* rightPin = FindPinByName(right->getIns(), rightPinName);
+		if (!leftPin || !rightPin)continue;
+
+		leftPin->createLink(rightPin);
+	}
+
+	// Select only pasted nodes
+	for (auto& [nodeId, nodePtr] : mINF.getNodes()) {
+		nodePtr->selected(newNodeIds.contains(nodePtr->getUID()));
 	}
 }
 
@@ -173,6 +365,10 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 		printf("Parse Error: %d\n", doc.GetParseError());
 		return;
 	}
+	if (!doc.IsObject()) {
+		printf("JSON root is not object %s\n", path.string().c_str());
+		return;
+	}
 	rapidjson::GenericObject root = doc.GetObject();
 	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray()))return;
 	if (!(root.HasMember("Links") && root["Links"].IsArray()))return;
@@ -204,12 +400,12 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 	for (auto itr = links.Begin(); itr != links.End(); itr++) {
 		if (!itr->IsObject())continue;
 		rapidjson::GenericObject link = itr->GetObject();
-		if (!(link.HasMember("LeftNode") && link["LeftNode"].IsUint64()))continue;
 		if (!(link.HasMember("LeftPin") && link["LeftPin"].IsString()))continue;
-		if (!(link.HasMember("RightNode") && link["RightNode"].IsUint64()))continue;
 		if (!(link.HasMember("RightPin") && link["RightPin"].IsString()))continue;
-		uint64_t leftId = link["LeftNode"].GetUint64();
-		uint64_t rightId = link["RightNode"].GetUint64();
+		uint64_t leftId = 0;
+		uint64_t rightId = 0;
+		if (!TryGetUint64(*itr, "LeftNode", leftId))continue;
+		if (!TryGetUint64(*itr, "RightNode", rightId))continue;
 		std::string leftPinName = link["LeftPin"].GetString();
 		std::string rightPinName = link["RightPin"].GetString();
 
@@ -228,8 +424,10 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 			leftPinName = "Vector2 Res";
 		if (leftPinName == "Vector3" && hasOutPin(left, "Vector3 Res"))
 			leftPinName = "Vector3 Res";
-
-		left->outPin(leftPinName)->createLink(right->inPin(rightPinName));
+		ImFlow::Pin* leftPin = FindPinByName(left->getOuts(), leftPinName);
+		ImFlow::Pin* rightPin = FindPinByName(right->getIns(), rightPinName);
+		if (!leftPin || !rightPin)continue;
+		leftPin->createLink(rightPin);
 
 	}
 }

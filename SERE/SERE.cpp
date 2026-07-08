@@ -353,9 +353,18 @@ int main(int argc, char** argv)
                 }
                 if (ImGui::MenuItem("Export")) {
                     nodeEdit.Export();
-					is_exporting = true;
+					          is_exporting = true;
                 }
                 ImGui::EndDisabled();
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Copy")) {
+                    nodeEdit.CopyNodes();
+                }
+                if (ImGui::MenuItem("Paste")) {
+                    nodeEdit.PasteNodes();
+                }
                 ImGui::EndMenu();
             }
             if(ImGui::MenuItem("Settings")) {
@@ -397,6 +406,16 @@ int main(int argc, char** argv)
         }
         render.EndFrame();
         render.DrawImage();
+
+       const bool isEditingWidget = ImGui::GetIO().WantTextInput || ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused();
+       if (assetsLoaded && !isEditingWidget) {
+           if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_C, ImGuiInputFlags_RouteGlobal)) {
+               nodeEdit.CopyNodes();
+           }
+           if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_V, ImGuiInputFlags_RouteGlobal)) {
+               nodeEdit.PasteNodes();
+           }
+       }
         
        //ImPlot::ShowDemoWindow();
        // Rendering
@@ -406,6 +425,7 @@ int main(int argc, char** argv)
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
+
        g_renderFramework->ImGuiEndFrame();
     }
 
