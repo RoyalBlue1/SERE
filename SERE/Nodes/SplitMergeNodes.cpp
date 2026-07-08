@@ -357,7 +357,7 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,r.GetFormattedName(proto), in.value.red));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.red",typeName,r.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.red;",typeName,r.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = g.name;
@@ -367,7 +367,7 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,g.GetFormattedName(proto), in.value.green));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.green",typeName,g.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.green;",typeName,g.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = b.name;
@@ -377,7 +377,7 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,b.GetFormattedName(proto), in.value.blue));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.blue",typeName,b.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.blue;",typeName,b.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 	ele.identifier = a.name;
@@ -387,7 +387,7 @@ void SplitColorNode::Export(RuiExportPrototype& proto) {
 		if(in.IsConstant())
 			proto.codeLines.push_back(std::format("{} {} = {};",typeName,a.GetFormattedName(proto), in.value.alpha));
 		else
-			proto.codeLines.push_back(std::format("{} {} = {}.alpha",typeName,a.GetFormattedName(proto), in.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} {} = {}.alpha;",typeName,a.GetFormattedName(proto), in.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }
