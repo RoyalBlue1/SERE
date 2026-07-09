@@ -24,8 +24,6 @@ namespace {
         fs::path exportOutputPath;
         std::optional<int> width;
         std::optional<int> height;
-        std::optional<std::string> gamePath;
-        std::optional<std::string> customRpakPath;
         std::string error;
     };
 
@@ -150,18 +148,6 @@ namespace {
 
                 options.width = width;
                 options.height = height;
-                continue;
-            }
-
-            if (arg == "--game-path" || arg == "--custom-rpak-path") {
-                std::string value;
-                if (!ReadValueOption(argc, argv, i, arg, value, options.error))
-                    return options;
-
-                if (arg == "--game-path")
-                    options.gamePath = value;
-                else
-                    options.customRpakPath = value;
                 continue;
             }
 

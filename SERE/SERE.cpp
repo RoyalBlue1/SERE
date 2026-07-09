@@ -297,8 +297,6 @@ static int RunGraphExportCommand(const CommandLineOptions& options)
     const auto settingsSize = settings.GetRuiSize();
     const int width = options.width.value_or(settingsSize.width);
     const int height = options.height.value_or(settingsSize.height);
-    const std::string gamePath = options.gamePath.value_or(settings.GetTitanfall2Path());
-    const std::string customRpakPath = options.customRpakPath.value_or(settings.GetCustomRpakPath());
 
     g_renderFramework = std::make_unique<HeadlessRenderFramework>();
 
