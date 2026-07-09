@@ -253,7 +253,7 @@ void MergeFloat3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 }
 
 void MergeFloat3Node::Export(RuiExportPrototype& proto) {
-	const auto& out = getOut<Float2Variable>("Out")->val();
+	const auto& out = getOut<Float3Variable>("Out")->val();
 	const auto& x = getInNumeric("X");
 	const auto& y = getInNumeric("Y");
 	const auto& z = getInNumeric("Z");
