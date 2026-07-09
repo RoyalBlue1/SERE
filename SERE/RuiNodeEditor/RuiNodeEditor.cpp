@@ -350,12 +350,12 @@ void NodeEditor::Deserialize() {
 
 }
 
-void NodeEditor::DeserializeFromPath(const fs::path& path)
+bool NodeEditor::DeserializeFromPath(const fs::path& path)
 {
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		printf("Error Opening JSON File %s\n", path.string().c_str());
-		return;
+		return false;
 	}
 	rapidjson::IStreamWrapper wrap(file);
 	rapidjson::Document doc;
@@ -363,15 +363,15 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 	if (doc.HasParseError()) {
 		printf("Error in JSON File %s\n", path.string().c_str());
 		printf("Parse Error: %d\n", doc.GetParseError());
-		return;
+		return false;
 	}
 	if (!doc.IsObject()) {
 		printf("JSON root is not object %s\n", path.string().c_str());
-		return;
+		return false;
 	}
 	rapidjson::GenericObject root = doc.GetObject();
-	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray()))return;
-	if (!(root.HasMember("Links") && root["Links"].IsArray()))return;
+	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray()))return false;
+	if (!(root.HasMember("Links") && root["Links"].IsArray()))return false;
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
 		if (!itr->IsObject()) {
@@ -430,6 +430,7 @@ void NodeEditor::DeserializeFromPath(const fs::path& path)
 		leftPin->createLink(rightPin);
 
 	}
+	return true;
 }
 
 void NodeEditor::Export() {
