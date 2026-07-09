@@ -301,14 +301,9 @@ static int RunGraphExportCommand(const CommandLineOptions& options)
     const std::string customRpakPath = options.customRpakPath.value_or(settings.GetCustomRpakPath());
 
     g_renderFramework = std::make_unique<HeadlessRenderFramework>();
-    if (!ReloadAssets(gamePath, customRpakPath)) {
-        std::cerr
-            << "Could not load RUI assets. Configure settings.json or pass --game-path and/or --custom-rpak-path.\n";
-        return 1;
-    }
 
     RenderInstance render{ static_cast<float>(width), static_cast<float>(height) };
-    render.ResetFrameState(0.f);
+    render.StartFrame(0.f);
 
     NodeEditor nodeEdit{ render };
     RegisterSereNodeTypes(nodeEdit);
