@@ -370,8 +370,10 @@ bool NodeEditor::DeserializeFromPath(const fs::path& path)
 		return false;
 	}
 	rapidjson::GenericObject root = doc.GetObject();
-	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray())) return false;
-	if (!(root.HasMember("Links") && root["Links"].IsArray())) return false;
+	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray())) 
+		return false;
+	if (!(root.HasMember("Links") && root["Links"].IsArray())) 
+		return false;
 	rapidjson::GenericArray nodes = root["Nodes"].GetArray();
 	for (auto itr = nodes.Begin(); itr != nodes.End(); itr++) {
 		if (!itr->IsObject()) {
