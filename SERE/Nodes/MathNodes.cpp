@@ -1007,10 +1007,14 @@ void ClampNode::draw() {
 	ImGui::Text("Max %f", max.value);
 	ImGui::Text("Val %f", val.value);
 	if (min.value > max.value)
+	{
+		setStyle(styles.GetErrorStyle());
 		ImGui::Text("Error");
-	else
-		ImGui::Text("Res %f", std::clamp(val.value,min.value,max.value));
-
+	}
+	else {
+		setStyle(styles.GetNodeStyle(category));
+		ImGui::Text("Res %f", std::clamp(val.value, min.value, max.value));
+	}
 }
 
 void ClampNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
