@@ -759,7 +759,7 @@ void RenderInstance::sub_F9B80_rev(
 
 
 
-void RenderInstance::StartFrame(float time) {
+void RenderInstance::ResetFrameState(float time) {
 	segments.clear();
 	verts.clear();
 	indices.clear();
@@ -790,6 +790,10 @@ void RenderInstance::StartFrame(float time) {
 	__m128 inputSize = _mm_mul_ps(v19, _mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 0, 0)));
 	transformResults.push_back(TransformResult(directionVector,position,inputSize,transformHashes[2]));
 	styleDescriptor.clear();
+}
+
+void RenderInstance::StartFrame(float time) {
+	ResetFrameState(time);
 	g_renderFramework->RuiClearFrame();
 }
 

@@ -212,6 +212,7 @@ public:
 
 
 
+    void ResetFrameState(float time);
     void StartFrame(float time);
     void EndFrame();
 

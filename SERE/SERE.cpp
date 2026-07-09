@@ -1,12 +1,5 @@
 // SERE.cpp : Defines the entry point for the application.
 //
-
-#include <fstream>
-#include <streambuf>
-#include <execution>
-#include <system_error>
-
-#include "SERE.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_impl_win32.h"
@@ -29,6 +22,20 @@
 #include "Settings.h"
 #include "PakLoading/cpakfile.h"
 
+#include "SERE.h"
+
+
+void RegisterSereNodeTypes(NodeEditor& nodeEdit)
+{
+    AddArgumentNodes(nodeEdit);
+    AddConstantVarNodes(nodeEdit);
+    AddMathNodes(nodeEdit);
+    AddGlobalNodes(nodeEdit);
+    AddRenderNodes(nodeEdit);
+    AddSplitMergeNodes(nodeEdit);
+    AddTransformNodes(nodeEdit);
+    AddConditionalNodes(nodeEdit);
+}
 
 static bool IsExistingDirectory(const fs::path& path)
 {
@@ -265,9 +272,78 @@ bool ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
     return true;
 }
 
+static int RunGraphExportCommand(const CommandLineOptions& options)
+{
+    std::error_code error;
+    if (!fs::exists(options.graphInputPath, error) || !fs::is_regular_file(options.graphInputPath, error)) {
+        std::cerr << "Graph input does not exist: " << options.graphInputPath.string() << "\n";
+        return 1;
+    }
+
+    fs::path outputPath = options.exportOutputPath;
+    if (outputPath.extension().empty())
+        outputPath.replace_extension(".ruip");
+
+    const fs::path outputDirectory = outputPath.parent_path();
+    if (!outputDirectory.empty()) {
+        fs::create_directories(outputDirectory, error);
+        if (error) {
+            std::cerr << "Could not create output directory: " << outputDirectory.string() << "\n";
+            return 1;
+        }
+    }
+
+    Settings settings;
+    const auto settingsSize = settings.GetRuiSize();
+    const int width = options.width.value_or(settingsSize.width);
+    const int height = options.height.value_or(settingsSize.height);
+    const std::string gamePath = options.gamePath.value_or(settings.GetTitanfall2Path());
+    const std::string customRpakPath = options.customRpakPath.value_or(settings.GetCustomRpakPath());
+
+    g_renderFramework = std::make_unique<HeadlessRenderFramework>();
+    if (!ReloadAssets(gamePath, customRpakPath)) {
+        std::cerr
+            << "Could not load RUI assets. Configure settings.json or pass --game-path and/or --custom-rpak-path.\n";
+        return 1;
+    }
+
+    RenderInstance render{ static_cast<float>(width), static_cast<float>(height) };
+    render.ResetFrameState(0.f);
+
+    NodeEditor nodeEdit{ render };
+    RegisterSereNodeTypes(nodeEdit);
+    if (!nodeEdit.DeserializeFromPath(options.graphInputPath)) {
+        std::cerr << "Could not deserialize graph input: " << options.graphInputPath.string() << "\n";
+        return 1;
+    }
+    nodeEdit.ExportToPath(outputPath);
+
+    if (!fs::exists(outputPath, error)) {
+        std::cerr << "Export failed: " << outputPath.string() << " was not written.\n";
+        return 1;
+    }
+
+    std::cout << "Exported " << options.graphInputPath.string() << " -> " << outputPath.string() << "\n";
+    return 0;
+}
+
 // Main code
 int main(int argc, char** argv)
 {
+    const CommandLineOptions commandLineOptions = ParseCommandLine(argc, argv);
+    if (!commandLineOptions.error.empty()) {
+        std::cerr << commandLineOptions.error << "\n\n";
+        PrintCommandLineUsage();
+        return 1;
+    }
+
+    if (commandLineOptions.showHelp) {
+        PrintCommandLineUsage();
+        return 0;
+    }
+
+    if (commandLineOptions.exportGraph)
+        return RunGraphExportCommand(commandLineOptions);
 
 
     // Setup Dear ImGui context
@@ -313,14 +389,7 @@ int main(int argc, char** argv)
 
     RenderInstance render{(float)ruiSize.width,(float)ruiSize.height};
     NodeEditor nodeEdit{render};
-    AddArgumentNodes(nodeEdit);
-    AddConstantVarNodes(nodeEdit);
-    AddMathNodes(nodeEdit);
-    AddGlobalNodes(nodeEdit);
-    AddRenderNodes(nodeEdit);
-    AddSplitMergeNodes(nodeEdit);
-    AddTransformNodes(nodeEdit);
-    AddConditionalNodes(nodeEdit);
+    RegisterSereNodeTypes(nodeEdit);
 
     
 
