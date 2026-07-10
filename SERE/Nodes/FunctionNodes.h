@@ -43,10 +43,6 @@ class ProjectionNode : public RuiBaseNode
 public:
 	static inline std::string name = "Project";
 	static inline std::string category = "Functions";
-private:
-
-
-public:
 	explicit ProjectionNode(RenderInstance& prot, ImFlow::StyleManager& style);
 	explicit ProjectionNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
@@ -56,7 +52,19 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
+class ToUpperNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "To Upper";
+	static inline std::string category = "Functions";
+	explicit ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles);
+	explicit ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
 
 
 void AddFunctionNodes(NodeEditor& editor);

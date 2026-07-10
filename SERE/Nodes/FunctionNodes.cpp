@@ -1,5 +1,8 @@
 #include "FunctionNodes.h"
 
+#include <algorithm>
+#include <cctype>
+
 SetNoRenderNode::SetNoRenderNode(RenderInstance& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
@@ -110,10 +113,8 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> RandomFloatNode::GetPinInfo()
 ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<Float2Variable>("Res")->behaviour([this, outName]() {
-
 		return Float2Variable(Vector2(0.5f, 0.5f), name);
-
-		});
+	});
 
 }
 
@@ -156,7 +157,69 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ProjectionNode::GetPinInfo() {
 	return info;
 }
 
+static std::string ToUpper(std::string value)
+{
+	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char character) {
+		return static_cast<char>(std::toupper(character));
+		});
+	return value;
+}
 
+ToUpperNode::ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles)
+	: RuiBaseNode(name, category, GetPinInfo(), prot, styles)
+{
+	std::string outName = Variable::UniqueName();
+	getOut<StringVariable>("Out")->behaviour([this, outName]() {
+		const StringVariable& input = getInVal<StringVariable>("In");
+		return StringVariable(ToUpper(input.value), input.IsConstant() ? "" : outName);
+		});
+}
+
+ToUpperNode::ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj)
+	: ToUpperNode(prot, styles)
+{}
+
+void ToUpperNode::draw()
+{
+}
+
+void ToUpperNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void ToUpperNode::Export(RuiExportPrototype& proto)
+{
+	const StringVariable& out = getOut<StringVariable>("Out")->val();
+	const StringVariable& input = getInVal<StringVariable>("In");
+	if (out.IsConstant())
+		return;
+
+	ExportElement<std::string> element;
+#if _DEBUG
+	element.sourceNodeName = typeid(*this).name();
+#endif
+	element.dependencys = { input.name };
+	element.identifier = out.name;
+	element.callback = [out, input](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = funcs->toUpper(inst, {});", out.GetFormattedName(proto), input.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("const char* {} = funcs->toUpper(inst, {});", out.GetFormattedName(proto), input.GetFormattedName(proto)));
+	};
+	proto.codeElements.push_back(element);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> ToUpperNode::GetPinInfo()
+{
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<StringVariable>>(
+		"In", ImFlow::ConnectionFilter::SameType(), StringVariable("Default Text")));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<StringVariable>>("Out"));
+	return info;
+}
 
 
 void AddFunctionNodes(NodeEditor& editor)
@@ -164,8 +227,6 @@ void AddFunctionNodes(NodeEditor& editor)
 	editor.AddNodeType<SetNoRenderNode>();
 	editor.AddNodeType<RandomFloatNode>();
 	editor.AddNodeType<ProjectionNode>();
+	editor.AddNodeType<ToUpperNode>();
 
 }
-
-
-
