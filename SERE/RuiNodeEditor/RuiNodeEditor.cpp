@@ -371,7 +371,7 @@ bool NodeEditor::DeserializeFromPath(const fs::path& path)
 	}
 	if (!doc.IsObject()) {
 		printf("JSON root is not object %s\n", path.string().c_str());
-		return;
+		return false;
 	}
 	rapidjson::GenericObject root = doc.GetObject();
 	if (!(root.HasMember("Nodes") && root["Nodes"].IsArray())) 
