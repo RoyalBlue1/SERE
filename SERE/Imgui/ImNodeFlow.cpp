@@ -349,7 +349,6 @@ namespace ImFlow {
                 m_dragOut = nullptr;
         }
 
-        updateMarqueeSelection(draw_list);
 
         // Right-click PopUp
         if (m_rightClickPopUp && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
