@@ -240,64 +240,6 @@ namespace ImFlow {
         return ( p + m_context.scroll() ) * m_context.scale() + m_context.origin();
     }
 
-    bool ImNodeFlow::nodeOverlapsMarquee(BaseNode* node, const ImVec2& selectMin, const ImVec2& selectMax)
-    {
-        const ImVec4& padding = node->getStyle()->padding;
-        ImVec2 nodeMin = grid2screen(node->getPos() - ImVec2(padding.x, padding.y));
-        ImVec2 nodeMax = grid2screen(node->getPos() + node->getSize() + ImVec2(padding.z, padding.w));
-
-        return nodeMin.x <= selectMax.x && nodeMax.x >= selectMin.x &&
-               nodeMin.y <= selectMax.y && nodeMax.y >= selectMin.y;
-    }
-
-    void ImNodeFlow::updateMarqueeSelection(ImDrawList* draw_list)
-    {
-        if (!m_marqueeSelecting && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered() &&
-            !m_draggingNode && !m_dragOut && !m_hovering && on_free_space())
-        {
-            m_marqueeSelecting = true;
-            m_marqueeAdditive = ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl);
-            m_marqueeStart = ImGui::GetMousePos();
-            m_marqueeEnd = m_marqueeStart;
-            consumeSingleUseClick();
-        }
-
-        if (!m_marqueeSelecting)
-            return;
-
-        m_marqueeEnd = ImGui::GetMousePos();
-        ImVec2 selectMin(std::min(m_marqueeStart.x, m_marqueeEnd.x), std::min(m_marqueeStart.y, m_marqueeEnd.y));
-        ImVec2 selectMax(std::max(m_marqueeStart.x, m_marqueeEnd.x), std::max(m_marqueeStart.y, m_marqueeEnd.y));
-        bool hasDragged = ImGui::IsMouseDragging(ImGuiMouseButton_Left);
-
-        if (hasDragged || ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-        {
-            for (auto& node : m_nodes)
-            {
-                bool overlaps = nodeOverlapsMarquee(node.second.get(), selectMin, selectMax);
-                if (m_marqueeAdditive)
-                {
-                    if (overlaps)
-                        node.second->selected(true);
-                }
-                else
-                {
-                    node.second->selected(overlaps);
-                }
-                node.second->updatePublicStatus();
-            }
-        }
-
-        if (hasDragged)
-        {
-            draw_list->AddRectFilled(selectMin, selectMax, IM_COL32(87, 155, 185, 45), 2.f);
-            draw_list->AddRect(selectMin, selectMax, IM_COL32(170, 210, 235, 190), 2.f, 0, 1.4f);
-        }
-
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-            m_marqueeSelecting = false;
-    }
-
     void ImNodeFlow::addLink(std::shared_ptr<Link> &link) {
         m_links.push_back(link);
     }
