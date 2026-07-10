@@ -1,0 +1,941 @@
+{
+    "Nodes": [
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 540.0,
+            "Value": 540.0,
+            "PosX": -870.0,
+            "PosY": -310.0,
+            "Id": 15918445799582319514
+        },
+        {
+            "Name": "Vector2 Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 1.0,
+            "Value_X": 0.5,
+            "Value_Y": 0.5,
+            "PosX": 390.0,
+            "PosY": -310.0,
+            "Id": 14671659643377346265
+        },
+        {
+            "Name": "Subtract",
+            "Category": "Math",
+            "PosX": 1410.0,
+            "PosY": -1260.0,
+            "Id": 8301225983359532014
+        },
+        {
+            "Name": "Rotate Transform",
+            "Category": "Transform",
+            "PosX": 760.0,
+            "PosY": 470.0,
+            "Id": 4632470326477046741
+        },
+        {
+            "Name": "Transform 6",
+            "Category": "Transform",
+            "PosX": 940.0,
+            "PosY": -410.0,
+            "Id": 16865716571927293142
+        },
+        {
+            "Name": "Vector2 Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 1.0,
+            "Value_X": 1920.0,
+            "Value_Y": 1080.0,
+            "PosX": -780.0,
+            "PosY": -550.0,
+            "Id": 9585628916027591153
+        },
+        {
+            "Name": "Vector3 Arg",
+            "Category": "Argument",
+            "ArgName": "teamColor",
+            "DefaultValue": {
+                "X": 1.0,
+                "Y": 1.0,
+                "Z": 1.0
+            },
+            "PosX": 250.0,
+            "PosY": -980.0,
+            "Id": 6629203817807396105
+        },
+        {
+            "Name": "Split Vector2",
+            "Category": "Split Merge",
+            "PosX": 830.0,
+            "PosY": -610.0,
+            "Id": 15292830934308874577
+        },
+        {
+            "Name": "Float Arg",
+            "Category": "Argument",
+            "ArgName": "crosshairMovementY",
+            "DefaultValue": 0.0,
+            "PosX": -480.0,
+            "PosY": -810.0,
+            "Id": 3101292897840522362
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.25,
+            "Value": 0.25,
+            "PosX": 800.0,
+            "PosY": 0.0,
+            "Id": 10835953695479471616
+        },
+        {
+            "Name": "Color Constant",
+            "Category": "Constant",
+            "Value_Red": 0.9607843160629272,
+            "Value_Green": 0.5254902243614197,
+            "Value_Blue": 0.1568627506494522,
+            "Value_Alpha": 1.0,
+            "PosX": 340.0,
+            "PosY": -1340.0,
+            "Id": 17341989294922374375
+        },
+        {
+            "Name": "Render Image Image Mask",
+            "Category": "Image Render",
+            "Layer": 0,
+            "PosX": 2160.0,
+            "PosY": -570.0,
+            "Id": 17464561506750395107
+        },
+        {
+            "Name": "Color Constant",
+            "Category": "Constant",
+            "Value_Red": 0.3019607961177826,
+            "Value_Green": 0.9529411792755127,
+            "Value_Blue": 0.5764706134796143,
+            "Value_Alpha": 1.0,
+            "PosX": 1450.0,
+            "PosY": -1720.0,
+            "Id": 13093003391217109310
+        },
+        {
+            "Name": "Conditional (Float)",
+            "Category": "Conditionals",
+            "PosX": 1490.0,
+            "PosY": -1460.0,
+            "Id": 2786510457671891219
+        },
+        {
+            "Name": "Asset Constant",
+            "Category": "Constant",
+            "AssetName": "rui/hud/crosshairs/crosshair_arc",
+            "PosX": 1430.0,
+            "PosY": -840.0,
+            "Id": 13170192848206640262
+        },
+        {
+            "Name": "Multiply",
+            "Category": "Math",
+            "PosX": -470.0,
+            "PosY": -250.0,
+            "Id": 9514152705564043348
+        },
+        {
+            "Name": "Conditional (Any)",
+            "Category": "Conditionals",
+            "PosX": 1740.0,
+            "PosY": -1470.0,
+            "Id": 8176501244474379407
+        },
+        {
+            "Name": "Size Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 20.0,
+            "Value_0": 20.0,
+            "Value_1": 20.0,
+            "Value_2": 20.0,
+            "Value_3": 20.0,
+            "PosX": 730.0,
+            "PosY": -170.0,
+            "Id": 3539217525669181610
+        },
+        {
+            "Name": "Transform 6",
+            "Category": "Transform",
+            "PosX": 1300.0,
+            "PosY": -630.0,
+            "Id": 13081341778924121325
+        },
+        {
+            "Name": "Boolean Arg",
+            "Category": "Argument",
+            "ArgName": "isFiring",
+            "DefaultValue": false,
+            "PosX": 250.0,
+            "PosY": -1460.0,
+            "Id": 7949512418043799047
+        },
+        {
+            "Name": "Rotate Transform",
+            "Category": "Transform",
+            "PosX": 1260.0,
+            "PosY": -260.0,
+            "Id": 10203284525361053841
+        },
+        {
+            "Name": "Render Image Image Mask",
+            "Category": "Image Render",
+            "Layer": 0,
+            "PosX": 1760.0,
+            "PosY": -940.0,
+            "Id": 16096692991441380223
+        },
+        {
+            "Name": "Subtract",
+            "Category": "Math",
+            "PosX": 1180.0,
+            "PosY": -1240.0,
+            "Id": 3007814666648161564
+        },
+        {
+            "Name": "Conditional (Any)",
+            "Category": "Conditionals",
+            "PosX": 810.0,
+            "PosY": -1100.0,
+            "Id": 1778198461421435534
+        },
+        {
+            "Name": "Boolean Arg",
+            "Category": "Argument",
+            "ArgName": "isAmped",
+            "DefaultValue": false,
+            "PosX": 300.0,
+            "PosY": -1090.0,
+            "Id": 16938543254494452203
+        },
+        {
+            "Name": "Rotate Transform",
+            "Category": "Transform",
+            "PosX": 1420.0,
+            "PosY": -450.0,
+            "Id": 12871985037370314635
+        },
+        {
+            "Name": "Add",
+            "Category": "Math",
+            "PosX": 440.0,
+            "PosY": -760.0,
+            "Id": 7811207734406379211
+        },
+        {
+            "Name": "Boolean Arg",
+            "Category": "Argument",
+            "ArgName": "isSprinting",
+            "DefaultValue": false,
+            "PosX": 810.0,
+            "PosY": -1610.0,
+            "Id": 6585107392223236469
+        },
+        {
+            "Name": "Boolean Arg",
+            "Category": "Argument",
+            "ArgName": "isReloading",
+            "DefaultValue": false,
+            "PosX": 780.0,
+            "PosY": -1510.0,
+            "Id": 9079682900227242032
+        },
+        {
+            "Name": "Merge Vector2",
+            "Category": "Split Merge",
+            "PosX": -121.854248046875,
+            "PosY": -875.849609375,
+            "Id": 15022215761431719113
+        },
+        {
+            "Name": "OR",
+            "Category": "Conditionals",
+            "PosX": 1090.0,
+            "PosY": -1620.0,
+            "Id": 7318793458866342633
+        },
+        {
+            "Name": "Split Color RGB",
+            "Category": "Split Merge",
+            "PosX": 1210.0,
+            "PosY": -1060.0,
+            "Id": 17190884163780411168
+        },
+        {
+            "Name": "Merge Color RGB",
+            "Category": "Split Merge",
+            "PosX": 1620.0,
+            "PosY": -1220.0,
+            "Id": 16647528638903532999
+        },
+        {
+            "Name": "Transform 6",
+            "Category": "Transform",
+            "PosX": 1290.0,
+            "PosY": -820.0,
+            "Id": 4342775308824577512
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.550000011920929,
+            "Value": 0.550000011920929,
+            "PosX": 1062.3131103515625,
+            "PosY": -1360.201171875,
+            "Id": 10395703224921945291
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 1.0,
+            "Value": 0.0,
+            "PosX": 1070.0,
+            "PosY": -1460.0,
+            "Id": 8941655190057652672
+        },
+        {
+            "Name": "Float Arg",
+            "Category": "Argument",
+            "ArgName": "adsFrac",
+            "DefaultValue": 0.0,
+            "PosX": 762.2554321289063,
+            "PosY": -1348.521484375,
+            "Id": 15180279285110420131
+        },
+        {
+            "Name": "Float Arg",
+            "Category": "Argument",
+            "ArgName": "adjustedSpread",
+            "DefaultValue": 0.05000000074505806,
+            "PosX": -880.0,
+            "PosY": -180.0,
+            "Id": 6165300315943316313
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.75,
+            "Value": 0.75,
+            "PosX": 800.0,
+            "PosY": -1230.0,
+            "Id": 16881471433500746395
+        },
+        {
+            "Name": "Boolean Arg",
+            "Category": "Argument",
+            "ArgName": "isGrappleInRange",
+            "DefaultValue": false,
+            "PosX": 1718.4241943359375,
+            "PosY": -1623.249267578125,
+            "Id": 13024443145663554654
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.5,
+            "Value": 0.5,
+            "PosX": -440.0,
+            "PosY": -670.0,
+            "Id": 455670026008816280
+        },
+        {
+            "Name": "Float Arg",
+            "Category": "Argument",
+            "ArgName": "crosshairMovementX",
+            "DefaultValue": 0.0,
+            "PosX": -520.0,
+            "PosY": -950.0,
+            "Id": 2178254821207815042
+        },
+        {
+            "Name": "Divide",
+            "Category": "Math",
+            "PosX": -440.0,
+            "PosY": -510.0,
+            "Id": 12336274546885899688
+        },
+        {
+            "Name": "Render Image Image Mask",
+            "Category": "Image Render",
+            "Layer": 0,
+            "PosX": 1660.0,
+            "PosY": -460.0,
+            "Id": 2449875281137813237
+        },
+        {
+            "Name": "Subtract",
+            "Category": "Math",
+            "PosX": 0.0,
+            "PosY": -660.0,
+            "Id": 13213726227519301644
+        },
+        {
+            "Name": "Add",
+            "Category": "Math",
+            "PosX": -30.0,
+            "PosY": -460.0,
+            "Id": 9729493206090589958
+        },
+        {
+            "Name": "Transform 6",
+            "Category": "Transform",
+            "PosX": 630.0,
+            "PosY": 410.0,
+            "Id": 5311995958738729415
+        },
+        {
+            "Name": "Vector2 Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 1.0,
+            "Value_X": 0.5,
+            "Value_Y": 0.5,
+            "PosX": 20.0,
+            "PosY": 650.0,
+            "Id": 6175203830405814754
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.75,
+            "Value": 0.75,
+            "PosX": 460.0,
+            "PosY": 710.0,
+            "Id": 10173051622346113323
+        },
+        {
+            "Name": "Size Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 20.0,
+            "Value_0": 20.0,
+            "Value_1": 20.0,
+            "Value_2": 20.0,
+            "Value_3": 20.0,
+            "PosX": 320.0,
+            "PosY": 600.0,
+            "Id": 7302802481664609907
+        },
+        {
+            "Name": "Render Image Image Mask",
+            "Category": "Image Render",
+            "Layer": 0,
+            "PosX": 1680.0,
+            "PosY": 70.0,
+            "Id": 10734334407713657120
+        },
+        {
+            "Name": "Add",
+            "Category": "Math",
+            "PosX": 420.0,
+            "PosY": -620.0,
+            "Id": 7352819211813273394
+        },
+        {
+            "Name": "Split Vector2",
+            "Category": "Split Merge",
+            "PosX": 840.0,
+            "PosY": -740.0,
+            "Id": 1025438431446560371
+        },
+        {
+            "Name": "Merge Vector2",
+            "Category": "Split Merge",
+            "PosX": 1070.0,
+            "PosY": -610.0,
+            "Id": 741089570884694702
+        },
+        {
+            "Name": "Merge Vector2",
+            "Category": "Split Merge",
+            "PosX": 1060.0,
+            "PosY": -740.0,
+            "Id": 14747783910957832760
+        },
+        {
+            "Name": "Float Constant",
+            "Category": "Constant",
+            "Min": 0.0,
+            "Max": 0.5,
+            "Value": 0.5,
+            "PosX": 1060.0,
+            "PosY": -480.0,
+            "Id": 1089858200290730981
+        },
+        {
+            "Name": "Merge Color RGB",
+            "Category": "Split Merge",
+            "PosX": 690.0,
+            "PosY": -950.0,
+            "Id": 8042046230157942422
+        },
+        {
+            "Name": "Split Vector3",
+            "Category": "Split Merge",
+            "PosX": 520.0,
+            "PosY": -950.0,
+            "Id": 10787168871981561059
+        }
+    ],
+    "Links": [
+        {
+            "LeftNode": 14671659643377346265,
+            "LeftPin": "Value",
+            "RightNode": 16865716571927293142,
+            "RightPin": "Val_3"
+        },
+        {
+            "LeftNode": 13170192848206640262,
+            "LeftPin": "Value",
+            "RightNode": 17464561506750395107,
+            "RightPin": "Main Asset"
+        },
+        {
+            "LeftNode": 16938543254494452203,
+            "LeftPin": "Value",
+            "RightNode": 1778198461421435534,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 17341989294922374375,
+            "LeftPin": "Value",
+            "RightNode": 1778198461421435534,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 6585107392223236469,
+            "LeftPin": "Value",
+            "RightNode": 7318793458866342633,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 9079682900227242032,
+            "LeftPin": "Value",
+            "RightNode": 7318793458866342633,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 1778198461421435534,
+            "LeftPin": "Color Res",
+            "RightNode": 17190884163780411168,
+            "RightPin": "In"
+        },
+        {
+            "LeftNode": 17190884163780411168,
+            "LeftPin": "Red",
+            "RightNode": 16647528638903532999,
+            "RightPin": "Red"
+        },
+        {
+            "LeftNode": 17190884163780411168,
+            "LeftPin": "Green",
+            "RightNode": 16647528638903532999,
+            "RightPin": "Green"
+        },
+        {
+            "LeftNode": 17190884163780411168,
+            "LeftPin": "Blue",
+            "RightNode": 16647528638903532999,
+            "RightPin": "Blue"
+        },
+        {
+            "LeftNode": 7318793458866342633,
+            "LeftPin": "Res",
+            "RightNode": 2786510457671891219,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 10395703224921945291,
+            "LeftPin": "Value",
+            "RightNode": 2786510457671891219,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 8941655190057652672,
+            "LeftPin": "Value",
+            "RightNode": 2786510457671891219,
+            "RightPin": "C"
+        },
+        {
+            "LeftNode": 8301225983359532014,
+            "LeftPin": "Res",
+            "RightNode": 16647528638903532999,
+            "RightPin": "Alpha"
+        },
+        {
+            "LeftNode": 16881471433500746395,
+            "LeftPin": "Value",
+            "RightNode": 3007814666648161564,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 15180279285110420131,
+            "LeftPin": "Value",
+            "RightNode": 3007814666648161564,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 3007814666648161564,
+            "LeftPin": "Res",
+            "RightNode": 8301225983359532014,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 2786510457671891219,
+            "LeftPin": "Res",
+            "RightNode": 8301225983359532014,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 13024443145663554654,
+            "LeftPin": "Value",
+            "RightNode": 8176501244474379407,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 16647528638903532999,
+            "LeftPin": "Out",
+            "RightNode": 8176501244474379407,
+            "RightPin": "C"
+        },
+        {
+            "LeftNode": 13093003391217109310,
+            "LeftPin": "Value",
+            "RightNode": 8176501244474379407,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 8176501244474379407,
+            "LeftPin": "Color Res",
+            "RightNode": 17464561506750395107,
+            "RightPin": "Main Color"
+        },
+        {
+            "LeftNode": 10203284525361053841,
+            "LeftPin": "Out",
+            "RightNode": 17464561506750395107,
+            "RightPin": "Transform"
+        },
+        {
+            "LeftNode": 10835953695479471616,
+            "LeftPin": "Value",
+            "RightNode": 10203284525361053841,
+            "RightPin": "Rotation"
+        },
+        {
+            "LeftNode": 16865716571927293142,
+            "LeftPin": "Out",
+            "RightNode": 10203284525361053841,
+            "RightPin": "Parent"
+        },
+        {
+            "LeftNode": 6165300315943316313,
+            "LeftPin": "Value",
+            "RightNode": 9514152705564043348,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 15918445799582319514,
+            "LeftPin": "Value",
+            "RightNode": 9514152705564043348,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 9514152705564043348,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 12336274546885899688,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 9585628916027591153,
+            "LeftPin": "Value",
+            "RightNode": 12336274546885899688,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 12336274546885899688,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 13213726227519301644,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 455670026008816280,
+            "LeftPin": "Value",
+            "RightNode": 13213726227519301644,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 12336274546885899688,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 9729493206090589958,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 455670026008816280,
+            "LeftPin": "Value",
+            "RightNode": 9729493206090589958,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 6175203830405814754,
+            "LeftPin": "Value",
+            "RightNode": 5311995958738729415,
+            "RightPin": "Val_3"
+        },
+        {
+            "LeftNode": 10173051622346113323,
+            "LeftPin": "Value",
+            "RightNode": 4632470326477046741,
+            "RightPin": "Rotation"
+        },
+        {
+            "LeftNode": 5311995958738729415,
+            "LeftPin": "Out",
+            "RightNode": 4632470326477046741,
+            "RightPin": "Parent"
+        },
+        {
+            "LeftNode": 13170192848206640262,
+            "LeftPin": "Value",
+            "RightNode": 10734334407713657120,
+            "RightPin": "Main Asset"
+        },
+        {
+            "LeftNode": 4632470326477046741,
+            "LeftPin": "Out",
+            "RightNode": 10734334407713657120,
+            "RightPin": "Transform"
+        },
+        {
+            "LeftNode": 2178254821207815042,
+            "LeftPin": "Value",
+            "RightNode": 15022215761431719113,
+            "RightPin": "X"
+        },
+        {
+            "LeftNode": 3101292897840522362,
+            "LeftPin": "Value",
+            "RightNode": 15022215761431719113,
+            "RightPin": "Y"
+        },
+        {
+            "LeftNode": 13213726227519301644,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 7811207734406379211,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 15022215761431719113,
+            "LeftPin": "Out",
+            "RightNode": 7811207734406379211,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 9729493206090589958,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 7352819211813273394,
+            "RightPin": "A"
+        },
+        {
+            "LeftNode": 15022215761431719113,
+            "LeftPin": "Out",
+            "RightNode": 7352819211813273394,
+            "RightPin": "B"
+        },
+        {
+            "LeftNode": 7811207734406379211,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 1025438431446560371,
+            "RightPin": "In"
+        },
+        {
+            "LeftNode": 7352819211813273394,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 15292830934308874577,
+            "RightPin": "In"
+        },
+        {
+            "LeftNode": 7811207734406379211,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 16865716571927293142,
+            "RightPin": "Val_0"
+        },
+        {
+            "LeftNode": 7352819211813273394,
+            "LeftPin": "Vector2 Res",
+            "RightNode": 5311995958738729415,
+            "RightPin": "Val_0"
+        },
+        {
+            "LeftNode": 13170192848206640262,
+            "LeftPin": "Value",
+            "RightNode": 2449875281137813237,
+            "RightPin": "Main Asset"
+        },
+        {
+            "LeftNode": 15292830934308874577,
+            "LeftPin": "X",
+            "RightNode": 741089570884694702,
+            "RightPin": "X"
+        },
+        {
+            "LeftNode": 1025438431446560371,
+            "LeftPin": "Y",
+            "RightNode": 741089570884694702,
+            "RightPin": "Y"
+        },
+        {
+            "LeftNode": 1025438431446560371,
+            "LeftPin": "X",
+            "RightNode": 14747783910957832760,
+            "RightPin": "X"
+        },
+        {
+            "LeftNode": 15292830934308874577,
+            "LeftPin": "Y",
+            "RightNode": 14747783910957832760,
+            "RightPin": "Y"
+        },
+        {
+            "LeftNode": 14671659643377346265,
+            "LeftPin": "Value",
+            "RightNode": 13081341778924121325,
+            "RightPin": "Val_3"
+        },
+        {
+            "LeftNode": 741089570884694702,
+            "LeftPin": "Out",
+            "RightNode": 13081341778924121325,
+            "RightPin": "Val_0"
+        },
+        {
+            "LeftNode": 13081341778924121325,
+            "LeftPin": "Out",
+            "RightNode": 12871985037370314635,
+            "RightPin": "Parent"
+        },
+        {
+            "LeftNode": 12871985037370314635,
+            "LeftPin": "Out",
+            "RightNode": 2449875281137813237,
+            "RightPin": "Transform"
+        },
+        {
+            "LeftNode": 1089858200290730981,
+            "LeftPin": "Value",
+            "RightNode": 12871985037370314635,
+            "RightPin": "Rotation"
+        },
+        {
+            "LeftNode": 8176501244474379407,
+            "LeftPin": "Color Res",
+            "RightNode": 2449875281137813237,
+            "RightPin": "Main Color"
+        },
+        {
+            "LeftNode": 8176501244474379407,
+            "LeftPin": "Color Res",
+            "RightNode": 10734334407713657120,
+            "RightPin": "Main Color"
+        },
+        {
+            "LeftNode": 14747783910957832760,
+            "LeftPin": "Out",
+            "RightNode": 4342775308824577512,
+            "RightPin": "Val_0"
+        },
+        {
+            "LeftNode": 14671659643377346265,
+            "LeftPin": "Value",
+            "RightNode": 4342775308824577512,
+            "RightPin": "Val_3"
+        },
+        {
+            "LeftNode": 13170192848206640262,
+            "LeftPin": "Value",
+            "RightNode": 16096692991441380223,
+            "RightPin": "Main Asset"
+        },
+        {
+            "LeftNode": 4342775308824577512,
+            "LeftPin": "Out",
+            "RightNode": 16096692991441380223,
+            "RightPin": "Transform"
+        },
+        {
+            "LeftNode": 8176501244474379407,
+            "LeftPin": "Color Res",
+            "RightNode": 16096692991441380223,
+            "RightPin": "Main Color"
+        },
+        {
+            "LeftNode": 3539217525669181610,
+            "LeftPin": "Value",
+            "RightNode": 16865716571927293142,
+            "RightPin": "Size"
+        },
+        {
+            "LeftNode": 3539217525669181610,
+            "LeftPin": "Value",
+            "RightNode": 13081341778924121325,
+            "RightPin": "Size"
+        },
+        {
+            "LeftNode": 3539217525669181610,
+            "LeftPin": "Value",
+            "RightNode": 4342775308824577512,
+            "RightPin": "Size"
+        },
+        {
+            "LeftNode": 7302802481664609907,
+            "LeftPin": "Value",
+            "RightNode": 5311995958738729415,
+            "RightPin": "Size"
+        },
+        {
+            "LeftNode": 8042046230157942422,
+            "LeftPin": "Out",
+            "RightNode": 1778198461421435534,
+            "RightPin": "C"
+        },
+        {
+            "LeftNode": 6629203817807396105,
+            "LeftPin": "Value",
+            "RightNode": 10787168871981561059,
+            "RightPin": "In"
+        },
+        {
+            "LeftNode": 10787168871981561059,
+            "LeftPin": "X",
+            "RightNode": 8042046230157942422,
+            "RightPin": "Red"
+        },
+        {
+            "LeftNode": 10787168871981561059,
+            "LeftPin": "Y",
+            "RightNode": 8042046230157942422,
+            "RightPin": "Green"
+        },
+        {
+            "LeftNode": 10787168871981561059,
+            "LeftPin": "Z",
+            "RightNode": 8042046230157942422,
+            "RightPin": "Blue"
+        }
+    ]
+}
