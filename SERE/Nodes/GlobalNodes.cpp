@@ -434,10 +434,12 @@ void ColorGlobalNode::Export(RuiExportPrototype& proto)
 #endif
 	ele.identifier = out.name;
 	ele.callback = [out, exportField = exportField](RuiExportPrototype& proto) {
+		const std::string value = std::format(
+			"Color(globals->{0}.x,globals->{0}.y,globals->{0}.z,1.0f)", exportField);
 		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = globals->{};", out.GetFormattedName(proto), exportField));
+			proto.codeLines.push_back(std::format("{} = {};", out.GetFormattedName(proto), value));
 		else
-			proto.codeLines.push_back(std::format("Vector3 {} = globals->{};", out.GetFormattedName(proto), exportField));
+			proto.codeLines.push_back(std::format("Color {} = {};", out.GetFormattedName(proto), value));
 		};
 	proto.codeElements.push_back(ele);
 }
