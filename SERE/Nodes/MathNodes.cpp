@@ -1053,56 +1053,6 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
 	return info;
 }
 
-ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	std::string outName = Variable::UniqueName();
-	getOut<Float2Variable>("Res")->behaviour([this, outName]() {
-
-		return Float2Variable(Vector2(0.5f,0.5f), name);
-
-	});
-
-}
-
-ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ProjectionNode(rend, style) {}
-
-void ProjectionNode::draw() {
-
-
-}
-
-void ProjectionNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
-}
-
-void ProjectionNode::Export(RuiExportPrototype& proto) {
-	const auto& out = getOut<Float2Variable>("Res")->val();
-	const auto& pos = getInVal<Float3Variable>("Position");
-
-	ExportElement<std::string> ele;
-#if _DEBUG
-	ele.sourceNodeName = typeid(*this).name();
-#endif
-	ele.dependencys = { pos.name };
-	ele.identifier = out.name;
-	ele.callback = [out, pos](RuiExportPrototype& proto) {
-		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = project3d(funcs,globals,inst,&{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
-		else
-			proto.codeLines.push_back(std::format("float {} = project3d(funcs,globals,inst,&{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
-	};
-	proto.codeElements.push_back(ele);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> ProjectionNode::GetPinInfo() {
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<Float3Variable>>("Position",ImFlow::ConnectionFilter::SameType() , Float3Variable(Vector3(0.f,0.f,0.f))));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Res"));
-	return info;
-}
-
-
 
 
 void AddMathNodes(NodeEditor& editor) {
@@ -1124,5 +1074,4 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<CeilNode>();
 	editor.AddNodeType<TruncNode>();
 	editor.AddNodeType<ClampNode>();
-	editor.AddNodeType<ProjectionNode>();
 }
