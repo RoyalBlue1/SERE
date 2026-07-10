@@ -38,7 +38,7 @@ void SetNoRenderNode::Export(RuiExportPrototype& proto)
 	ele.identifier = Variable::UniqueName();
 	ele.callback = [value](RuiExportPrototype& proto) {
 		proto.codeLines.push_back(std::format(
-			"if ({}) {{\n\tsetNoRender(inst);\n\treturn;\n}}",
+			"if ({}) {{\n\tfuncs->setNoRender(inst);\n\treturn;\n}}",
 			value.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
