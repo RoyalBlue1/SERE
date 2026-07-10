@@ -106,6 +106,7 @@ public:
 
 private:
 	void AddArgumentPin();
+	void SyncArgumentPins();
 	bool Print(std::string& out);
 	std::string FormatArgument(size_t index, const std::string& options);
 	int GetPrintfString(std::string& out, std::vector<bool>* floatArgumentsAsInt = nullptr);

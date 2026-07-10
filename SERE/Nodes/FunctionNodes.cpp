@@ -591,7 +591,6 @@ PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style)
 		Print(value);
 		return StringVariable(value, outName);
 		});
-	AddArgumentPin();
 }
 
 PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style,
@@ -607,12 +606,7 @@ PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style,
 
 	if (obj.HasMember("Format") && obj["Format"].IsString())
 		fmt = obj["Format"].GetString();
-
-	size_t savedArgumentCount = 1;
-	if (obj.HasMember("ArgumentCount") && obj["ArgumentCount"].IsUint64())
-		savedArgumentCount = static_cast<size_t>(obj["ArgumentCount"].GetUint64());
-	for (size_t index = 0; index < savedArgumentCount; ++index)
-		AddArgumentPin();
+	SyncArgumentPins();
 }
 
 void PrintFNode::AddArgumentPin()
@@ -629,6 +623,32 @@ void PrintFNode::AddArgumentPin()
 	auto pin = std::make_shared<ImFlow::InPinProto<StringVariable>>(
 		std::format("Arg {}", argumentCount), printfArgument, StringVariable(""));
 	pin->CreatePin(this, styles);
+}
+
+void PrintFNode::SyncArgumentPins()
+{
+	size_t required = 0;
+	for (size_t index = 0; index < fmt.size(); ++index) {
+		if (fmt[index] != '{')
+			continue;
+		if (index + 1 < fmt.size() && fmt[index + 1] == '{') {
+			++index;
+			continue;
+		}
+		const size_t end = fmt.find('}', index + 1);
+		if (end == std::string::npos)
+			break;
+		++required;
+		index = end;
+	}
+
+	while (argumentCount < required)
+		AddArgumentPin();
+	while (argumentCount > required) {
+		const std::string id = std::format("Arg {}", argumentCount--);
+		inPin(id)->deleteLink();
+		dropIN(id);
+	}
 }
 
 std::string PrintFNode::FormatArgument(size_t index, const std::string& options)
@@ -762,21 +782,9 @@ int PrintFNode::GetPrintfString(std::string& out, std::vector<bool>* floatArgume
 void PrintFNode::draw()
 {
 	ImGui::PushItemWidth(160.f);
-	ImGui::InputText("Format", &fmt);
+	if (ImGui::InputText("Format", &fmt))
+		SyncArgumentPins();
 	ImGui::PopItemWidth();
-
-	const bool canRemove = argumentCount > 0 &&
-		!inPin(std::format("Arg {}", argumentCount))->isConnected();
-	ImGui::BeginDisabled(!canRemove);
-	if (ImGui::SmallButton("-")) {
-		const std::string id = std::format("Arg {}", argumentCount);
-		dropIN(id);
-		--argumentCount;
-	}
-	ImGui::EndDisabled();
-	ImGui::SameLine();
-	if (ImGui::SmallButton("+"))
-		AddArgumentPin();
 
 	std::string preview;
 	Print(preview);
@@ -789,7 +797,6 @@ void PrintFNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
 	obj.AddMember("Name", name, allocator);
 	obj.AddMember("Category", category, allocator);
 	obj.AddMember("Format", fmt, allocator);
-	obj.AddMember("ArgumentCount", static_cast<uint64_t>(argumentCount), allocator);
 	RuiBaseNode::Serialize(obj, allocator);
 }
 
