@@ -18,6 +18,7 @@
 #include "Nodes/SplitMergeNodes.h"
 #include "Nodes/TransformNodes.h"
 #include "Nodes/ConditionalNodes.h"
+#include "Nodes/FunctionNodes.h"
 
 #include "Settings.h"
 #include "PakLoading/cpakfile.h"
@@ -35,6 +36,7 @@ void RegisterSereNodeTypes(NodeEditor& nodeEdit)
     AddSplitMergeNodes(nodeEdit);
     AddTransformNodes(nodeEdit);
     AddConditionalNodes(nodeEdit);
+    AddFunctionNodes(nodeEdit);
 }
 
 static bool IsExistingDirectory(const fs::path& path)

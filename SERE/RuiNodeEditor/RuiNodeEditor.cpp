@@ -636,6 +636,9 @@ void NodeEditor::SetStyles(ImFlow::StyleManager& styles) {
 	styles.AddNodeStlye(
 		"Conditionals",
 		std::make_shared<ImFlow::NodeStyle>(IM_COL32(173, 74, 17, 255), ImColor(233, 241, 244, 255), 6.5f));
+	styles.AddNodeStlye(
+		"Functions",
+		std::make_shared<ImFlow::NodeStyle>(IM_COL32(91, 91, 214, 255), ImColor(233, 241, 244, 255), 6.5f));
 	
 	auto errorNodeStyle = std::make_shared<ImFlow::NodeStyle>(IM_COL32(173,25,17,255),ImColor(233,241,244,255),6.5f);
 	errorNodeStyle->bg = IM_COL32(132,23,17,255);

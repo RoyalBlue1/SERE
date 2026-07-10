@@ -52,6 +52,7 @@ add_executable (SERE
 	"Nodes/SplitMergeNodes.cpp"
 	"Nodes/MathNodes.cpp"
 	"Nodes/GlobalNodes.cpp"
+	"Nodes/FunctionNodes.cpp"
 	
 	"RuiNodeEditor/RuiBaseNode.cpp"
 	"RuiNodeEditor/RuiExportPrototype.cpp"

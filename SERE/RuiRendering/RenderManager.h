@@ -116,6 +116,17 @@ struct Globals {
     float localPlayerPos[3];
     float screenWidth = 0.f;
     float screenHeight = 0.f;
+	float friendlyTeamColor[3] = { 0.34f, 0.59f, 0.86f };
+	float enemyTeamColor[3] = { 0.8f, 0.25f, 0.15f };
+	float partyTeamColor[3] = { 0.7f, 1.f, 0.8f };
+	int isKillReplay = 0;
+	int isUsingController = 0;
+	int isAlive = 0;
+	int isSpectating = 0;
+	int isMenuOpen = 0;
+    int isPhaseShifted = 0;
+	float announcementTime = 0.f;
+	int isAnnoncementActive = 0;
 };
 class RenderInstance;
 
