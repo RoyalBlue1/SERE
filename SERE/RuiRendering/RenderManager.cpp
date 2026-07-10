@@ -758,15 +758,14 @@ void RenderInstance::sub_F9B80_rev(
 }
 
 
-
 void RenderInstance::StartFrame(float time) {
 	segments.clear();
 	verts.clear();
 	indices.clear();
 	transformResults.clear();
-	static uint64_t transformHashes[3] = {randomInt64(),randomInt64(),randomInt64()};
-	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[0]));
-	transformResults.push_back(TransformResult(_mm_set_ps(1,0,0,1),_mm_setzero_ps(),_mm_set_ps(elementHeight,elementHeight,elementWidth,elementWidth),transformHashes[1]));
+	static uint64_t transformHashes[3] = { randomInt64(),randomInt64(),randomInt64() };
+	transformResults.push_back(TransformResult(_mm_set_ps(1, 0, 0, 1), _mm_setzero_ps(), _mm_set_ps(elementHeight, elementHeight, elementWidth, elementWidth), transformHashes[0]));
+	transformResults.push_back(TransformResult(_mm_set_ps(1, 0, 0, 1), _mm_setzero_ps(), _mm_set_ps(elementHeight, elementHeight, elementWidth, elementWidth), transformHashes[1]));
 	globals.currentTime = time;
 	float v17 = elementHeightRpc;
 	v17 = v17 * elementHeight;
@@ -788,9 +787,8 @@ void RenderInstance::StartFrame(float time) {
 		_mm_set1_ps(0.5),
 		_mm_mul_ps(_mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 0, 3, 0)), _mm_set1_ps(0.5)));
 	__m128 inputSize = _mm_mul_ps(v19, _mm_shuffle_ps(directionVector, directionVector, _MM_SHUFFLE(3, 3, 0, 0)));
-	transformResults.push_back(TransformResult(directionVector,position,inputSize,transformHashes[2]));
-	styleDescriptor.clear();
-	g_renderFramework->RuiClearFrame();
+	transformResults.push_back(TransformResult(directionVector, position, inputSize, transformHashes[2]));
+	styleDescriptor.clear();	g_renderFramework->RuiClearFrame();
 }
 
 

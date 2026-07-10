@@ -33,7 +33,7 @@ public:
 	void Draw();
 	void Serialize();
 	void Deserialize();
-	void DeserializeFromPath(const fs::path& path);
+	bool DeserializeFromPath(const fs::path& path);
 	void Export();
 	void ExportToPath(const fs::path& path);
 	void Clear();
