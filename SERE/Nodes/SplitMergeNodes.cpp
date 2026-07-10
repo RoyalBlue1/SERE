@@ -715,13 +715,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitTransformSizeNode::GetPinInf
 MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
-	getOut<TransformSize>("Out")->behaviour([this]() {
+	std::string name = Variable::UniqueName();
+	getOut<TransformSize>("Out")->behaviour([this,name]() {
 		const FloatVariable& inX = getInNumeric("X");
 		const FloatVariable& inY = getInNumeric("Y");
 		const FloatVariable& inZ = getInNumeric("Z");
 		const FloatVariable& inW = getInNumeric("W");
-
-		std::string name = (inX.IsConstant() && inY.IsConstant() && inZ.IsConstant() && inW.IsConstant()) ? "" : Variable::UniqueName();
 
 		__m128 vec = _mm_set_ps(inW.value, inZ.value, inY.value, inX.value); // highest first
 		return TransformSize(vec, name);
