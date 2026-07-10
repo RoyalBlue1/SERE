@@ -296,10 +296,72 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ScreenHeightNode::GetPinInfo() {
 	return info;
 }
 
+static float getRandomFloat(float min, float max) {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dis(min, max);
+	return dis(gen);
+}
+
+RandomFloatNode::RandomFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+	std::string outName = Variable::UniqueName();
+	randomFloat = getRandomFloat(0.0f, 1.0f);
+	getOut<FloatVariable>("Out")->behaviour([this, outName]() {
+		return FloatVariable(randomFloat, outName);
+		});
+}
+
+RandomFloatNode::RandomFloatNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) : RandomFloatNode(prot, styles)
+{
+
+}
+
+void RandomFloatNode::draw()
+{
+	ImGui::Text("Value: %f", randomFloat);
+}
+
+void RandomFloatNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void RandomFloatNode::Export(RuiExportPrototype& proto)
+{
+	auto out = getOut<FloatVariable>("Out")->val();
+	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	ele.identifier = out.name;
+	ele.callback = [out](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = randomFloat(inst);", out.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = randomFloat(inst);", out.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> RandomFloatNode::GetPinInfo()
+{
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Out"));
+	return info;
+}
+
+
+
+
 void AddGlobalNodes(NodeEditor& editor) {
 	editor.AddNodeType<TimeNode>();
 	editor.AddNodeType<ScreenWidthNode>();
 	editor.AddNodeType<ScreenHeightNode>();
 	editor.AddNodeType<ADSFracNode>();
 	editor.AddNodeType<LocalPlayerPosNode>();
+	editor.AddNodeType<RandomFloatNode>();
 }
+
+

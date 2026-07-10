@@ -1007,10 +1007,14 @@ void ClampNode::draw() {
 	ImGui::Text("Max %f", max.value);
 	ImGui::Text("Val %f", val.value);
 	if (min.value > max.value)
+	{
+		setStyle(styles.GetErrorStyle());
 		ImGui::Text("Error");
-	else
-		ImGui::Text("Res %f", std::clamp(val.value,min.value,max.value));
-
+	}
+	else {
+		setStyle(styles.GetNodeStyle(category));
+		ImGui::Text("Res %f", std::clamp(val.value, min.value, max.value));
+	}
 }
 
 void ClampNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
@@ -1084,9 +1088,9 @@ void ProjectionNode::Export(RuiExportPrototype& proto) {
 	ele.identifier = out.name;
 	ele.callback = [out, pos](RuiExportPrototype& proto) {
 		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = project3d(funcs,globals,inst,{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("{} = project3d(funcs,globals,inst,&{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
 		else
-			proto.codeLines.push_back(std::format("float {} = project3d(funcs,globals,inst,{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
+			proto.codeLines.push_back(std::format("float {} = project3d(funcs,globals,inst,&{});", out.GetFormattedName(proto), pos.GetFormattedName(proto)));
 	};
 	proto.codeElements.push_back(ele);
 }

@@ -211,7 +211,6 @@ public:
     void sub_FFAE0(__m128 a1,__m128 a2, __m128* a3);
 
 
-
     void StartFrame(float time);
     void EndFrame();
 

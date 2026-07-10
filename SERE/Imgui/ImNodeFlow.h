@@ -572,6 +572,9 @@ namespace ImFlow
          */
         std::vector<std::string>& get_recursion_blacklist() { return m_pinRecursionBlacklist; }
     private:
+        void updateMarqueeSelection(ImDrawList* draw_list);
+        bool nodeOverlapsMarquee(BaseNode* node, const ImVec2& selectMin, const ImVec2& selectMax);
+
         std::string m_name;
         ContainedContext m_context;
 
@@ -595,6 +598,11 @@ namespace ImFlow
         StyleManager m_styles;
 
         ImVec2 m_lastRightClickPos;
+
+        bool m_marqueeSelecting = false;
+        bool m_marqueeAdditive = false;
+        ImVec2 m_marqueeStart = ImVec2(0.f, 0.f);
+        ImVec2 m_marqueeEnd = ImVec2(0.f, 0.f);
     };
 
     // -----------------------------------------------------------------------------------------------------------------
