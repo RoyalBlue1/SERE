@@ -303,5 +303,3 @@ void AddGlobalNodes(NodeEditor& editor) {
 	editor.AddNodeType<ADSFracNode>();
 	editor.AddNodeType<LocalPlayerPosNode>();
 }
-
-

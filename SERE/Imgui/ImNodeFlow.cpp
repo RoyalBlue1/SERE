@@ -349,7 +349,6 @@ namespace ImFlow {
                 m_dragOut = nullptr;
         }
 
-
         // Right-click PopUp
         if (m_rightClickPopUp && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
             m_hoveredNodeAux = m_hoveredNode;
