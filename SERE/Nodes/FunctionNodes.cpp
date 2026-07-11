@@ -668,5 +668,4 @@ void AddFunctionNodes(NodeEditor& editor)
 	editor.AddNodeType<ToUpperNode>();
 	editor.AddNodeType<LocalizeNode>();
 	editor.AddNodeType<PrintFNode>();
-
 }
