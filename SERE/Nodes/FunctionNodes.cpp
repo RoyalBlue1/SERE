@@ -323,9 +323,7 @@ static std::string PrintfFloatSpecifier(const std::string& options)
 LocalizeNode::LocalizeNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<StringVariable>("Out")->behaviour([this, outName]() {
-		std::string out;
-		Print(fmt, out);
-		return StringVariable(out, outName);
+		return StringVariable(fmt, outName);
 		});
 
 }
@@ -335,192 +333,11 @@ LocalizeNode::LocalizeNode(RenderInstance& rend, ImFlow::StyleManager& style, ra
 		fmt = obj["Format"].GetString();
 }
 
-
-std::string LocalizeNode::Format(int valId, std::string options) {
-	std::string id = std::format("Val {}", valId);
-	if (inPin(id)->getLink().expired())return "***";
-	try {
-		if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(IntVariable)) {
-			int val = getInVal<IntVariable>(id).value;
-			return std::vformat(options, std::make_format_args(val));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(BoolVariable)) {
-			bool val = getInVal<BoolVariable>(id).value;
-			return std::vformat(options, std::make_format_args(val));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(FloatVariable)) {
-			float val = getInVal<FloatVariable>(id).value;
-			return std::vformat(options, std::make_format_args(val));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(Float2Variable)) {
-			Vector2 val = getInVal<Float2Variable>(id).value;
-			return std::format("<{}, {}>",
-				std::vformat(options, std::make_format_args(val.x)),
-				std::vformat(options, std::make_format_args(val.y)));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(Float3Variable)) {
-			Vector3 val = getInVal<Float3Variable>(id).value;
-			return std::format("<{}, {}, {}>",
-				std::vformat(options, std::make_format_args(val.x)),
-				std::vformat(options, std::make_format_args(val.y)),
-				std::vformat(options, std::make_format_args(val.z)));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(ColorVariable)) {
-			Color val = getInVal<ColorVariable>(id).value;
-			return std::format("<{}, {}, {}, {}>",
-				std::vformat(options, std::make_format_args(val.red)),
-				std::vformat(options, std::make_format_args(val.green)),
-				std::vformat(options, std::make_format_args(val.blue)),
-				std::vformat(options, std::make_format_args(val.alpha)));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(StringVariable)) {
-			std::string val = getInVal<StringVariable>(id).value;
-			return std::vformat(options, std::make_format_args(val));
-		}
-		else if (inPin(id)->getLink().lock()->left()->getDataType() == typeid(AssetVariable)) {
-			uint32_t val = getInVal<AssetVariable>(id).hash;
-			return std::vformat(options, std::make_format_args(val));
-		}
-	}
-	catch (std::format_error& e) {
-		return "***";
-	}
-	return "***";
-}
-
-bool LocalizeNode::Print(const std::string& fmt, std::string& out) {
-
-	int varId = 1;
-	for (size_t i = 0; i < fmt.size(); i++) {
-
-		if (fmt[i] == '{') {
-			if ((i + 1) >= fmt.size()) {
-				out = "***";
-				return false;
-			}
-			if (fmt[i + 1] == '{') {
-				out += '{';
-				i++;
-			}
-			else {
-				std::string options = "";
-				bool validOptions = false;
-				for (i; i < fmt.size(); i++) {
-					options += fmt[i];
-					if (fmt[i] == '}') {
-						validOptions = true;
-						break;
-					}
-				}
-				if (!validOptions) {
-					out = "***";
-					return false;
-				}
-				std::string f = "***";
-				if (varId < 6)
-					f = Format(varId++, options);
-				out += f;
-			}
-		}
-		else if (fmt[i] == '}') {
-			if ((i + 1) < fmt.size() && fmt[i + 1] == '}') {
-				out += '}';
-				i++;
-			}
-			else {
-				out = "***";
-				return false;
-			}
-		}
-		else {
-			out += fmt[i];
-		}
-	}
-	return true;
-}
-
-int LocalizeNode::GetPrintfString(std::string& out) {
-
-	int varId = 1;
-	for (size_t i = 0; i < fmt.size(); i++) {
-
-		if (fmt[i] == '{') {
-			if ((i + 1) >= fmt.size()) {
-				out = "***";
-				return -1;
-			}
-			if (fmt[i + 1] == '{') {
-				out += '{';
-				i++;
-			}
-			else {
-				std::string options = "";
-				bool validOptions = false;
-				for (i; i < fmt.size(); i++) {
-					options += fmt[i];
-					if (fmt[i] == '}') {
-						validOptions = true;
-						break;
-					}
-				}
-				if (!validOptions) {
-					out = "***";
-					return -1;
-				}
-				if (varId > 5) {
-					out = "***";
-					return -1;
-				}
-
-				ImFlow::Pin* in = inPin(std::format("Val {}", varId++));
-				std::string f = "%s";
-				if (!in->getLink().expired()) {
-					if (in->getLink().lock()->left()->getDataType() == typeid(BoolVariable)) {
-						f = "%i";
-					}
-					else if (in->getLink().lock()->left()->getDataType() == typeid(IntVariable)) {
-						f = "%i";
-					}
-					else if (in->getLink().lock()->left()->getDataType() == typeid(FloatVariable)) {
-						f = "%f";
-					}
-					else if (in->getLink().lock()->left()->getDataType() == typeid(StringVariable)) {
-						f = "%s";
-					}
-				}
-				out += f;
-
-			}
-		}
-		else if (fmt[i] == '}') {
-			if ((i + 1) < fmt.size() && fmt[i + 1] == '}') {
-				out += '}';
-				i++;
-			}
-			else {
-				out = "***";
-				return -1;
-			}
-		}
-		else {
-			if (fmt[i] == '%')
-				out += "%%";
-			else
-				out += fmt[i];
-		}
-	}
-	return varId - 1;
-}
-
 void LocalizeNode::draw() {
 
 	ImGui::PushItemWidth(120.f);
 	ImGui::InputText("Format", &fmt);
-
-	std::string out = "";
-	Print(fmt, out);
-
-	ImGui::Text("\"%s\"", out.c_str());
+	ImGui::Text("\"%s\"", "Localized text");
 	ImGui::PopItemWidth();
 
 }
@@ -533,24 +350,22 @@ void LocalizeNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 }
 
 void LocalizeNode::Export(RuiExportPrototype& proto) {
-	auto out = getOut<StringVariable>("Out")->val();
-	std::string printfString;
-	const int argumentCount = GetPrintfString(printfString);
-	if (argumentCount < 0)
-		return;
-
+	const StringVariable out = getOut<StringVariable>("Out")->val();
 	std::vector<LocalizeArgument> arguments;
-	arguments.reserve(argumentCount);
-	for (int index = 1; index <= argumentCount; ++index)
-		arguments.push_back(GetLocalizeArgument(*this, std::format("Val {}", index)));
+	for (size_t index = 1; index <= 5; ++index) {
+		const std::string id = std::format("Val {}", index);
+		if (inPin(id)->isConnected())
+			arguments.push_back(GetLocalizeArgument(*this, id));
+	}
 
 	ExportElement<std::string> ele;
 	ele.identifier = out.name;
 	for (const LocalizeArgument& argument : arguments)
 		ele.dependencys.insert(GetLocalizeArgumentName(argument));
-	ele.callback = [out, printfString, arguments](RuiExportPrototype& proto) {
-		const StringVariable format(printfString);
-		std::string call = std::format("funcs->Localize(inst, {}", format.GetFormattedName(proto));
+
+	ele.callback = [out, format = fmt, arguments](RuiExportPrototype& proto) {
+		const StringVariable formatVar(format);
+		std::string call = std::format("funcs->Localize(inst, {}", formatVar.GetFormattedName(proto));
 		for (const LocalizeArgument& argument : arguments)
 			call += std::format(", {}", GetFormattedLocalizeArgument(argument, proto));
 		call += ')';

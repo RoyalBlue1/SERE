@@ -81,9 +81,6 @@ public:
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 
-	bool Print(const std::string& fmt, std::string& out);
-	std::string Format(int valId, std::string options);
-	int GetPrintfString(std::string& out);
 	std::string fmt;
 };
 
