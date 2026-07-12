@@ -67,4 +67,50 @@ public:
 };
 
 
+class LocalizeNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Localize";
+	static inline std::string category = "Functions";
+
+	explicit LocalizeNode(RenderInstance& prot, ImFlow::StyleManager& styles);
+	explicit LocalizeNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+
+	std::string fmt;
+};
+
+class PrintFNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "PrintF";
+	static inline std::string category = "Functions";
+
+	explicit PrintFNode(RenderInstance& prot, ImFlow::StyleManager& styles);
+	explicit PrintFNode(RenderInstance& prot, ImFlow::StyleManager& styles,
+		rapidjson::GenericObject<false, rapidjson::Value> obj);
+
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,
+		rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+
+private:
+	void AddArgumentPin();
+	void SyncArgumentPins();
+	bool Print(std::string& out);
+	std::string FormatArgument(size_t index, const std::string& options);
+	int GetPrintfString(std::string& out, std::vector<bool>* floatArgumentsAsInt = nullptr);
+
+	std::string fmt;
+	size_t argumentCount = 0;
+};
+
+
 void AddFunctionNodes(NodeEditor& editor);
