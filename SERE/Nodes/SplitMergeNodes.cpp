@@ -275,12 +275,7 @@ void MergeFloat3Node::Export(RuiExportPrototype& proto) {
 }
 
 void MergeFloat3Node::draw() {
-	const FloatVariable& inX = getInNumeric("X");
-	const FloatVariable& inY = getInNumeric("Y");
-	const FloatVariable& inZ = getInNumeric("Z");
-	ImGui::Text("%f",inX.value);
-	ImGui::Text("%f",inY.value);
-	ImGui::Text("%f",inZ.value);
+
 }
 
 std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat3Node::GetPinInfo() {

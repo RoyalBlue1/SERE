@@ -353,9 +353,11 @@ namespace ImFlow
         }
         ImGui::BeginGroup();
         ImGui::SetCursorPos(m_pos);
-        ImGui::Text("%s", m_proto->name.c_str());
+        drawNodeContent();
         m_size = ImGui::GetItemRectSize();
+        ImGui::EndGroup();
 
+        ImGui::BeginGroup();
         drawDecoration();
         drawSocket();
         ImGui::EndGroup();

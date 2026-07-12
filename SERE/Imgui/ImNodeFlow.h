@@ -1097,6 +1097,12 @@ namespace ImFlow
         void drawDecoration();
 
         /**
+         *@brief <BR>Draw the pins in node content(name,current value,value selection if unset)
+         */
+        virtual void drawNodeContent() = 0;
+
+
+        /**
          * @brief <BR>Used by output pins to calculate their values
          */
         virtual void resolve() {}
@@ -1312,6 +1318,11 @@ namespace ImFlow
          */
         ImVec2 pinPoint() override { return m_pos + ImVec2(-m_style->extra.socket_padding, m_size.y / 2); }
 
+        void drawNodeContent() override
+        {
+            ImGui::Text("%s", m_proto->name.c_str());
+        }
+
         /**
          * @brief <BR>Get value carried by the connected link
          * @return Reference to the value of the connected OutPin. Or the default value if not connected
@@ -1319,6 +1330,7 @@ namespace ImFlow
         const T& val();
 
         void setEmptyVal(T& val){m_emptyVal = val;}
+
 
     private:
         std::shared_ptr<Link> m_link;
@@ -1351,6 +1363,11 @@ namespace ImFlow
         ~OutPin() override {
             std::vector<std::weak_ptr<Link>> links = std::move(m_links);
             for (auto &l: links) if (!l.expired()) l.lock()->right()->deleteLink();
+        }
+
+        void drawNodeContent() override
+        {
+            ImGui::Text("%s", m_proto->name.c_str());
         }
 
         /**
