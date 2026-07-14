@@ -20,7 +20,7 @@ bool AtlasImageButton(const char* id, const Asset_t& asset,ImVec2 maxSize) {
 	const ImVec2 maxs(shd.minX + shd.sizeX, shd.minY + shd.sizeY);
 	ImVec2 displaySize(maxSize.x, maxSize.x / dim.width * dim.height);
 	if (displaySize.y > maxSize.y)displaySize.y = maxSize.y;
-	return ImGui::ImageButton(asset.name.c_str(), (ImTextureRef)atlas.GetImageView(),
+	return ImGui::ImageButton(id, (ImTextureRef)atlas.GetImageView(),
 		displaySize, mins, maxs);
 		
 }
@@ -28,7 +28,7 @@ bool AtlasImageButton(const char* id, const Asset_t& asset,ImVec2 maxSize) {
 
 void AssetSelectionPopup(const char* id, uint32_t* hash) {
 	static std::string search = "";
-	if (ImGui::BeginPopup("Asset Selection", ImGuiWindowFlags_MenuBar)) {
+	if (ImGui::BeginPopup(id, ImGuiWindowFlags_MenuBar)) {
 
 		if (ImGui::BeginMenuBar()) {
 			ImGui::Text("Search:");
@@ -47,6 +47,7 @@ void AssetSelectionPopup(const char* id, uint32_t* hash) {
 			if(AtlasImageButton(asset.name.c_str(),asset)) {
 				*hash = assetHash;
 				ImGui::CloseCurrentPopup();
+				break;
 			}
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + 100.f);
 			ImGui::Text("%s", asset.name.c_str());

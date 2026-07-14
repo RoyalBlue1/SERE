@@ -358,7 +358,6 @@ namespace ImFlow
         ImGui::EndGroup();
 
         ImGui::BeginGroup();
-        drawDecoration();
         drawSocket();
         ImGui::EndGroup();
         if (ImGui::IsItemHovered())

@@ -546,8 +546,8 @@ void AssetArgNode::draw() {
 	if(render.arguments.contains(argName)&&(render.arguments[argName].type() == typeid(std::string)))
 		val = std::any_cast<std::string>(render.arguments[argName]);
 	uint32_t hash = loadAsset(val.c_str());
-	if (AtlasImageButton("AssetButton", imageAssetMap[hash])) {
-		ImGui::OpenPopup("Asset Selection");
+	if (AtlasImageButton("AssetButton", hash)) {
+		ImGui::OpenPopup("Default Value");
 	}
 	AssetSelectionPopup("Default Value",&hash);
 	val = imageAssetMap[hash].name;
