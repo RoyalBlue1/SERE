@@ -94,7 +94,13 @@ void ImFlow::InPin<TransformSize>::drawNodeContent()
         if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
             ImGui::SetNextItemWidth(120.f);
-            ImGui::DragScalarN("size",ImGuiDataType_Float,disp,4);
+            ImGui::DragScalar("X",ImGuiDataType_Float,&disp[0],0.02f);
+            ImGui::SetNextItemWidth(120.f);
+            ImGui::DragScalar("Y",ImGuiDataType_Float,&disp[1],0.02f);
+            ImGui::SetNextItemWidth(120.f);
+            ImGui::DragScalar("Z",ImGuiDataType_Float,&disp[2],0.02f);
+            ImGui::SetNextItemWidth(120.f);
+            ImGui::DragScalar("W",ImGuiDataType_Float,&disp[3],0.02f);
             m_emptyVal.size = _mm_load_ps(disp);
             ImGui::TreePop();
         }
