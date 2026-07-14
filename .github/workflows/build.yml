@@ -59,8 +59,14 @@ jobs:
                     libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
                     libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
                     libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                    libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev patchelf
-
+                    libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libglew-dev libtbb-dev  libudev-dev libthai-dev libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+            - name: Setup SDL
+              uses: libsdl-org/setup-sdl@main
+              id: sdl
+              with:
+                  install-linux-dependencies: true
+                  version: 3-latest
+                  version-sdl-image: 3-latest
             - name: Configure CMake
               # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
               # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
