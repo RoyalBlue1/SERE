@@ -6,13 +6,16 @@
 set(SDL_SHARED OFF)
 set(SDL_STATIC ON)
 
-if(WIN32)
+if(WIN32 AND NOT DEFINED ENV{CI})
 	add_subdirectory(Thirdparty/SDL EXCLUDE_FROM_ALL)
 	add_subdirectory(Thirdparty/glew)
-else()
+elseif(LINUX)
 	find_package(SDL3 REQUIRED)
 	find_package(GLEW REQUIRED)
 	find_package(TBB REQUIRED)
+else()
+	add_subdirectory(Thirdparty/glew)
+	find_package(SDL3 REQUIRED)
 endif()
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
