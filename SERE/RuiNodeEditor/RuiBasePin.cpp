@@ -27,7 +27,7 @@ void ImFlow::InPin<Float2Variable>::drawNodeContent()
     }
     else
     {
-        if (ImGui::TreeNode(m_proto->name.c_str()))
+        if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
             ImGui::SetNextItemWidth(120.f);
             ImGui::DragFloat("X",&m_emptyVal.value.x,0.002f,0.f,1.f);
@@ -48,7 +48,7 @@ void ImFlow::InPin<Float3Variable>::drawNodeContent()
     }
     else
     {
-        if (ImGui::TreeNode(m_proto->name.c_str()))
+        if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
             ImGui::SetNextItemWidth(120.f);
             ImGui::DragFloat("X",&m_emptyVal.value.x,0.002f,0.f,1.f);
@@ -91,7 +91,7 @@ void ImFlow::InPin<TransformSize>::drawNodeContent()
     {
         float disp[4];
         _mm_store_ps(disp,m_emptyVal.size);
-        if (ImGui::TreeNode(m_proto->name.c_str()))
+        if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
             ImGui::SetNextItemWidth(120.f);
             ImGui::DragScalarN("size",ImGuiDataType_Float,disp,4);
@@ -113,7 +113,7 @@ void ImFlow::InPin<AssetVariable>::drawNodeContent()
     else
     {
         ImGui::PushItemWidth(120.f);
-        if (ImGui::TreeNode(m_proto->name.c_str()))
+        if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
 
             if (AtlasImageButton("Image",m_emptyVal.hash))
@@ -141,7 +141,7 @@ void ImFlow::InPin<StringVariable>::drawNodeContent()
     }
     else
     {
-        if (ImGui::TreeNode(m_proto->name.c_str()))
+        if (ImGui::TreeNodeEx(m_proto->name.c_str(),ImGuiTreeNodeFlags_SpanLabelWidth))
         {
             ImGui::SetNextItemWidth(120.f);
             ImGui::InputText("Value",&m_emptyVal.value,0);
