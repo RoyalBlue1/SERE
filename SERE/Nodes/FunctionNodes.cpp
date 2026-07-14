@@ -64,9 +64,8 @@ static float getRandomFloat(float min, float max) {
 
 RandomFloatNode::RandomFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
-	randomFloat = getRandomFloat(0.0f, 1.0f);
 	getOut<FloatVariable>("Out")->behaviour([this, outName]() {
-		return FloatVariable(randomFloat, outName);
+		return FloatVariable(GenRandom(), outName);
 		});
 }
 
@@ -75,9 +74,21 @@ RandomFloatNode::RandomFloatNode(RenderInstance& prot, ImFlow::StyleManager& sty
 
 }
 
+
+float RandomFloatNode::GenRandom()
+{
+	if (lastRandomChangedFrame!=ImGui::GetFrameCount())
+	{
+		lastRandomChangedFrame = ImGui::GetFrameCount();
+		randomFloat = getRandomFloat(0.0f, 1.0f);
+	}
+	return randomFloat;
+}
+
+
 void RandomFloatNode::draw()
 {
-	ImGui::Text("Value: %f", randomFloat);
+	ImGui::Text("Value: %f", GenRandom());
 }
 
 void RandomFloatNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
