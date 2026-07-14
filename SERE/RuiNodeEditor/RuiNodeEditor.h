@@ -13,6 +13,7 @@
 #include "RuiNodeEditor/RuiBaseNode.h"
 #include "RuiNodeEditor/RuiVariables.h"
 #include "RuiNodeEditor/RuiExportPrototype.h"
+#include "RuiNodeEditor/RuiBasePin.h"
 
 namespace fs = std::filesystem;
 
