@@ -321,11 +321,6 @@ SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitColorNode(rend,style){}
 
 void SplitColorNode::draw() {
-	const ColorVariable& col = getInVal<ColorVariable>("In");
-	ImGui::Text("%f",col.value.red);
-	ImGui::Text("%f",col.value.green);
-	ImGui::Text("%f",col.value.blue);
-	ImGui::Text("%f",col.value.alpha);
 }
 
 void SplitColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
@@ -413,14 +408,7 @@ RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RGBToColorNode(rend,style){}
 
 void RGBToColorNode::draw() {
-	const FloatVariable& inRed = getInNumeric("Red");
-	const FloatVariable& inGreen = getInNumeric("Green");
-	const FloatVariable& inBlue = getInNumeric("Blue");
-	const FloatVariable& inAlpha = getInNumeric("Alpha");
-	ImGui::Text("%f",inRed.value);
-	ImGui::Text("%f",inGreen.value);
-	ImGui::Text("%f",inBlue.value);
-	ImGui::Text("%f",inAlpha.value);
+
 }
 
 void RGBToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
@@ -557,14 +545,7 @@ HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):HSVToColorNode(rend,style){}
 
 void HSVToColorNode::draw() {
-	const FloatVariable& inRed = getInNumeric("Hue");
-	const FloatVariable& inGreen = getInNumeric("Saturation");
-	const FloatVariable& inBlue = getInNumeric("Vibrance");
-	const FloatVariable& inAlpha = getInNumeric("Alpha");
-	ImGui::Text("%f",inRed.value);
-	ImGui::Text("%f",inGreen.value);
-	ImGui::Text("%f",inBlue.value);
-	ImGui::Text("%f",inAlpha.value);
+
 }
 
 void HSVToColorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
@@ -654,13 +635,6 @@ SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SplitTransformSizeNode(rend, style) {}
 
 void SplitTransformSizeNode::draw() {
-	const TransformSize& in = getInVal<TransformSize>("In");
-	float size[4];
-	_mm_storeu_ps(size, in.size);
-	ImGui::Text("X: %f", size[0]);
-	ImGui::Text("Y: %f", size[1]);
-	ImGui::Text("Z: %f", size[2]);
-	ImGui::Text("W: %f", size[3]);
 
 }
 
@@ -727,15 +701,7 @@ MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 }
 
 void MergeTransformSizeNode::draw() {
-	const FloatVariable& inX = getInNumeric("X");
-	const FloatVariable& inY = getInNumeric("Y");
-	const FloatVariable& inZ = getInNumeric("Z");
-	const FloatVariable& inW = getInNumeric("W");
 
-	ImGui::Text("%f", inX.value);
-	ImGui::Text("%f", inY.value);
-	ImGui::Text("%f", inZ.value);
-	ImGui::Text("%f", inW.value);
 }
 
 void MergeTransformSizeNode::Export(RuiExportPrototype& proto) {
