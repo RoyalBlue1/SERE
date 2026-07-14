@@ -1512,10 +1512,11 @@ void Transform11Node::Export(RuiExportPrototype& proto) {
 std::vector<std::shared_ptr<ImFlow::PinProto>> Transform11Node::GetPinInfo(){
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> info;
 	if(info.size()) return info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<TransformSize>>("Size",ImFlow::ConnectionFilter::SameType(), TransformSize(_mm_set1_ps(64.f))));
+
 	info.push_back(std::make_shared<ImFlow::InPinProto<TransformResult>>("Parent",ImFlow::ConnectionFilter::SameType(), TransformResult()));
 	info.push_back(std::make_shared<ImFlow::InPinProto<Float2Variable>>("Rotation Origin",ImFlow::ConnectionFilter::SameType(), Float2Variable(.5f,.5f))); 
 	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("Rotation",ImFlow::ConnectionFilter::SameType(), FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<TransformSize>>("Size",ImFlow::ConnectionFilter::SameType(), TransformSize(_mm_set1_ps(64.f))));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformResult>>("Out"));
 	return info;
 	
