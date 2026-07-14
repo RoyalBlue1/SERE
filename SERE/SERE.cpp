@@ -239,7 +239,7 @@ bool ReloadAssets(std::string folderPath, std::string customRpakPath = "") {
     };
 
     if (hasGamePakRoot) {
-        std::for_each(std::execution::par, paksToLoad.begin(), paksToLoad.end(), [pakRoot](std::string& pak) {
+        std::for_each(std::execution::seq, paksToLoad.begin(), paksToLoad.end(), [pakRoot](std::string& pak) {
             const fs::path pakPath = pakRoot / pak;
             if (DoesRpakExist(pakPath))
                 LoadRpak(pakPath);

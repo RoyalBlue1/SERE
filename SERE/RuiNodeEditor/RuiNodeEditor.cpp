@@ -495,14 +495,22 @@ void NodeEditor::RightClickPopup(ImFlow::BaseNode* node) {
 					nodeType.AddNode(mINF,render,mINF.getStyleManager());
 				}
 			}
-
+#ifdef _DEBUG
+			if (ImGui::MenuItem("Spawn All Nodes Form Category"))
+			{
+				for (auto& [name,node]:category)
+				{
+					node.AddNode(mINF,render,mINF.getStyleManager());
+				}
+			}
+#endif
 			ImGui::EndMenu();
 		}
 
 	}
 #ifdef _DEBUG
 	if (ImGui::BeginMenu("Debug")) {
-		if (ImGui::MenuItem("Spawn All Node Types")) {
+		if (ImGui::MenuItem("Spawn All Node")) {
 			for (auto& [catName, category] : nodeTypes) {
 				for (auto& [name, node] : category) {
 					node.AddNode(mINF,render,mINF.getStyleManager());

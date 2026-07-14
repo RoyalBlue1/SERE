@@ -6,14 +6,19 @@
 set(SDL_SHARED OFF)
 set(SDL_STATIC ON)
 
-add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
-add_subdirectory(ThirdParty/glew)
-
-set(CMAKE_INCLUDE_CURRENT_DIR,ON)
+if(WIN32)
+	add_subdirectory(Thirdparty/SDL EXCLUDE_FROM_ALL)
+	add_subdirectory(Thirdparty/glew)
+else()
+	find_package(SDL3 REQUIRED)
+	find_package(GLEW REQUIRED)
+	find_package(TBB REQUIRED)
+endif()
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
+set(CMAKE_INCLUDE_CURRENT_DIR,ON)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-find_package(OpenGL)
+
 
 
 add_executable (SERE
@@ -55,6 +60,7 @@ add_executable (SERE
 	"Nodes/FunctionNodes.cpp"
 	
 	"RuiNodeEditor/RuiBaseNode.cpp"
+	"RuiNodeEditor/RuiBasePin.cpp"
 	"RuiNodeEditor/RuiExportPrototype.cpp"
 	"Nodes/ConditionalNodes.cpp"
 	"RenderFrameworks/RenderFramework.cpp"
@@ -73,28 +79,21 @@ add_executable (SERE
 
 target_include_directories(SERE PUBLIC CMAKE_CURRENT_SOURCE_DIR )
 target_link_libraries(SERE PRIVATE SDL3::SDL3)
-target_link_libraries(SERE PRIVATE libglew_static)
 target_link_libraries(SERE PUBLIC ${OPENGL_LIBRARIES})
 
-if(UNIX AND NOT APPLE)
-
-	set_target_properties(SERE PROPERTIES
-		BUILD_RPATH "$ORIGIN"
-		INSTALL_RPATH "$ORIGIN"
-		BUILD_RPATH_USE_ORIGIN TRUE
-		SKIP_BUILD_RPATH FALSE)
-	target_link_options(SERE PRIVATE "LINKER:-rpath,$ORIGIN")
-endif()
 
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Assets ${CMAKE_CURRENT_BINARY_DIR}/Assets)
 add_custom_command(TARGET SERE POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/DroidSans.ttf ${CMAKE_CURRENT_BINARY_DIR}/imgui/DroidSans.ttf)
 
 if(WIN32)
+	target_link_libraries(SERE PRIVATE libglew_static)
 	target_sources(SERE PRIVATE
 	"Imgui/imgui_impl_dx11.cpp"
 	"ThirdParty/DDSTextureLoader11.cpp"
 	"RenderFrameworks/RenderFramework_Dx11.cpp"
 	)
+else()
+	target_link_libraries(SERE PRIVATE GLEW::GLEW TBB::tbb)
 endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

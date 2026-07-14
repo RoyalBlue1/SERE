@@ -188,8 +188,6 @@ void DrawMathValue(const char* label, const MathVariable& value) {
 }
 
 bool CanUseMathOutput(MathVariableType resultType, MathVariableType outputType) {
-	if (resultType == MathVariableType::FLOAT)
-		return true;
 	return resultType == outputType;
 }
 
@@ -445,8 +443,6 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	bool divideByZero = false; \
 	MathVariable res = EvalBinary(OpName, a, b, "", &valid, &divideByZero); \
 	UpdateDynamicMathOutputVisibility(this, res.Type(), valid); \
-	DrawMathValue("A", a); \
-	DrawMathValue("B", b); \
 	if (!valid) { \
 		setStyle(styles.GetErrorStyle()); \
 		ImGui::Text("Mismatched vector sizes"); \
@@ -454,11 +450,9 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	else if (divideByZero) { \
 		setStyle(styles.GetErrorStyle()); \
 		ImGui::Text("Zero divisor"); \
-		DrawMathValue("Res", res); \
 	} \
 	else { \
 		setStyle(styles.GetNodeStyle(category)); \
-		DrawMathValue("Res", res); \
 	}
 
 #define EXPORT_BINARY_NODE(OpName) \
@@ -509,8 +503,6 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
 	MathVariable res = EvalUnary(OpName, a, ""); \
 	UpdateDynamicMathOutputVisibility(this, res.Type(), true); \
 	setStyle(styles.GetNodeStyle(category)); \
-	DrawMathValue("A", a); \
-	DrawMathValue("Res", res);
 
 #define EXPORT_UNARY_NODE(OpName) \
 	MathVariable a = getInMath("A"); \

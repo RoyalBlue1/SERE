@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /SERE/Assets
 /build
+.idea/
