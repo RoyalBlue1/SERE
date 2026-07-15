@@ -34,7 +34,9 @@ public:
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 private:
+	float GenRandom();
 	float randomFloat;
+	int lastRandomChangedFrame;
 };
 
 
