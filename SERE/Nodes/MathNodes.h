@@ -308,3 +308,32 @@ public:
 
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
+
+class MinNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Min";
+	static inline std::string category = "Math";
+private:
+
+public:
+	explicit MinNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit MinNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};
+
+class MaxNode : public RuiBaseNode
+{
+public:
+	static inline std::string name = "Max";
+	static inline std::string category = "Math";
+	explicit MaxNode(RenderInstance& prot, ImFlow::StyleManager& style);
+	explicit MaxNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void draw() override;
+	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
+	void Export(RuiExportPrototype& proto) override;
+	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+};

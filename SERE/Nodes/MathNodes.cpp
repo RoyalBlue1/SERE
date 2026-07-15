@@ -1045,6 +1045,110 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
 	return info;
 }
 
+MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+{
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+		const FloatVariable& a = getInNumeric("A");
+		const FloatVariable& b = getInNumeric("B");
+		return FloatVariable(std::min(a.value, b.value), outName);
+	});
+}
+
+MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(prot, style) {}
+
+void MinNode::draw()
+{
+	
+}
+
+void MinNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void MinNode::Export(RuiExportPrototype& proto)
+{
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const FloatVariable& a = getInNumeric("A");
+	const FloatVariable& b = getInNumeric("B");
+	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	ele.dependencys = { a.name,b.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a, b](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> MinNode::GetPinInfo()
+{
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
+MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+{
+	std::string outName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
+		const FloatVariable& a = getInNumeric("A");
+		const FloatVariable& b = getInNumeric("B");
+		return FloatVariable(std::max(a.value, b.value), outName);
+	});
+}
+
+MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(prot, style) {}
+
+void MaxNode::draw()
+{}
+
+void MaxNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	obj.AddMember("Name", name, allocator);
+	obj.AddMember("Category", category, allocator);
+	RuiBaseNode::Serialize(obj, allocator);
+}
+
+void MaxNode::Export(RuiExportPrototype& proto)
+{
+	const auto& out = getOut<FloatVariable>("Res")->val();
+	const FloatVariable& a = getInNumeric("A");
+	const FloatVariable& b = getInNumeric("B");
+	ExportElement<std::string> ele;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	ele.dependencys = { a.name,b.name };
+	ele.identifier = out.name;
+	ele.callback = [out, a, b](RuiExportPrototype& proto) {
+		if (proto.varsInDataStruct.contains(out.name))
+			proto.codeLines.push_back(std::format("{} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		else
+			proto.codeLines.push_back(std::format("float {} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
+		};
+	proto.codeElements.push_back(ele);
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> MaxNode::GetPinInfo()
+{
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	return info;
+}
+
 void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<AdditionNode>();
 	editor.AddNodeType<MultiplyNode>();
@@ -1063,4 +1167,7 @@ void AddMathNodes(NodeEditor& editor) {
 	editor.AddNodeType<CeilNode>();
 	editor.AddNodeType<TruncNode>();
 	editor.AddNodeType<ClampNode>();
+	editor.AddNodeType<MinNode>();
+	editor.AddNodeType<MaxNode>();
 }
+
