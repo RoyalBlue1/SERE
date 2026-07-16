@@ -22,8 +22,12 @@ public:
 		obj.AddMember("PosX", pos.x, allocator);
 		obj.AddMember("PosY", pos.y, allocator);
 		obj.AddMember("Id", static_cast<uint64_t>(getUID()), allocator);
+		storeInputPinEmptyValues(obj,allocator);
+
 	}
 	virtual void Export(RuiExportPrototype&) = 0;
+	void recreateInputPinEmptyValues(rapidjson::GenericObject<false, rapidjson::Value> obj);
+	void storeInputPinEmptyValues(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator);
 protected:
 	RenderInstance& render;
 	ImFlow::StyleManager& styles;
@@ -81,7 +85,10 @@ template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& 
 		return nullptr;
 	}
 
-	return mINF.recreateNode<T>(pos, uid, proto, styles, obj);
+	std::shared_ptr<RuiBaseNode> res = mINF.recreateNode<T>(pos, uid, proto, styles, obj);
+
+	res->recreateInputPinEmptyValues(obj);
+	return res;
 }
 
 template<class T> NodeType CreateNodeType() {

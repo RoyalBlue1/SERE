@@ -62,3 +62,31 @@ bool isPinMath(const std::type_info& out, const std::type_info& in) {
 		out == typeid(TransformSize) ||
 		out == typeid(MathVariable);
 }
+
+
+void RuiBaseNode::recreateInputPinEmptyValues(rapidjson::GenericObject<false,rapidjson::Value> obj)
+{
+	if (!obj.HasMember("InputPins") || !obj["InputPins"].IsObject())
+		return;
+	for (auto&[name,value]: obj["InputPins"].GetObject())
+	{
+		ImFlow::Pin* in = inPin(name.GetString());
+		if (in)
+		{
+			in->LoadEmptyValue(value);
+		}
+	}
+}
+
+void RuiBaseNode::storeInputPinEmptyValues(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	if (getIns().size() == 0)
+		return;
+	rapidjson::GenericValue<rapidjson::UTF8<>> emptyValues;
+	emptyValues.SetObject();
+	for (auto& in:getIns())
+	{
+		in->StoreEmptyValue(emptyValues,allocator);
+	}
+	obj.AddMember("InputPins", emptyValues,allocator);
+}

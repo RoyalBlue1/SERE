@@ -18,6 +18,24 @@ void ImFlow::InPin<FloatVariable>::drawNodeContent()
     }
 }
 
+template <>
+void ImFlow::InPin<FloatVariable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsFloat())
+        return;
+    m_emptyVal.value = value.GetFloat();
+}
+
+template <>
+void ImFlow::InPin<FloatVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        rapidjson::Value().SetFloat(m_emptyVal.value),
+        allocator);
+}
+
 template<>
 void ImFlow::InPin<Float2Variable>::drawNodeContent()
 {
@@ -37,6 +55,30 @@ void ImFlow::InPin<Float2Variable>::drawNodeContent()
             ImGui::TreePop();
         }
     }
+}
+
+template <>
+void ImFlow::InPin<Float2Variable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsObject())
+        return;
+    if (value.HasMember("X")&&value["X"].IsFloat())
+        m_emptyVal.value.x = value["X"].GetFloat();
+    if (value.HasMember("Y")&&value["Y"].IsFloat())
+        m_emptyVal.value.y = value["Y"].GetFloat();
+}
+
+template <>
+void ImFlow::InPin<Float2Variable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+    rapidjson::GenericValue<rapidjson::UTF8<>> vector;
+    vector.SetObject();
+    vector.AddMember("X",m_emptyVal.value.x,allocator);
+    vector.AddMember("Y",m_emptyVal.value.y,allocator);
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        vector,
+        allocator);
 }
 
 template<>
@@ -62,6 +104,32 @@ void ImFlow::InPin<Float3Variable>::drawNodeContent()
     }
 }
 
+template <>
+void ImFlow::InPin<Float3Variable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsObject())
+        return;
+    if (value.HasMember("X")&&value["X"].IsFloat())
+        m_emptyVal.value.x = value["X"].GetFloat();
+    if (value.HasMember("Y")&&value["Y"].IsFloat())
+        m_emptyVal.value.y = value["Y"].GetFloat();
+    if (value.HasMember("Z")&&value["Z"].IsFloat())
+        m_emptyVal.value.z = value["Z"].GetFloat();
+}
+
+template <>
+void ImFlow::InPin<Float3Variable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+    rapidjson::GenericValue<rapidjson::UTF8<>> vector;
+    vector.SetObject();
+    vector.AddMember("X",m_emptyVal.value.x,allocator);
+    vector.AddMember("Y",m_emptyVal.value.y,allocator);
+    vector.AddMember("Z",m_emptyVal.value.z,allocator);
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        vector,
+        allocator);
+}
 
 template<>
 void ImFlow::InPin<ColorVariable>::drawNodeContent()
@@ -78,6 +146,37 @@ void ImFlow::InPin<ColorVariable>::drawNodeContent()
         ImGui::ColorEdit4(m_proto->name.c_str(),&m_emptyVal.value.red,ImGuiColorEditFlags_NoInputs);
 
     }
+}
+
+template <>
+void ImFlow::InPin<ColorVariable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsObject())
+        return;
+    if (value.HasMember("Red")&&value["Red"].IsFloat())
+        m_emptyVal.value.red = value["Red"].GetFloat();
+    if (value.HasMember("Green")&&value["Green"].IsFloat())
+        m_emptyVal.value.green = value["Green"].GetFloat();
+    if (value.HasMember("Blue")&&value["Blue"].IsFloat())
+        m_emptyVal.value.blue = value["Blue"].GetFloat();
+    if (value.HasMember("Alpha")&&value["Alpha"].IsFloat())
+        m_emptyVal.value.alpha = value["Alpha"].GetFloat();
+}
+
+template <>
+void ImFlow::InPin<ColorVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+    rapidjson::GenericValue<rapidjson::UTF8<>> vector;
+    vector.SetObject();
+    vector.AddMember("Red",m_emptyVal.value.red,allocator);
+    vector.AddMember("Green",m_emptyVal.value.green,allocator);
+    vector.AddMember("Blue",m_emptyVal.value.blue,allocator);
+    vector.AddMember("Alpha",m_emptyVal.value.alpha,allocator);
+
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        vector,
+        allocator);
 }
 
 template<>
@@ -109,6 +208,40 @@ void ImFlow::InPin<TransformSize>::drawNodeContent()
     }
 }
 
+template <>
+void ImFlow::InPin<TransformSize>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsObject())
+        return;
+    float size[4];
+    if (value.HasMember("X")&&value["X"].IsFloat())
+        size[0] = value["X"].GetFloat();
+    if (value.HasMember("Y")&&value["Y"].IsFloat())
+        size[1] = value["Y"].GetFloat();
+    if (value.HasMember("Z")&&value["Z"].IsFloat())
+        size[2] = value["Z"].GetFloat();
+    if (value.HasMember("W")&&value["W"].IsFloat())
+        size[3] = value["W"].GetFloat();
+}
+
+template <>
+void ImFlow::InPin<TransformSize>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+    float size[4];
+    _mm_store_ps(size,m_emptyVal.size);
+    rapidjson::GenericValue<rapidjson::UTF8<>> vector;
+    vector.SetObject();
+    vector.AddMember("X",size[0],allocator);
+    vector.AddMember("Y",size[1],allocator);
+    vector.AddMember("Z",size[2],allocator);
+    vector.AddMember("W",size[3],allocator);
+
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        vector,
+        allocator);
+}
+
 template<>
 void ImFlow::InPin<AssetVariable>::drawNodeContent()
 {
@@ -138,6 +271,18 @@ void ImFlow::InPin<AssetVariable>::drawNodeContent()
     }
 }
 
+template <>
+void ImFlow::InPin<AssetVariable>::LoadEmptyValue(rapidjson::Value& value)
+{
+
+}
+
+template <>
+void ImFlow::InPin<AssetVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+
+}
+
 template<>
 void ImFlow::InPin<StringVariable>::drawNodeContent()
 {
@@ -158,6 +303,23 @@ void ImFlow::InPin<StringVariable>::drawNodeContent()
 }
 
 template <>
+void ImFlow::InPin<StringVariable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsString())
+        return;
+    m_emptyVal.value = value.GetString();
+}
+
+template <>
+void ImFlow::InPin<StringVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        rapidjson::Value(m_emptyVal.value.c_str(),allocator),
+        allocator);
+}
+
+template <>
 void ImFlow::InPin<MathVariable>::drawNodeContent()
 {
     if (isConnected()){
@@ -175,4 +337,23 @@ void ImFlow::InPin<MathVariable>::drawNodeContent()
         }
 
     }
+}
+
+template <>
+void ImFlow::InPin<MathVariable>::LoadEmptyValue(rapidjson::Value& value)
+{
+    if (!value.IsFloat())
+        return;
+    m_emptyVal.value = FloatVariable(value.GetFloat());
+}
+
+template <>
+void ImFlow::InPin<MathVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
+{
+
+    FloatVariable& val = std::get<FloatVariable>(m_emptyVal.value);
+    object.AddMember(
+        rapidjson::Value(m_proto->name.c_str(),allocator),
+        rapidjson::Value().SetFloat(val.value),
+        allocator);
 }
