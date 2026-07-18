@@ -17,6 +17,8 @@
 #include "imgui.h"
 #include "imgui_bezier_math.h"
 #include "context_wrapper.h"
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "ThirdParty/rapidjson/document.h"
 
 //#define ConnectionFilter_None       [](ImFlow::Pin* out, ImFlow::Pin* in){ return true; }
 //#define ConnectionFilter_SameType   [](ImFlow::Pin* out, ImFlow::Pin* in){ return out->getDataType() == in->getDataType(); }
@@ -1147,6 +1149,10 @@ namespace ImFlow
          */
         virtual std::weak_ptr<Link> getLink() { return std::weak_ptr<Link>{}; }
 
+        virtual void LoadEmptyValue(rapidjson::Value& value){}
+        virtual void StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator){}
+
+
         /**
          * @brief <BR>Get pin's UID
          * @return Unique identifier of the pin
@@ -1282,6 +1288,8 @@ namespace ImFlow
         */
         void deleteLink() override { m_link.reset(); }
 
+        void LoadEmptyValue(rapidjson::Value& value) override{}
+        void StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator) override{}
         /**
          * @brief Specify if connections from an output on the same node are allowed
          * @param state New state of the flag
