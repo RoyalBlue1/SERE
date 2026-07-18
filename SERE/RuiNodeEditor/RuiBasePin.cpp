@@ -274,13 +274,18 @@ void ImFlow::InPin<AssetVariable>::drawNodeContent()
 template <>
 void ImFlow::InPin<AssetVariable>::LoadEmptyValue(rapidjson::Value& value)
 {
-
+    if (!value.IsString())
+        return;
+    m_emptyVal.hash = loadAsset(value.GetString());
 }
 
 template <>
 void ImFlow::InPin<AssetVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidjson::UTF8<>>& object, rapidjson::Document::AllocatorType& allocator)
 {
-
+    object.AddMember(
+    rapidjson::Value(m_proto->name.c_str(),allocator),
+    rapidjson::Value(imageAssetMap[m_emptyVal.hash].name.c_str(),allocator),
+    allocator);
 }
 
 template<>
