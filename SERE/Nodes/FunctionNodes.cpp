@@ -7,11 +7,11 @@
 #include <variant>
 #include "Imgui/imgui_stdlib.h"
 
-SetNoRenderNode::SetNoRenderNode(RenderInstance& rend, ImFlow::StyleManager& style)
+SetNoRenderNode::SetNoRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {}
 
-SetNoRenderNode::SetNoRenderNode(RenderInstance& rend, ImFlow::StyleManager& style,
+SetNoRenderNode::SetNoRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : SetNoRenderNode(rend, style)
 {}
 
@@ -62,14 +62,14 @@ static float getRandomFloat(float min, float max) {
 	return dis(gen);
 }
 
-RandomFloatNode::RandomFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+RandomFloatNode::RandomFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Out")->behaviour([this, outName]() {
 		return FloatVariable(GenRandom(), outName);
 		});
 }
 
-RandomFloatNode::RandomFloatNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) : RandomFloatNode(prot, styles)
+RandomFloatNode::RandomFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) : RandomFloatNode(rend, styles)
 {
 
 }
@@ -123,7 +123,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> RandomFloatNode::GetPinInfo()
 }
 
 
-ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ProjectionNode::ProjectionNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<Float2Variable>("Res")->behaviour([this, outName]() {
 		return Float2Variable(Vector2(0.5f, 0.5f), name);
@@ -131,7 +131,7 @@ ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style
 
 }
 
-ProjectionNode::ProjectionNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ProjectionNode(rend, style) {}
+ProjectionNode::ProjectionNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ProjectionNode(rend, style) {}
 
 void ProjectionNode::draw() {
 
@@ -178,8 +178,8 @@ static std::string ToUpper(std::string value)
 	return value;
 }
 
-ToUpperNode::ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles)
-	: RuiBaseNode(name, category, GetPinInfo(), prot, styles)
+ToUpperNode::ToUpperNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles)
+	: RuiBaseNode(name, category, GetPinInfo(), rend, styles)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<StringVariable>("Out")->behaviour([this, outName]() {
@@ -188,8 +188,8 @@ ToUpperNode::ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles)
 		});
 }
 
-ToUpperNode::ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj)
-	: ToUpperNode(prot, styles)
+ToUpperNode::ToUpperNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj)
+	: ToUpperNode(rend, styles)
 {}
 
 void ToUpperNode::draw()
@@ -331,7 +331,7 @@ static std::string PrintfFloatSpecifier(const std::string& options)
 	return "%" + modifiers + (presentation == '\0' ? 'f' : presentation);
 }
 
-LocalizeNode::LocalizeNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+LocalizeNode::LocalizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<StringVariable>("Out")->behaviour([this, outName]() {
 		return StringVariable(fmt, outName);
@@ -339,7 +339,7 @@ LocalizeNode::LocalizeNode(RenderInstance& rend, ImFlow::StyleManager& style) :R
 
 }
 
-LocalizeNode::LocalizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LocalizeNode(rend, style) {
+LocalizeNode::LocalizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LocalizeNode(rend, style) {
 	if (obj.HasMember("Format") && obj["Format"].IsString())
 		fmt = obj["Format"].GetString();
 }
@@ -408,7 +408,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> LocalizeNode::GetPinInfo() {
 	return info;
 }
 
-PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style)
+PrintFNode::PrintFNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
 	const std::string outName = Variable::UniqueName();
@@ -419,7 +419,7 @@ PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style)
 		});
 }
 
-PrintFNode::PrintFNode(RenderInstance& rend, ImFlow::StyleManager& style,
+PrintFNode::PrintFNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
@@ -671,12 +671,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> PrintFNode::GetPinInfo()
 }
 
 
-void AddFunctionNodes(NodeEditor& editor)
+void AddFunctionNodes(const std::unique_ptr<NodeEditor>& editor)
 {
-	editor.AddNodeType<SetNoRenderNode>();
-	editor.AddNodeType<RandomFloatNode>();
-	editor.AddNodeType<ProjectionNode>();
-	editor.AddNodeType<ToUpperNode>();
-	editor.AddNodeType<LocalizeNode>();
-	editor.AddNodeType<PrintFNode>();
+	editor->AddNodeType<SetNoRenderNode>();
+	editor->AddNodeType<RandomFloatNode>();
+	editor->AddNodeType<ProjectionNode>();
+	editor->AddNodeType<ToUpperNode>();
+	editor->AddNodeType<LocalizeNode>();
+	editor->AddNodeType<PrintFNode>();
 }

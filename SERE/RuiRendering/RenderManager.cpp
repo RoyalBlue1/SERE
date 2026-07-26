@@ -800,7 +800,7 @@ void RenderInstance::EndFrame() {
 	});
 
 	for (auto& job : jobs) {
-		job.func(*this);
+		job.func(shared_from_this());
 	}
 	jobs.clear();
 

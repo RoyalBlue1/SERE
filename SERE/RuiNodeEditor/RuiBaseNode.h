@@ -58,12 +58,12 @@ public:
 
 	}
 protected:
-	RenderInstance& render;
+	std::shared_ptr<RenderInstance> render;
 	ImFlow::StyleManager& styles;
 	RuiBaseNode(const std::string& name,
 		const std::string& category,
 		std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,
-		RenderInstance& rend,
+		const std::shared_ptr<RenderInstance>& rend,
 		ImFlow::StyleManager& style
 	) :render(rend), styles(style) {
 		setTitle(name);
@@ -78,8 +78,8 @@ protected:
 };
 
 struct NodeType {
-	std::shared_ptr<RuiBaseNode>(*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& style);
-	std::shared_ptr<RuiBaseNode>(*RecreateNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	std::shared_ptr<RuiBaseNode>(*AddNode)(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& style);
+	std::shared_ptr<RuiBaseNode>(*RecreateNode)(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	std::vector<std::shared_ptr<ImFlow::PinProto>>(*GetPinInfo)();
 };
 
@@ -87,7 +87,7 @@ struct NodeType {
 typedef std::map<std::string, NodeType> NodeCategory;
 
 
-template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& styles) {
+template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& styles) {
 	return mINF.placeNode<T>(proto, styles);
 }
 
@@ -95,7 +95,7 @@ template<class T> std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo() {
 	return T::GetPinInfo();
 }
 
-template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("Id"))return nullptr;
 	if (!(obj.HasMember("PosX") && obj["PosX"].IsNumber()))return nullptr;
 	if (!(obj.HasMember("PosY") && obj["PosY"].IsNumber()))return nullptr;

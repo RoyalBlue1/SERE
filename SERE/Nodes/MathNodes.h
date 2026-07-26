@@ -20,7 +20,7 @@ public:
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 
 protected:
-	explicit BaseMathNode(const std::string& name,const std::string& category,std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit BaseMathNode(const std::string& name,const std::string& category,std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
 
 	void UpdateInPin(const char* name,MathNodeConnectionType& lastConnectionType,std::unordered_map<std::string,std::any>& emptyVals);
 	void UpdateOutPinVisibility();
@@ -36,7 +36,7 @@ private:
 class UnaryMathNode : public BaseMathNode
 {
 protected:
-	explicit UnaryMathNode(const std::string& name,const std::string& category,RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit UnaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
 
 	virtual float Operation(float val) = 0;
 	virtual std::string OperationString(std::string val) = 0;
@@ -59,7 +59,7 @@ public:
 class BinaryMathNode : public BaseMathNode
 {
 protected:
-	explicit BinaryMathNode(const std::string& name,const std::string& category,RenderInstance& prot,ImFlow::StyleManager& styles);
+	explicit BinaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
 
 	virtual float Operation(float a,float b) = 0;
 	virtual std::string OperationString(std::string a,std::string b) = 0;
@@ -79,7 +79,7 @@ public:
 };
 
 
-void AddMathNodes(NodeEditor& editor);
+void AddMathNodes(const std::unique_ptr<NodeEditor>& editor);
 
 class MultiplyNode : public BinaryMathNode
 {
@@ -89,8 +89,8 @@ public:
 
 	
 
-	explicit MultiplyNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit MultiplyNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
@@ -102,8 +102,8 @@ public:
 	static inline std::string name = "Add";
 	static inline std::string category = "Math";
 
-	explicit AdditionNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit AdditionNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 
 protected:
 	float Operation(float a,float b) override;
@@ -119,8 +119,8 @@ public:
 private:
 	
 public:
-	explicit SubtractNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit SubtractNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
@@ -135,8 +135,8 @@ private:
 	std::shared_ptr<ImFlow::NodeStyle> style;
 	std::shared_ptr<ImFlow::NodeStyle> errorStyle;
 public:
-	explicit DivideNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit DivideNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
@@ -152,8 +152,8 @@ private:
 	std::shared_ptr<ImFlow::NodeStyle> style;
 	std::shared_ptr<ImFlow::NodeStyle> errorStyle;
 public:
-	explicit ModuloNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit ModuloNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
@@ -169,8 +169,8 @@ protected:
 	std::string OperationString(std::string val) override;
 
 public:
-	explicit AbsoluteNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit AbsoluteNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 
 };
 
@@ -184,8 +184,8 @@ protected:
 	
 
 public:
-	explicit SineNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit SineNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 
 };
 
@@ -200,8 +200,8 @@ protected:
 	
 
 public:
-	explicit ExponentNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit ExponentNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 
 
 };
@@ -215,8 +215,8 @@ private:
 	
 	Mapping map;
 public:
-	explicit MappingNode(RenderInstance& prot,ImFlow::StyleManager& style);
-	explicit MappingNode(RenderInstance& prot,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -235,8 +235,8 @@ protected:
 
 
 public:
-	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit TangentNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -251,8 +251,8 @@ protected:
 
 
 public:
-	explicit CosineNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit CosineNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -267,8 +267,8 @@ protected:
 
 
 public:
-	explicit SquareRootNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit SquareRootNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -283,8 +283,8 @@ protected:
 
 
 public:
-	explicit RoundNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit RoundNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -299,8 +299,8 @@ protected:
 
 
 public:
-	explicit FloorNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit FloorNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -315,8 +315,8 @@ protected:
 
 
 public:
-	explicit CeilNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit CeilNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -331,8 +331,8 @@ protected:
 
 
 public:
-	explicit TruncNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit TruncNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 };
 
@@ -342,8 +342,8 @@ public:
 	static inline std::string name = "Clamp";
 	static inline std::string category = "Math";
 	
-	explicit ClampNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit ClampNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -358,8 +358,8 @@ public:
 private:
 
 public:
-	explicit MinNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit MinNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -371,8 +371,8 @@ class MaxNode : public RuiBaseNode
 public:
 	static inline std::string name = "Max";
 	static inline std::string category = "Math";
-	explicit MaxNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit MaxNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;

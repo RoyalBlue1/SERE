@@ -7,7 +7,7 @@
      (idx) == 2 ? _mm_cvtss_f32(_mm_shuffle_ps((v), (v), _MM_SHUFFLE(2, 2, 2, 2))) : \
                   _mm_cvtss_f32(_mm_shuffle_ps((v), (v), _MM_SHUFFLE(3, 3, 3, 3))))
 
-SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitFloat2Node::SplitFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string nameX = Variable::UniqueName();
 	getOut<FloatVariable>("X")->behaviour([this,nameX]() {
 		const Float2Variable& in = getInVal<Float2Variable>("In");
@@ -24,7 +24,7 @@ SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& styl
 	});
 }
 
-SplitFloat2Node::SplitFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat2Node(rend,style){}
+SplitFloat2Node::SplitFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat2Node(rend,style){}
 
 void SplitFloat2Node::draw() {
 	const Float2Variable& in = getInVal<Float2Variable>("In");
@@ -80,7 +80,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat2Node::GetPinInfo() {
 	return info;
 }
 
-MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MergeFloat2Node::MergeFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string name = Variable::UniqueName();
 	getOut<Float2Variable>("Out")->behaviour([this,name]() {
 
@@ -92,7 +92,7 @@ MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,ImFlow::StyleManager& styl
 	});
 }
 
-MergeFloat2Node::MergeFloat2Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat2Node(rend,style){}
+MergeFloat2Node::MergeFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat2Node(rend,style){}
 
 void MergeFloat2Node::draw() {
 	const FloatVariable& inX = getInNumeric("X");
@@ -138,7 +138,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat2Node::GetPinInfo() {
 	return info;
 }
 
-SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitFloat3Node::SplitFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	std::string nameX = Variable::UniqueName();
 	getOut<FloatVariable>("X")->behaviour([this,nameX]() {
@@ -162,7 +162,7 @@ SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& styl
 	});
 }
 
-SplitFloat3Node::SplitFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat3Node(rend,style){}
+SplitFloat3Node::SplitFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitFloat3Node(rend,style){}
 
 void SplitFloat3Node::draw() {
 	const Float3Variable& in = getInVal<Float3Variable>("In");
@@ -229,7 +229,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitFloat3Node::GetPinInfo() {
 	return info;
 }
 
-MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MergeFloat3Node::MergeFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	std::string name = Variable::UniqueName();
 	getOut<Float3Variable>("Out")->behaviour([this,name]() {
@@ -244,7 +244,7 @@ MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,ImFlow::StyleManager& styl
 	});
 }
 
-MergeFloat3Node::MergeFloat3Node(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat3Node(rend,style){}
+MergeFloat3Node::MergeFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MergeFloat3Node(rend,style){}
 
 void MergeFloat3Node::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
 	obj.AddMember("Name",name,allocator);
@@ -287,7 +287,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeFloat3Node::GetPinInfo() {
 	return info;
 }
 
-SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SplitColorNode::SplitColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string nameR = Variable::UniqueName();
 	getOut<FloatVariable>("Red")->behaviour([this,nameR]() {
 
@@ -318,7 +318,7 @@ SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 	});
 }
 
-SplitColorNode::SplitColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitColorNode(rend,style){}
+SplitColorNode::SplitColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SplitColorNode(rend,style){}
 
 void SplitColorNode::draw() {
 }
@@ -393,7 +393,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitColorNode::GetPinInfo() {
 	return info;
 }
 
-RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+RGBToColorNode::RGBToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string name = Variable::UniqueName();
 	getOut<ColorVariable>("Out")->behaviour([this,name]() {
 		const FloatVariable& inRed = getInNumeric("Red");
@@ -405,7 +405,7 @@ RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 	});
 }
 
-RGBToColorNode::RGBToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RGBToColorNode(rend,style){}
+RGBToColorNode::RGBToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):RGBToColorNode(rend,style){}
 
 void RGBToColorNode::draw() {
 
@@ -463,7 +463,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> RGBToColorNode::GetPinInfo() {
 	return info;
 }
 
-HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+HSVToColorNode::HSVToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string name = Variable::UniqueName();
 	getOut<ColorVariable>("Out")->behaviour([this,name]() {
 
@@ -542,7 +542,7 @@ HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style)
 	});
 }
 
-HSVToColorNode::HSVToColorNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):HSVToColorNode(rend,style){}
+HSVToColorNode::HSVToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):HSVToColorNode(rend,style){}
 
 void HSVToColorNode::draw() {
 
@@ -600,7 +600,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> HSVToColorNode::GetPinInfo() {
 	return info;
 }
 
-SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style)
+SplitTransformSizeNode::SplitTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
 	std::string name = Variable::UniqueName();
@@ -632,7 +632,7 @@ SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 }
 
 
-SplitTransformSizeNode::SplitTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SplitTransformSizeNode(rend, style) {}
+SplitTransformSizeNode::SplitTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SplitTransformSizeNode(rend, style) {}
 
 void SplitTransformSizeNode::draw() {
 
@@ -681,7 +681,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SplitTransformSizeNode::GetPinInf
 	return info;
 }
 
-MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style)
+MergeTransformSizeNode::MergeTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
 	std::string name = Variable::UniqueName();
@@ -696,7 +696,7 @@ MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::Sty
 		});
 }
 
-MergeTransformSizeNode::MergeTransformSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj)
+MergeTransformSizeNode::MergeTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj)
 	: MergeTransformSizeNode(rend, style) {
 }
 
@@ -744,14 +744,14 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MergeTransformSizeNode::GetPinInf
 	return info;
 }
 
-void AddSplitMergeNodes(NodeEditor& editor) {
-	editor.AddNodeType<SplitFloat2Node>();
-	editor.AddNodeType<MergeFloat2Node>();
-	editor.AddNodeType<SplitFloat3Node>();
-	editor.AddNodeType<MergeFloat3Node>();
-	editor.AddNodeType<SplitColorNode>();
-	editor.AddNodeType<RGBToColorNode>();
-	editor.AddNodeType<HSVToColorNode>();
-	editor.AddNodeType<SplitTransformSizeNode>();
-	editor.AddNodeType<MergeTransformSizeNode>();
+void AddSplitMergeNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<SplitFloat2Node>();
+	editor->AddNodeType<MergeFloat2Node>();
+	editor->AddNodeType<SplitFloat3Node>();
+	editor->AddNodeType<MergeFloat3Node>();
+	editor->AddNodeType<SplitColorNode>();
+	editor->AddNodeType<RGBToColorNode>();
+	editor->AddNodeType<HSVToColorNode>();
+	editor->AddNodeType<SplitTransformSizeNode>();
+	editor->AddNodeType<MergeTransformSizeNode>();
 }

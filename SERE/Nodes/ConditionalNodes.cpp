@@ -336,7 +336,7 @@ void PushConditionalExport(RuiExportPrototype& proto, const T& out, const BoolVa
 }
 }
 
-GreaterNode::GreaterNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+GreaterNode::GreaterNode(const std::shared_ptr<RenderInstance>&rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -350,7 +350,7 @@ GreaterNode::GreaterNode(RenderInstance& rend, ImFlow::StyleManager& style) :Rui
 
 }
 
-GreaterNode::GreaterNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :GreaterNode(rend, style) {}
+GreaterNode::GreaterNode(const std::shared_ptr<RenderInstance>&rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :GreaterNode(rend, style) {}
 
 
 void GreaterNode::draw() {
@@ -397,7 +397,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> GreaterNode::GetPinInfo() {
 	return info;
 }
 
-LessNode::LessNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+LessNode::LessNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -411,7 +411,7 @@ LessNode::LessNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNo
 
 }
 
-LessNode::LessNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LessNode(rend, style) {}
+LessNode::LessNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LessNode(rend, style) {}
 
 
 void LessNode::draw() {
@@ -458,7 +458,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> LessNode::GetPinInfo() {
 	return info;
 }
 
-ConditionalFloatNode::ConditionalFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ConditionalFloatNode::ConditionalFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
 
@@ -477,7 +477,7 @@ ConditionalFloatNode::ConditionalFloatNode(RenderInstance& rend, ImFlow::StyleMa
 
 }
 
-ConditionalFloatNode::ConditionalFloatNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalFloatNode(rend, style) {}
+ConditionalFloatNode::ConditionalFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalFloatNode(rend, style) {}
 
 
 void ConditionalFloatNode::draw() {
@@ -535,7 +535,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ConditionalFloatNode::GetPinInfo(
 	return info;
 }
 
-ConditionalValueNode::ConditionalValueNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ConditionalValueNode::ConditionalValueNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outIntName = Variable::UniqueName();
 	std::string outFloatName = Variable::UniqueName();
 	std::string outFloat2Name = Variable::UniqueName();
@@ -592,7 +592,7 @@ ConditionalValueNode::ConditionalValueNode(RenderInstance& rend, ImFlow::StyleMa
 		});
 }
 
-ConditionalValueNode::ConditionalValueNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalValueNode(rend, style) {}
+ConditionalValueNode::ConditionalValueNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalValueNode(rend, style) {}
 
 bool ConditionalValueNode::CanCreateLink(ImFlow::Pin* pin, ImFlow::Pin* other) {
 	const std::string& pinName = pin->getName();
@@ -721,7 +721,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ConditionalValueNode::GetPinInfo(
 	return info;
 }
 
-EqualFloatNode::EqualFloatNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+EqualFloatNode::EqualFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -735,7 +735,7 @@ EqualFloatNode::EqualFloatNode(RenderInstance& rend, ImFlow::StyleManager& style
 
 }
 
-EqualFloatNode::EqualFloatNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :EqualFloatNode(rend, style) {}
+EqualFloatNode::EqualFloatNode(const std::shared_ptr<RenderInstance>&rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :EqualFloatNode(rend, style) {}
 
 
 void EqualFloatNode::draw() {
@@ -784,7 +784,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> EqualFloatNode::GetPinInfo() {
 
 
 
-NotGateNode::NotGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+NotGateNode::NotGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -797,7 +797,7 @@ NotGateNode::NotGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :Rui
 
 }
 
-NotGateNode::NotGateNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :NotGateNode(rend, style) {}
+NotGateNode::NotGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :NotGateNode(rend, style) {}
 
 
 void NotGateNode::draw() {
@@ -845,7 +845,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> NotGateNode::GetPinInfo() {
 	return info;
 }
 
-AndGateNode::AndGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+AndGateNode::AndGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -859,7 +859,7 @@ AndGateNode::AndGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :Rui
 
 }
 
-AndGateNode::AndGateNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AndGateNode(rend, style) {}
+AndGateNode::AndGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AndGateNode(rend, style) {}
 
 
 void AndGateNode::draw() {
@@ -907,7 +907,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AndGateNode::GetPinInfo() {
 	return info;
 }
 
-OrGateNode::OrGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+OrGateNode::OrGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -921,7 +921,7 @@ OrGateNode::OrGateNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBa
 
 }
 
-OrGateNode::OrGateNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :OrGateNode(rend, style) {}
+OrGateNode::OrGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :OrGateNode(rend, style) {}
 
 
 void OrGateNode::draw() {
@@ -969,7 +969,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> OrGateNode::GetPinInfo() {
 	return info;
 }
 
-EqualStringNode::EqualStringNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+EqualStringNode::EqualStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Res")->behaviour([this, outName]() {
 
@@ -983,7 +983,7 @@ EqualStringNode::EqualStringNode(RenderInstance& rend, ImFlow::StyleManager& sty
 
 }
 
-EqualStringNode::EqualStringNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :EqualStringNode(rend, style) {}
+EqualStringNode::EqualStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :EqualStringNode(rend, style) {}
 
 
 void EqualStringNode::draw() {
@@ -1031,7 +1031,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> EqualStringNode::GetPinInfo() {
 }
 
 
-ConditionalStringNode::ConditionalStringNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ConditionalStringNode::ConditionalStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<StringVariable>("Res")->behaviour([this, outName]() {
 
@@ -1050,7 +1050,7 @@ ConditionalStringNode::ConditionalStringNode(RenderInstance& rend, ImFlow::Style
 
 }
 
-ConditionalStringNode::ConditionalStringNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalStringNode(rend, style) {}
+ConditionalStringNode::ConditionalStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ConditionalStringNode(rend, style) {}
 
 
 void ConditionalStringNode::draw() {
@@ -1108,17 +1108,17 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ConditionalStringNode::GetPinInfo
 	return info;
 }
 
-void AddConditionalNodes(NodeEditor& editor) {
+void AddConditionalNodes(const std::unique_ptr<NodeEditor>& editor) {
 
-	editor.AddNodeType<GreaterNode>();
-	editor.AddNodeType<LessNode>();
-	editor.AddNodeType<ConditionalFloatNode>();
-	editor.AddNodeType<ConditionalValueNode>();
-	editor.AddNodeType<EqualFloatNode>();
-	editor.AddNodeType<AndGateNode>();
-	editor.AddNodeType<NotGateNode>();
-	editor.AddNodeType<OrGateNode>();
-	editor.AddNodeType<EqualStringNode>();
-	editor.AddNodeType<ConditionalStringNode>();
+	editor->AddNodeType<GreaterNode>();
+	editor->AddNodeType<LessNode>();
+	editor->AddNodeType<ConditionalFloatNode>();
+	editor->AddNodeType<ConditionalValueNode>();
+	editor->AddNodeType<EqualFloatNode>();
+	editor->AddNodeType<AndGateNode>();
+	editor->AddNodeType<NotGateNode>();
+	editor->AddNodeType<OrGateNode>();
+	editor->AddNodeType<EqualStringNode>();
+	editor->AddNodeType<ConditionalStringNode>();
 
 }

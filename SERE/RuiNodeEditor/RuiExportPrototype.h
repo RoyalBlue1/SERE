@@ -184,7 +184,7 @@ struct RuiExportPrototype {
 	ArgCluster_t cluster{};
 	std::vector<Argument_t> exportArgs;
 
-	RuiExportPrototype(const RenderInstance& inst,const std::string& name);
+	RuiExportPrototype(const std::shared_ptr<RenderInstance>& inst,const std::string& name);
 
 	void AddConstant(float f);
 	void AddConstant(std::string s);
@@ -219,7 +219,7 @@ struct RuiExportPrototype {
 	void GenerateArguments();
 	void GenerateMappingData();
 	bool GenerateCodeStruct();
-	void Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render);
+	void Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, const std::shared_ptr<RenderInstance>& render);
 
 	void WriteToFile(fs::path path);
 

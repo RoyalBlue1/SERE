@@ -131,10 +131,10 @@ class RenderInstance;
 
 struct RenderJob {
     int layer;
-    std::function<void(RenderInstance& render)> func;
+    std::function<void(const std::shared_ptr<RenderInstance>& render)> func;
 };
 
-class RenderInstance
+class RenderInstance : public std::enable_shared_from_this<RenderInstance>
 {
 
 

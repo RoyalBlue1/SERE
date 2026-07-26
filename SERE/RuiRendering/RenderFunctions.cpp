@@ -13,7 +13,7 @@
 
 #define TAU 6.2831855f
 
-bool Render_Asset(RenderInstance& proto, AssetInputData input) {
+bool Render_Asset(const std::shared_ptr<RenderInstance>& proto, AssetInputData input) {
 
 	__m128 v9; // xmm2
 	__m128 v10; // xmm6
@@ -148,7 +148,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	quad.assetIndex = static_cast<int16_t>(assetIndex);
 	quad.assetIndex2 = assetIndex2;
 	quad.flags = flags;
-	quad.styleDescriptorIndex = proto.styleDescriptor.size();// + pixelBufferElementCount;
+	quad.styleDescriptorIndex = proto->styleDescriptor.size();// + pixelBufferElementCount;
 	StyleDescriptorShader_t desc{};
 
 	desc.color0 = input.mainColor.value;
@@ -156,7 +156,7 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	desc.color2 = input.tertColor.value;
 	desc.blend = input.blend.value;
 	desc.premul = input.premul.value;
-	proto.styleDescriptor.push_back(desc);
+	proto->styleDescriptor.push_back(desc);
 	v39 = _mm_add_ps(_mm_mul_ps(v13, texSize), texMins);
 	v40 = _mm_shuffle_ps(imageAtlases[atlasIndex].offsets[assetIndex].m128_10, imageAtlases[atlasIndex].offsets[assetIndex].m128_10, _MM_SHUFFLE(3, 2, 3, 2));
 	v68 = _mm_mul_ps(v10, texSize);
@@ -263,8 +263,8 @@ bool Render_Asset(RenderInstance& proto, AssetInputData input) {
 	quad.m128_30 = _mm_setzero_ps();
 	quad.m128_40 = _mm_setzero_ps();
 	quad.m128_50 = _mm_setzero_ps();
-	__m128 ruiSize = _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth);
-	proto.sub_F9B80_rev(ruiSize, quad, a5, a6, a7, a8, a9, texMins, texSize);
+	__m128 ruiSize = _mm_set_ps(proto->elementHeightRpc,proto->elementWidthRpc,proto->elementHeight,proto->elementWidth);
+	proto->sub_F9B80_rev(ruiSize, quad, a5, a6, a7, a8, a9, texMins, texSize);
 	return 1;
 
 
@@ -486,7 +486,7 @@ const char* sub_F98F0(const char** a3, int64_t a4, const char* a5)
 	return (const char*)a4;
 }
 
-bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
+bool Render_AssetSmall(const std::shared_ptr<RenderInstance>& proto, AssetCircleInputData data) {
 	int16_t uint8_18; // r9
 
 	int64_t result; // rax
@@ -565,7 +565,7 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 	v22 = (uint16_t)data.flags | (uint8_t)imageAssetMap[assetHash].flags;
 	quad.assetIndex = assetIndex;
 	quad.flags = v22;
-	quad.styleDescriptorIndex = proto.styleDescriptor.size();// + pixelBufferElementCount;
+	quad.styleDescriptorIndex = proto->styleDescriptor.size();// + pixelBufferElementCount;
 	StyleDescriptorShader_t styleDesc;
 	styleDesc.color0 = data.mainColor.value;
 	styleDesc.color1 = data.scndColor.value;
@@ -579,7 +579,7 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 	styleDesc._anon_4 = data.ellipseSize.value.y;
 	styleDesc._anon_5 = data.innerMask.value;
 	styleDesc._anon_6 = 1.0f / fmaxf(1.1754944e-38f, data.vingette.value);
-	proto.styleDescriptor.push_back(styleDesc);
+	proto->styleDescriptor.push_back(styleDesc);
 	v23 = _mm_set_ps(0,0,0,data.mins.value.x);
 	v24 = _mm_set_ps(0,0,0,data.mins.value.y);
 	v25 = _mm_set_ps(0,0,0,data.maxs.value.x);
@@ -593,7 +593,7 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 	;
 	if ( _mm_movemask_ps(_mm_cmple_ps(transform.inputSize,_mm_setzero_ps()))&2 )
 		return 1LL;
-	proto.AddImageAtlasSegment( &imageAtlases[imageAssetMap[assetHash].atlasIndex]);
+	proto->AddImageAtlasSegment( &imageAtlases[imageAssetMap[assetHash].atlasIndex]);
 
 	v35 = _mm_unpacklo_ps(v27, v28);
 	v36 = _mm_setzero_ps();
@@ -670,12 +670,12 @@ bool Render_AssetSmall(RenderInstance& proto, AssetCircleInputData data) {
 	}
 	_mm_storeu_ps(&quad.vert[0][0], v56);
 	_mm_storeu_ps(&quad.vert[2][0], v57);
-	proto.AddQuad(quad);
+	proto->AddQuad(quad);
 	return true;
 }
 
 
-bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult transform) {
+bool Text_Render(const std::shared_ptr<RenderInstance>& proto, TextInputData data, TransformResult transform) {
 
 	__m128 v11; // xmm2
 	__m128 v13; // xmm0
@@ -853,7 +853,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 
 
 	float maxSize = -std::numeric_limits<float>::max();
-	size_t styleDescriptorBase = proto.styleDescriptor.size();
+	size_t styleDescriptorBase = proto->styleDescriptor.size();
 	for (int i = 0; i < 4; i++) {
 		fontArray[i] = getFontByIndex(data.styles[i].fontIndex);
 		FontAtlas_t* atlas = getFontAtlasByIndex(data.styles[i].fontIndex);
@@ -875,7 +875,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 		style._anon_5 = v17 * data.styles[i].boltness.value;
 		style._anon_6 = 1.f / fmaxf(1.1754944e-38f, v17 * data.styles[i].blur.value);
 
-		proto.styleDescriptor.push_back(style);
+		proto->styleDescriptor.push_back(style);
 	}
 
 
@@ -932,8 +932,8 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 			quad.assetIndex2 = -1;
 			quad.styleDescriptorIndex = image.styleId + styleDescriptorBase;
 			quad.flags = 0x1F00;
-			__m128 ruiSize = _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth);
-			proto.sub_F9B80_rev( ruiSize, quad, transform, a6, a7, a8, a9, a10, a11);
+			__m128 ruiSize = _mm_set_ps(proto->elementHeightRpc,proto->elementWidthRpc,proto->elementHeight,proto->elementWidth);
+			proto->sub_F9B80_rev( ruiSize, quad, transform, a6, a7, a8, a9, a10, a11);
 
 
 		}
@@ -942,7 +942,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 	v66 = data.styles[0].fontIndex;
 
 	fontAtlas = getFontAtlasByIndex(v66);
-	proto.AddFontAtlasSegment(fontAtlas);
+	proto->AddFontAtlasSegment(fontAtlas);
 
 	v76 = 0;
 	v77 = 0;
@@ -981,7 +981,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 	v87 = data.float_0;
 	v172 = 0.0;
 	v186 = v87;
-	proto.sub_FFAE0(transform.directionVector, _mm_set_ps(proto.elementHeightRpc,proto.elementWidthRpc,proto.elementHeight,proto.elementWidth), v209);
+	proto->sub_FFAE0(transform.directionVector, _mm_set_ps(proto->elementHeightRpc,proto->elementWidthRpc,proto->elementHeight,proto->elementWidth), v209);
 	v88 = 0.0;
 	a11 = _mm_setzero_ps();
 	v204 = (__m128)_mm_shuffle_ps(transform.inputSize, transform.inputSize, 216);
@@ -1292,7 +1292,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 					_mm_shuffle_ps(v171, v171, 0));
 				//si128 = _mm_load_si128((const __m128i *)v10);
 				TriData tri = transform.GenTri(v150, v148);
-				proto.sub_FEF30( v209, &a9, tri);
+				proto->sub_FEF30( v209, &a9, tri);
 				v153 = _mm_unpackhi_ps(tri.a, tri.b);
 				v154 = _mm_unpacklo_ps(tri.a, tri.b);
 				if (a6 == 2)
@@ -1302,7 +1302,7 @@ bool Text_Render(RenderInstance& proto, TextInputData data, TransformResult tran
 				}
 				_mm_storeu_ps(&quad.vert[0][0], v154);
 				_mm_storeu_ps(&quad.vert[2][0], v153);
-				proto.AddQuad(quad);
+				proto->AddQuad(quad);
 				v101 = v183;
 				v112 = v139;
 				v113 = v140;

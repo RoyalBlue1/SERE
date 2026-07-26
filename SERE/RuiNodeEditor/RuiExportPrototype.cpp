@@ -1,7 +1,7 @@
 #include "RuiNodeEditor/RuiExportPrototype.h"
 
 
-RuiExportPrototype::RuiExportPrototype(const RenderInstance& inst,const std::string& name):size(inst.elementWidth,inst.elementHeight),name(name) {
+RuiExportPrototype::RuiExportPrototype(const std::shared_ptr<RenderInstance>& inst,const std::string& name):size(inst->elementWidth,inst->elementHeight),name(name) {
 	renderJobCount = 0;
 }
 
@@ -517,13 +517,13 @@ bool RuiExportPrototype::GenerateCodeStruct() {
 	return true;
 }
 
-void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, RenderInstance& render) {
+void RuiExportPrototype::Generate(std::unordered_map<ImFlow::NodeUID, std::shared_ptr<ImFlow::BaseNode>>& nodes, const std::shared_ptr<RenderInstance>& render) {
 	for (int i = 0; i < 3; i++)
-		transformIndices.emplace(render.transformResults[i].hash, i);
+		transformIndices.emplace(render->transformResults[i].hash, i);
 	for (auto& [uid, node] : nodes) {
 		std::dynamic_pointer_cast<RuiBaseNode>(node)->Export(*this);
 	}
-	GenerateVariables(render.arguments);
+	GenerateVariables(render->arguments);
 	GenerateTransformData();
 	GenerateRenderJobData();
 	GenerateMappingData();

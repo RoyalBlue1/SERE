@@ -16,8 +16,8 @@ MathNodeConnectionType TypeInfoToConnectionType(const std::type_info& typeInfo)
 	return MathNodeConnectionType::Invalid;
 }
 
-BaseMathNode::BaseMathNode(const std::string& name,const std::string& category,std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,RenderInstance& prot,ImFlow::StyleManager& styles):
-RuiBaseNode(name,category,std::move(pinInfo),prot,styles),
+BaseMathNode::BaseMathNode(const std::string& name,const std::string& category,std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+RuiBaseNode(name,category,std::move(pinInfo),rend,styles),
 nodeName(name),
 nodeCategory(category)
 {}
@@ -154,8 +154,8 @@ void BaseMathNode::UpdateOutPinVisibility()
 	}
 }
 
-UnaryMathNode::UnaryMathNode(const std::string& name,const std::string& category,RenderInstance& prot,ImFlow::StyleManager& styles):
-	BaseMathNode(name,category,GetPinInfo(),prot,styles),
+UnaryMathNode::UnaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+	BaseMathNode(name,category,GetPinInfo(),rend,styles),
 	lastConnectionType(MathNodeConnectionType::None)
 {
 	std::string outFloatName = Variable::UniqueName();
@@ -289,8 +289,8 @@ void UnaryMathNode::draw()
 
 }
 
-BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& category,RenderInstance& prot,ImFlow::StyleManager& styles):
-	BaseMathNode(name,category,GetPinInfo(),prot,styles),
+BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+	BaseMathNode(name,category,GetPinInfo(),rend,styles),
 	lastConnectionType(MathNodeConnectionType::None)
 {
 	std::string outFloatName = Variable::UniqueName();
@@ -486,11 +486,11 @@ void BinaryMathNode::draw()
 }
 
 
-MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style) :
+MultiplyNode::MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style) :
 BinaryMathNode(name, category,rend,style)
 {}
 
-MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
+MultiplyNode::MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
 
 float MultiplyNode::Operation(float a,float b)
 {
@@ -502,11 +502,11 @@ std::string MultiplyNode::OperationString(std::string a,std::string b)
 	return std::format("{} * {}",a,b);
 }
 
-AdditionNode::AdditionNode(RenderInstance& rend,ImFlow::StyleManager& style):
+AdditionNode::AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
 
-AdditionNode::AdditionNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
+AdditionNode::AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
 
 float AdditionNode::Operation(float a,float b)
 {
@@ -518,10 +518,10 @@ std::string AdditionNode::OperationString(std::string a,std::string b)
 	return std::format("{} + {}",a,b);
 }
 
-SubtractNode::SubtractNode(RenderInstance& rend,ImFlow::StyleManager& style):
+SubtractNode::SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
-SubtractNode::SubtractNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
+SubtractNode::SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
 
 float SubtractNode::Operation(float a,float b)
 {
@@ -533,12 +533,12 @@ std::string SubtractNode::OperationString(std::string a,std::string b)
 	return std::format("{} - {}",a,b);
 }
 
-DivideNode::DivideNode(RenderInstance& rend,ImFlow::StyleManager& style):
+DivideNode::DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
 
 
-DivideNode::DivideNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
+DivideNode::DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
 
 float DivideNode::Operation(float a,float b)
 {
@@ -550,12 +550,12 @@ std::string DivideNode::OperationString(std::string a,std::string b)
 	return std::format("{} / {}",a,b);
 }
 
-ModuloNode::ModuloNode(RenderInstance& rend,ImFlow::StyleManager& style):
+ModuloNode::ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
 
 
-ModuloNode::ModuloNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
+ModuloNode::ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
 
 float ModuloNode::Operation(float a,float b)
 {
@@ -567,11 +567,11 @@ std::string ModuloNode::OperationString(std::string a,std::string b)
 	return std::format("std::fmodf({}, {})",a,b);
 }
 
-AbsoluteNode::AbsoluteNode(RenderInstance& rend,ImFlow::StyleManager& style):
+AbsoluteNode::AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 UnaryMathNode(name, category,rend,style)
 {}
 
-AbsoluteNode::AbsoluteNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
+AbsoluteNode::AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
 
 float AbsoluteNode::Operation(float a)
 {
@@ -583,11 +583,11 @@ std::string AbsoluteNode::OperationString(std::string a)
 	return std::format("std::abs({})",a);
 }
 
-SineNode::SineNode(RenderInstance& rend,ImFlow::StyleManager& style):
+SineNode::SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 UnaryMathNode(name, category,rend,style)
 {}
 
-SineNode::SineNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
+SineNode::SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
 
 float SineNode::Operation(float a)
 {
@@ -599,11 +599,11 @@ std::string SineNode::OperationString(std::string a)
 	return std::format("std::sinf({})",a);
 }
 
-ExponentNode::ExponentNode(RenderInstance& rend,ImFlow::StyleManager& style):
+ExponentNode::ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
 
-ExponentNode::ExponentNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
+ExponentNode::ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
 
 float ExponentNode::Operation(float a,float b)
 {
@@ -615,7 +615,7 @@ std::string ExponentNode::OperationString(std::string a,std::string b)
 	return std::format("std::pow({},{})",a,b);
 }
 
-MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+MappingNode::MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this,outName]() {
 		const FloatVariable& a = getInNumeric("A");
@@ -624,7 +624,7 @@ MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 
 }
 
-MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){
+MappingNode::MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){
 	if(obj.HasMember("CubicSpline")&&obj["CubicSpline"].IsBool())
 		map.cubicSpline = obj["CubicSpline"].GetBool();
 	if(obj.HasMember("ControlPoints")&&obj["ControlPoints"].IsArray()) {
@@ -704,11 +704,11 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 	return info;
 }
 
-TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+TangentNode::TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
+TangentNode::TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
 
 float TangentNode::Operation(float a)
 {
@@ -720,11 +720,11 @@ std::string TangentNode::OperationString(std::string a)
 	return std::format("std::tanf({})",a);
 }
 
-CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+CosineNode::CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CosineNode(rend, style) {}
+CosineNode::CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CosineNode(rend, style) {}
 
 float CosineNode::Operation(float a)
 {
@@ -736,11 +736,11 @@ std::string CosineNode::OperationString(std::string a)
 	return std::format("std::cosf({})",a);
 }
 
-SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+SquareRootNode::SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SquareRootNode(rend, style) {}
+SquareRootNode::SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SquareRootNode(rend, style) {}
 
 float SquareRootNode::Operation(float a)
 {
@@ -752,11 +752,11 @@ std::string SquareRootNode::OperationString(std::string a)
 	return std::format("std::sqrtf({})",a);
 }
 
-RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+RoundNode::RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :RoundNode(rend, style) {}
+RoundNode::RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :RoundNode(rend, style) {}
 
 float RoundNode::Operation(float a)
 {
@@ -768,11 +768,11 @@ std::string RoundNode::OperationString(std::string a)
 	return std::format("std::roundf({})",a);
 }
 
-FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+FloorNode::FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :FloorNode(rend, style) {}
+FloorNode::FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :FloorNode(rend, style) {}
 
 float FloorNode::Operation(float a)
 {
@@ -785,11 +785,11 @@ std::string FloorNode::OperationString(std::string a)
 }
 
 
-CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+CeilNode::CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CeilNode(rend, style) {}
+CeilNode::CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CeilNode(rend, style) {}
 
 float CeilNode::Operation(float a)
 {
@@ -801,11 +801,11 @@ std::string CeilNode::OperationString(std::string a)
 	return std::format("std::ceilf({})",a);
 }
 
-TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style) :
+TruncNode::TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
 
-TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TruncNode(rend, style) {}
+TruncNode::TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TruncNode(rend, style) {}
 
 float TruncNode::Operation(float a)
 {
@@ -818,7 +818,7 @@ std::string TruncNode::OperationString(std::string a)
 }
 
 
-ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ClampNode::ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
 
@@ -834,7 +834,7 @@ ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBase
 
 }
 
-ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ClampNode(rend, style) {}
+ClampNode::ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ClampNode(rend, style) {}
 
 void ClampNode::draw() {
 	const FloatVariable& min = getInNumeric("Min");
@@ -892,7 +892,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
 	return info;
 }
 
-MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -902,7 +902,7 @@ MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode
 	});
 }
 
-MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(prot, style) {}
+MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(rend, style) {}
 
 void MinNode::draw()
 {
@@ -945,7 +945,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MinNode::GetPinInfo()
 	return info;
 }
 
-MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -955,7 +955,7 @@ MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode
 	});
 }
 
-MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(prot, style) {}
+MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(rend, style) {}
 
 void MaxNode::draw()
 {}
@@ -996,25 +996,25 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MaxNode::GetPinInfo()
 	return info;
 }
 
-void AddMathNodes(NodeEditor& editor) {
-	editor.AddNodeType<AdditionNode>();
-	editor.AddNodeType<MultiplyNode>();
-	editor.AddNodeType<SubtractNode>();
-	editor.AddNodeType<DivideNode>();
-	editor.AddNodeType<ModuloNode>();
-	editor.AddNodeType<AbsoluteNode>();
-	editor.AddNodeType<SineNode>();
-	editor.AddNodeType<ExponentNode>();
-	editor.AddNodeType<MappingNode>();
-	editor.AddNodeType<TangentNode>();
-	editor.AddNodeType<CosineNode>();
-	editor.AddNodeType<SquareRootNode>();
-	editor.AddNodeType<RoundNode>();
-	editor.AddNodeType<FloorNode>();
-	editor.AddNodeType<CeilNode>();
-	editor.AddNodeType<TruncNode>();
-	editor.AddNodeType<ClampNode>();
-	editor.AddNodeType<MinNode>();
-	editor.AddNodeType<MaxNode>();
+void AddMathNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<AdditionNode>();
+	editor->AddNodeType<MultiplyNode>();
+	editor->AddNodeType<SubtractNode>();
+	editor->AddNodeType<DivideNode>();
+	editor->AddNodeType<ModuloNode>();
+	editor->AddNodeType<AbsoluteNode>();
+	editor->AddNodeType<SineNode>();
+	editor->AddNodeType<ExponentNode>();
+	editor->AddNodeType<MappingNode>();
+	editor->AddNodeType<TangentNode>();
+	editor->AddNodeType<CosineNode>();
+	editor->AddNodeType<SquareRootNode>();
+	editor->AddNodeType<RoundNode>();
+	editor->AddNodeType<FloorNode>();
+	editor->AddNodeType<CeilNode>();
+	editor->AddNodeType<TruncNode>();
+	editor->AddNodeType<ClampNode>();
+	editor->AddNodeType<MinNode>();
+	editor->AddNodeType<MaxNode>();
 }
 

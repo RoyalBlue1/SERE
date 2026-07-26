@@ -4,7 +4,7 @@
 
 
 
-IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+IntVarNode::IntVarNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	value = 0;
@@ -14,7 +14,7 @@ IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style):RuiBas
 	});
 }
 
-IntVarNode::IntVarNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):IntVarNode(rend,style) {
+IntVarNode::IntVarNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):IntVarNode(rend,style) {
 
 	if(obj.HasMember("Value")&&obj["Value"].IsInt())
 		value = obj["Value"].GetInt();
@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> IntVarNode::GetPinInfo() {
 	return info;
 }
 
-BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+BoolVarNode::BoolVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value = false;
 
@@ -55,7 +55,7 @@ BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 	});
 }
 
-BoolVarNode::BoolVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):BoolVarNode(rend,style) {
+BoolVarNode::BoolVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):BoolVarNode(rend,style) {
 
 
 	if(obj.HasMember("Value")&&obj["Value"].IsBool())
@@ -86,7 +86,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BoolVarNode::GetPinInfo() {
 	return info;
 }
 
-FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+FloatVarNode::FloatVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -97,7 +97,7 @@ FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 	});
 }
 
-FloatVarNode::FloatVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):FloatVarNode(rend,style) {
+FloatVarNode::FloatVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):FloatVarNode(rend,style) {
 
 
 	if(obj.HasMember("Min")&&obj["Min"].IsNumber())
@@ -139,7 +139,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> FloatVarNode::GetPinInfo() {
 	return info;
 }
 
-Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float2VarNode::Float2VarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 1;
@@ -152,7 +152,7 @@ Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float2VarNode::Float2VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float2VarNode(rend,style) {
+Float2VarNode::Float2VarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float2VarNode(rend,style) {
 
 
 
@@ -199,7 +199,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float2VarNode::GetPinInfo() {
 	return info;
 }
 
-Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float3VarNode::Float3VarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 
 	minVal = 0;
@@ -214,7 +214,7 @@ Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float3VarNode::Float3VarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float3VarNode(rend,style) {
+Float3VarNode::Float3VarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float3VarNode(rend,style) {
 
 
 
@@ -263,7 +263,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float3VarNode::GetPinInfo() {
 	return info;
 }
 
-ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+ColorVarNode::ColorVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	value[0] = 1.f;
 	value[1] = 1.f;
@@ -276,7 +276,7 @@ ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 	});
 }
 
-ColorVarNode::ColorVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ColorVarNode(rend,style) {
+ColorVarNode::ColorVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ColorVarNode(rend,style) {
 
 	if(obj.HasMember("Value_Red")&&obj["Value_Red"].IsNumber())
 		value[0] = obj["Value_Red"].GetFloat();
@@ -316,14 +316,14 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ColorVarNode::GetPinInfo() {
 	return info;
 }
 
-StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+StringVarNode::StringVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<StringVariable>("Value")->behaviour([this]() {
 		return StringVariable(value);
 	});
 }
 
-StringVarNode::StringVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):StringVarNode(rend,style) {
+StringVarNode::StringVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):StringVarNode(rend,style) {
 
 	if(obj.HasMember("Value")&&obj["Value"].IsString())
 		value = obj["Value"].GetString();
@@ -353,7 +353,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> StringVarNode::GetPinInfo() {
 	return info;
 }
 
-AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetVarNode::AssetVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	hash = loadAsset("white");
 	showSelectionUi = false;
@@ -363,7 +363,7 @@ AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 	});
 }
 
-AssetVarNode::AssetVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetVarNode(rend,style) {
+AssetVarNode::AssetVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetVarNode(rend,style) {
 
 	hash = loadAsset("white");
 	if (obj.HasMember("AssetName") && obj["AssetName"].IsString()) {
@@ -408,7 +408,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetVarNode::GetPinInfo() {
 	return info;
 }
 
-SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SizeVarNode::SizeVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	minVal = 0;
 	maxVal = 128;
@@ -426,7 +426,7 @@ SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 	});
 }
 
-SizeVarNode::SizeVarNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SizeVarNode(rend,style) {
+SizeVarNode::SizeVarNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SizeVarNode(rend,style) {
 
 
 	if(obj.HasMember("Min")&&obj["Min"].IsNumber())
@@ -477,14 +477,14 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> SizeVarNode::GetPinInfo() {
 	return info;
 }
 
-void AddConstantVarNodes(NodeEditor& editor) {
-	editor.AddNodeType<IntVarNode>();
-	editor.AddNodeType<BoolVarNode>();
-	editor.AddNodeType<FloatVarNode>();
-	editor.AddNodeType<Float2VarNode>();
-	editor.AddNodeType<Float3VarNode>();
-	editor.AddNodeType<ColorVarNode>();
-	editor.AddNodeType<StringVarNode>();
-	editor.AddNodeType<AssetVarNode>();
-	editor.AddNodeType<SizeVarNode>();
+void AddConstantVarNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<IntVarNode>();
+	editor->AddNodeType<BoolVarNode>();
+	editor->AddNodeType<FloatVarNode>();
+	editor->AddNodeType<Float2VarNode>();
+	editor->AddNodeType<Float3VarNode>();
+	editor->AddNodeType<ColorVarNode>();
+	editor->AddNodeType<StringVarNode>();
+	editor->AddNodeType<AssetVarNode>();
+	editor->AddNodeType<SizeVarNode>();
 }
