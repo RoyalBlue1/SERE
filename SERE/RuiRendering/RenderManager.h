@@ -6,19 +6,18 @@
 #include <map>
 #include <string>
 #include <any>
-
-
-class RenderInstance;
-
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Imgui/imgui.h"
-//#include "IntTypes.h"
 #include "FontAtlas.h"
 #include "ImageAtlas.h"
-#include "ShaderStructs.h"
 #include "Util.h"
-#include "RuiNodeEditor/RuiVariables.h"
 #include "RenderFrameworks/RenderFramework.h"
+class RenderInstance;
+
+#include "ShaderStructs.h"
+
+#include "RuiNodeEditor/RuiVariables.h"
+
 
 struct DrawInfoUnknown3
 {

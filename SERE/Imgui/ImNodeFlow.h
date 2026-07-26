@@ -974,23 +974,24 @@ namespace ImFlow
 
         template<typename T>
         std::shared_ptr<InPin<T>> getIn(const char* uid);
-
+    protected:
+        ImNodeFlow* m_inf = nullptr;
+        std::vector<std::shared_ptr<Pin>> m_ins;
+        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicIns;
+        std::vector<std::shared_ptr<Pin>> m_outs;
+        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicOuts;
     private:
         NodeUID m_uid = 0;
         std::string m_title;
         ImVec2 m_pos, m_posTarget;
         ImVec2 m_size;
-        ImNodeFlow* m_inf = nullptr;
         ImDrawListSplitter m_splitter;
         std::shared_ptr<NodeStyle> m_style;
         bool m_selected = false, m_selectedNext = false;
         bool m_dragged = false;
         bool m_destroyed = false;
 
-        std::vector<std::shared_ptr<Pin>> m_ins;
-        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicIns;
-        std::vector<std::shared_ptr<Pin>> m_outs;
-        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicOuts;
+
     };
 
     // -----------------------------------------------------------------------------------------------------------------

@@ -1,17 +1,17 @@
 #pragma once
 #include <memory>
-#include <set>
-#include "Util.h"
-
-#include "Imgui/ImNodeFlow.h"
-
-
-class RuiBaseNode;
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"
+
+#include "Imgui/ImNodeFlow.h"
 #include "RuiRendering/RenderManager.h"
-#include "RuiNodeEditor/Mapping.h"
+
+class RuiBaseNode;
+
+
+
+
 #include "RuiNodeEditor/RuiExportPrototype.h"
 
 
@@ -28,11 +28,40 @@ public:
 	virtual void Export(RuiExportPrototype&) = 0;
 	void recreateInputPinEmptyValues(rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void storeInputPinEmptyValues(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator);
+	template <typename T> void storePin(const char* name,std::unordered_map<std::string,std::any>& defaultVals)
+	{
+		std::string typeName = typeid(T).name();
+		std::any value = getInVal<T>(name);
+		defaultVals[typeName] = value;
+	}
+	template <typename T> std::shared_ptr<ImFlow::InPin<T>> recreatePin(const char* name,std::function<bool(const std::type_info&, const std::type_info&)> selectionFunc,std::unordered_map<std::string,std::any>& defaultVals)
+	{
+		std::string typeName = typeid(T).name();
+		if (!defaultVals.contains(typeName))
+			defaultVals[typeName] = T();
+		auto info = std::make_shared<ImFlow::InPinProto<T>>(name, selectionFunc, std::any_cast<T>(defaultVals[typeName]));
+
+		ImFlow::PinUID h = std::hash<std::string>{}(name);
+		for (auto it = m_ins.begin(); it != m_ins.end(); it++)
+		{
+			if (it->get()->getUid() == h)
+			{
+				auto pin = std::make_shared<ImFlow::InPin<T>>(h,info,std::any_cast<T>(defaultVals[typeName]),styles.GetPinStyle(typeName),this,&m_inf);
+				*it = pin;
+				return pin;
+			}
+		}
+
+
+
+		return addIN<T>(info,std::any_cast<T>(defaultVals[typeName]),styles.GetPinStyle(typeName));
+
+	}
 protected:
 	RenderInstance& render;
 	ImFlow::StyleManager& styles;
-	RuiBaseNode(std::string name,
-		std::string category,
+	RuiBaseNode(const std::string& name,
+		const std::string& category,
 		std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,
 		RenderInstance& rend,
 		ImFlow::StyleManager& style
