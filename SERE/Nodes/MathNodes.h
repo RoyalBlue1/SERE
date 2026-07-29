@@ -40,6 +40,7 @@ protected:
 
 	virtual float Operation(float val) = 0;
 	virtual std::string OperationString(std::string val) = 0;
+	virtual std::string OperationStringM128(std::string val) = 0;
 
 	MathNodeConnectionType GetConnectionRestrictions() override;
 
@@ -63,11 +64,14 @@ protected:
 
 	virtual float Operation(float a,float b) = 0;
 	virtual std::string OperationString(std::string a,std::string b) = 0;
+	virtual std::string OperationStringM128(std::string a,std::string b) = 0;
 
 	MathNodeConnectionType GetConnectionRestrictions() override;
 
-	std::unordered_map<std::string,std::any> inPinEmptyVal;
-	MathNodeConnectionType lastConnectionType;
+	std::unordered_map<std::string,std::any> aPinEmptyVal;
+	std::unordered_map<std::string,std::any> bPinEmptyVal;
+	MathNodeConnectionType aLastConnectionType;
+	MathNodeConnectionType bLastConnectionType;
 public:
 
 	void draw() override;
@@ -94,6 +98,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 };
 
 class AdditionNode : public BinaryMathNode
@@ -108,6 +114,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 };
 
 
@@ -124,6 +132,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 };
 
 class DivideNode : public BinaryMathNode
@@ -140,6 +150,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 };
 
 class ModuloNode : public BinaryMathNode
@@ -157,6 +169,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 };
 
 class AbsoluteNode : public UnaryMathNode
@@ -167,7 +181,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 public:
 	explicit AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
 	explicit AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
@@ -181,7 +195,7 @@ class SineNode : public UnaryMathNode
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-	
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
@@ -197,7 +211,8 @@ public:
 protected:
 	float Operation(float a,float b) override;
 	std::string OperationString(std::string a,std::string b) override;
-	
+	std::string OperationStringM128(std::string a,std::string b) override;
+
 
 public:
 	explicit ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
@@ -232,7 +247,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -248,7 +263,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -264,7 +279,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -280,7 +295,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -296,7 +311,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -312,7 +327,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
@@ -328,7 +343,7 @@ public:
 protected:
 	float Operation(float val) override;
 	std::string OperationString(std::string val) override;
-
+	std::string OperationStringM128(std::string val) override;
 
 public:
 	explicit TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);

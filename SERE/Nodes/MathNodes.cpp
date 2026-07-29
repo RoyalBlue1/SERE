@@ -279,7 +279,117 @@ bool UnaryMathNode::CanCreateLink(ImFlow::Pin* own, ImFlow::Pin* other)
 
 void UnaryMathNode::Export(RuiExportPrototype& proto)
 {
+	std::string outName;
+	std::string inName;
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Invalid:
+		return;
+	case MathNodeConnectionType::Float:
+		outName = getOut<FloatVariable>("Res")->val().name;
+		inName = getIn<FloatVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float2:
+		outName = getOut<Float2Variable>("Res")->val().name;
+		inName = getIn<Float2Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float3:
+		outName = getOut<Float3Variable>("Res")->val().name;
+		inName = getIn<Float3Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Color:
+		outName = getOut<ColorVariable>("Res")->val().name;
+		inName = getIn<ColorVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Size:
+		outName = getOut<TransformSize>("Res")->val().name;
+		inName = getIn<TransformSize>("In")->val().name;
+	default:
+		return;
+	}
 
+	ExportElement<std::string> ele;
+	ele.dependencys = {inName};
+	ele.identifier = outName;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::Float:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<FloatVariable>("In");
+			auto res = getOut<FloatVariable>("Res")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"float";
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,res.GetFormattedName(proto),OperationString(in.GetFormattedName(proto))));
+
+		};
+		break;
+	case MathNodeConnectionType::Float2:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<Float2Variable>("In");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector2({},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.y",in.GetFormattedName(proto)))
+			));
+		};
+		break;
+	case MathNodeConnectionType::Float3:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<Float3Variable>("In");
+			auto res = getOut<Float3Variable>("Res Vector3")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector3";
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector3({},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.y",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.z",in.GetFormattedName(proto)))
+			));
+		};
+	case MathNodeConnectionType::Color:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<ColorVariable>("In");
+			auto res = getOut<ColorVariable>("Res Color")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Color";
+			proto.codeLines.push_back(std::format(
+				"{} {} = Color({},{},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.red",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.green",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.blue",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.alpha",in.GetFormattedName(proto)))
+			));
+		};
+		break;
+	case MathNodeConnectionType::Size:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<TransformSize>("In");
+			auto res = getOut<TransformSize>("Res Size")->val();
+			proto.codeLines.push_back(std::format(
+				"_m128 {} = {}",
+				res.GetFormattedName(proto),
+				OperationStringM128(in.GetFormattedName(proto))
+			));
+		};
+		break;
+	default:
+		return;
+	}
+	proto.codeElements.push_back(ele);
 }
 
 void UnaryMathNode::draw()
@@ -291,7 +401,8 @@ void UnaryMathNode::draw()
 
 BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
 	BaseMathNode(name,category,GetPinInfo(),rend,styles),
-	lastConnectionType(MathNodeConnectionType::None)
+	aLastConnectionType(MathNodeConnectionType::None),
+	bLastConnectionType(MathNodeConnectionType::None)
 {
 	std::string outFloatName = Variable::UniqueName();
 	std::string outFloat2Name = Variable::UniqueName();
@@ -475,12 +586,190 @@ bool BinaryMathNode::CanCreateLink(ImFlow::Pin* own, ImFlow::Pin* other)
 
 void BinaryMathNode::Export(RuiExportPrototype& proto)
 {
+	std::string outName;
+	std::string inName;
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Invalid:
+		return;
+	case MathNodeConnectionType::Float:
+		outName = getOut<FloatVariable>("Res")->val().name;
+		inName = getIn<FloatVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float2:
+		outName = getOut<Float2Variable>("Res")->val().name;
+		inName = getIn<Float2Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float3:
+		outName = getOut<Float3Variable>("Res")->val().name;
+		inName = getIn<Float3Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Color:
+		outName = getOut<ColorVariable>("Res")->val().name;
+		inName = getIn<ColorVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Size:
+		outName = getOut<TransformSize>("Res")->val().name;
+		inName = getIn<TransformSize>("In")->val().name;
+	default:
+		return;
+	}
 
+	ExportElement<std::string> ele;
+	ele.dependencys = {inName};
+	ele.identifier = outName;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::Float:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<FloatVariable>("A");
+			auto b = getInVal<FloatVariable>("B");
+			auto res = getOut<FloatVariable>("Res")->val();
+
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"float";
+			proto.codeLines.push_back(std::format("{} {} = {};",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(a.GetFormattedName(proto),b.GetFormattedName(proto))
+			));
+
+		};
+		break;
+	case MathNodeConnectionType::Float2:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<Float2Variable>("A");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
+			std::string bx;
+			std::string by;
+			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(Float2Variable))
+			{
+				auto b = getInVal<Float2Variable>("B");
+				bx = std::format("{}.x",b.GetFormattedName(proto));
+				by = std::format("{}.y",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bx = b.GetFormattedName(proto);
+				by = bx;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector2({},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",a.GetFormattedName(proto)),bx),
+				OperationString(std::format("{}.y",a.GetFormattedName(proto)),by)
+			));
+		};
+		break;
+	case MathNodeConnectionType::Float3:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<Float3Variable>("A");
+			auto res = getOut<Float3Variable>("Res Vector3")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector3";
+			std::string bx;
+			std::string by;
+			std::string bz;
+			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(Float3Variable))
+			{
+				auto b = getInVal<Float3Variable>("B");
+				bx = std::format("{}.x",b.GetFormattedName(proto));
+				by = std::format("{}.y",b.GetFormattedName(proto));
+				bz = std::format("{}.z",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bx = b.GetFormattedName(proto);
+				by = bx;
+				bz = bx;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector3({},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",a.GetFormattedName(proto)),bx),
+				OperationString(std::format("{}.y",a.GetFormattedName(proto)),by),
+				OperationString(std::format("{}.z",a.GetFormattedName(proto)),bz)
+			));
+		};
+	case MathNodeConnectionType::Color:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<ColorVariable>("A");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
+			std::string bRed;
+			std::string bGreen;
+			std::string bBlue;
+			std::string bAlpha;
+			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(ColorVariable))
+			{
+				auto b = getInVal<ColorVariable>("B");
+				bRed = std::format("{}.red",b.GetFormattedName(proto));
+				bGreen = std::format("{}.green",b.GetFormattedName(proto));
+				bBlue = std::format("{}.blue",b.GetFormattedName(proto));
+				bAlpha = std::format("{}.alpha",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bRed = b.GetFormattedName(proto);
+				bGreen = bRed;
+				bBlue = bRed;
+				bAlpha = bRed;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Color({},{},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.red",a.GetFormattedName(proto)),bRed),
+				OperationString(std::format("{}.green",a.GetFormattedName(proto)),bGreen),
+				OperationString(std::format("{}.blue",a.GetFormattedName(proto)),bBlue),
+				OperationString(std::format("{}.alpha",a.GetFormattedName(proto)),bAlpha)
+			));
+		};
+		break;
+	case MathNodeConnectionType::Size:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<TransformSize>("A");
+			auto res = getOut<TransformSize>("Res Size")->val();
+			std::string bName;
+			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(TransformSize))
+			{
+				auto b = getInVal<TransformSize>("B");
+				bName = b.GetFormattedName(proto);
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bName = std::format("_mm_set1_ps({})",b.GetFormattedName(proto));
+			}
+			proto.codeLines.push_back(std::format(
+				"_m128 {} = {}",
+				res.GetFormattedName(proto),
+				OperationStringM128(a.GetFormattedName(proto),bName)
+			));
+		};
+		break;
+	default:
+		return;
+	}
+	proto.codeElements.push_back(ele);
 }
 
 void BinaryMathNode::draw()
 {
-	UpdateInPin("A",lastConnectionType,inPinEmptyVal);
+	UpdateInPin("A",aLastConnectionType,aPinEmptyVal);
+	UpdateInPin("B",bLastConnectionType,bPinEmptyVal);
 	UpdateOutPinVisibility();
 
 }
@@ -502,6 +791,11 @@ std::string MultiplyNode::OperationString(std::string a,std::string b)
 	return std::format("{} * {}",a,b);
 }
 
+std::string MultiplyNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_mul_ps({},{})",a,b);
+}
+
 AdditionNode::AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
@@ -518,6 +812,13 @@ std::string AdditionNode::OperationString(std::string a,std::string b)
 	return std::format("{} + {}",a,b);
 }
 
+std::string AdditionNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_add_ps({},{})",a,b);
+}
+
+
+
 SubtractNode::SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
@@ -532,6 +833,11 @@ std::string SubtractNode::OperationString(std::string a,std::string b)
 {
 	return std::format("{} - {}",a,b);
 }
+std::string SubtractNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_sub_ps({},{})",a,b);
+}
+
 
 DivideNode::DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
@@ -550,6 +856,12 @@ std::string DivideNode::OperationString(std::string a,std::string b)
 	return std::format("{} / {}",a,b);
 }
 
+std::string DivideNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_div_ps({},{})",a,b);
+}
+
+
 ModuloNode::ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
@@ -567,6 +879,12 @@ std::string ModuloNode::OperationString(std::string a,std::string b)
 	return std::format("std::fmodf({}, {})",a,b);
 }
 
+std::string ModuloNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_sub_ps({}, _mm_mul_ps(_mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_div_ps({}, {}))), {}))",a,a,b,b);
+}
+
+
 AbsoluteNode::AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 UnaryMathNode(name, category,rend,style)
 {}
@@ -581,6 +899,11 @@ float AbsoluteNode::Operation(float a)
 std::string AbsoluteNode::OperationString(std::string a)
 {
 	return std::format("std::abs({})",a);
+}
+
+std::string AbsoluteNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_and_ps({}, _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF))",a);
 }
 
 SineNode::SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
@@ -599,6 +922,11 @@ std::string SineNode::OperationString(std::string a)
 	return std::format("std::sinf({})",a);
 }
 
+std::string SineNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_sin_ps({})",a);
+}
+
 ExponentNode::ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
 BinaryMathNode(name, category,rend,style)
 {}
@@ -613,6 +941,11 @@ float ExponentNode::Operation(float a,float b)
 std::string ExponentNode::OperationString(std::string a,std::string b)
 {
 	return std::format("std::pow({},{})",a,b);
+}
+
+std::string ExponentNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_pow_ps({}, {})",a,b);
 }
 
 MappingNode::MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
@@ -720,6 +1053,11 @@ std::string TangentNode::OperationString(std::string a)
 	return std::format("std::tanf({})",a);
 }
 
+std::string TangentNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_tan_ps({})",a);
+}
+
 CosineNode::CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
@@ -734,6 +1072,11 @@ float CosineNode::Operation(float a)
 std::string CosineNode::OperationString(std::string a)
 {
 	return std::format("std::cosf({})",a);
+}
+
+std::string CosineNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_cos_ps({})",a);
 }
 
 SquareRootNode::SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
@@ -752,6 +1095,11 @@ std::string SquareRootNode::OperationString(std::string a)
 	return std::format("std::sqrtf({})",a);
 }
 
+std::string SquareRootNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_sqrt_ps({})",a);
+}
+
 RoundNode::RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
@@ -766,6 +1114,11 @@ float RoundNode::Operation(float a)
 std::string RoundNode::OperationString(std::string a)
 {
 	return std::format("std::roundf({})",a);
+}
+
+std::string RoundNode::OperationStringM128(std::string a)
+{
+	return std::format("mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_add_ps({}, _mm_or_ps(_mm_set1_ps(0.5f), _mm_and_ps({}, _mm_set1_ps(-0.0f))))))",a,a);
 }
 
 FloorNode::FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
@@ -784,6 +1137,10 @@ std::string FloorNode::OperationString(std::string a)
 	return std::format("std::floorf({})",a);
 }
 
+std::string FloorNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)",a);
+}
 
 CeilNode::CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
@@ -801,6 +1158,11 @@ std::string CeilNode::OperationString(std::string a)
 	return std::format("std::ceilf({})",a);
 }
 
+std::string CeilNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)",a);
+}
+
 TruncNode::TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
 UnaryMathNode(name, category,rend,style)
 {}
@@ -815,6 +1177,11 @@ float TruncNode::Operation(float a)
 std::string TruncNode::OperationString(std::string a)
 {
 	return std::format("std::truncf({})",a);
+}
+
+std::string TruncNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC)",a);
 }
 
 
