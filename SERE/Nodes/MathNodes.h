@@ -365,31 +365,35 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
-class MinNode : public RuiBaseNode
+class MinNode : public BinaryMathNode
 {
 public:
 	static inline std::string name = "Min";
 	static inline std::string category = "Math";
-private:
-
+protected:
+	float Operation(float a,float b) override;
+	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
 public:
-	explicit MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
-	explicit MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
-	void draw() override;
-	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
-	void Export(RuiExportPrototype& proto) override;
-	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+
+	explicit MinNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit MinNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+
 };
 
-class MaxNode : public RuiBaseNode
+class MaxNode : public BinaryMathNode
 {
 public:
 	static inline std::string name = "Max";
 	static inline std::string category = "Math";
-	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
-	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
-	void draw() override;
-	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
-	void Export(RuiExportPrototype& proto) override;
-	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
+
+protected:
+	float Operation(float a,float b) override;
+	std::string OperationString(std::string a,std::string b) override;
+	std::string OperationStringM128(std::string a,std::string b) override;
+public:
+
+	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style);
+	explicit MaxNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj);
+
 };

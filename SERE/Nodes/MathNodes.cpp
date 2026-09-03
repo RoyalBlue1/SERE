@@ -423,7 +423,7 @@ BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& catego
 			return Float2Variable(1,1);
 
 		Float2Variable a = getInVal<Float2Variable>("A");
-		if (inPin("B")->isConnected() && inPin("B")->getDataType() == typeid(Float2Variable))
+		if (getIn<Float2Variable>("B")->getConnectedDataType() == typeid(Float2Variable))
 		{
 			Float2Variable b = getInVal<Float2Variable>("B");
 			return Float2Variable(Operation(a.value.x,b.value.x),Operation(a.value.y,b.value.y),outFloat2Name);
@@ -436,7 +436,7 @@ BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& catego
 			return Float3Variable(1,1,1);
 
 		Float3Variable a = getInVal<Float3Variable>("A");
-		if (inPin("B")->isConnected() && inPin("B")->getDataType() == typeid(Float3Variable))
+		if (getIn<Float3Variable>("B")->getConnectedDataType() == typeid(Float3Variable))
 		{
 			Float3Variable b = getInVal<Float3Variable>("B");
 			return Float3Variable(Operation(a.value.x,b.value.x),Operation(a.value.y,b.value.y),Operation(a.value.z,b.value.z),outFloat3Name);
@@ -449,7 +449,7 @@ BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& catego
 			return ColorVariable(1,1,1,1);
 
 		ColorVariable a = getInVal<ColorVariable>("A");
-		if (inPin("B")->getDataType() == typeid(ColorVariable))
+		if (getIn<ColorVariable>("B")->getConnectedDataType() == typeid(ColorVariable))
 		{
 			ColorVariable b = getInVal<ColorVariable>("B");
 		return ColorVariable(
@@ -472,7 +472,7 @@ BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& catego
 			return TransformSize(_mm_set1_ps(1));
 
 		TransformSize a = getInVal<TransformSize>("A");
-		if (inPin("B")->isConnected() && inPin("B")->getDataType() == typeid(TransformSize))
+		if (getIn<TransformSize>("B")->getConnectedDataType() == typeid(TransformSize))
 		{
 			TransformSize b = getInVal<TransformSize>("B");
 			float aInVal[4];
@@ -587,7 +587,8 @@ bool BinaryMathNode::CanCreateLink(ImFlow::Pin* own, ImFlow::Pin* other)
 void BinaryMathNode::Export(RuiExportPrototype& proto)
 {
 	std::string outName;
-	std::string inName;
+	std::string aName;
+	std::string bName;
 	switch (GetConnectionRestrictions())
 	{
 	case MathNodeConnectionType::None:
@@ -595,29 +596,58 @@ void BinaryMathNode::Export(RuiExportPrototype& proto)
 		return;
 	case MathNodeConnectionType::Float:
 		outName = getOut<FloatVariable>("Res")->val().name;
-		inName = getIn<FloatVariable>("In")->val().name;
+		aName = getIn<FloatVariable>("A")->val().name;
+		bName = getIn<FloatVariable>("B")->val().name;
 		break;
 	case MathNodeConnectionType::Float2:
-		outName = getOut<Float2Variable>("Res")->val().name;
-		inName = getIn<Float2Variable>("In")->val().name;
+		outName = getOut<Float2Variable>("Vector2 Res")->val().name;
+		if (getIn<Float2Variable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<Float2Variable>("A")->val().name;
+		if (getIn<Float2Variable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<Float2Variable>("B")->val().name;
 		break;
 	case MathNodeConnectionType::Float3:
-		outName = getOut<Float3Variable>("Res")->val().name;
-		inName = getIn<Float3Variable>("In")->val().name;
+		outName = getOut<Float3Variable>("Vector3 Res")->val().name;
+		if (getIn<Float3Variable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<Float3Variable>("A")->val().name;
+		if (getIn<Float3Variable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<Float3Variable>("B")->val().name;
 		break;
 	case MathNodeConnectionType::Color:
-		outName = getOut<ColorVariable>("Res")->val().name;
-		inName = getIn<ColorVariable>("In")->val().name;
+		outName = getOut<ColorVariable>("Color Res")->val().name;
+		if (getIn<ColorVariable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<ColorVariable>("A")->val().name;
+		if (getIn<ColorVariable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<ColorVariable>("B")->val().name;
 		break;
 	case MathNodeConnectionType::Size:
-		outName = getOut<TransformSize>("Res")->val().name;
-		inName = getIn<TransformSize>("In")->val().name;
+		outName = getOut<TransformSize>("Size Res")->val().name;
+		if (getIn<TransformSize>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<TransformSize>("A")->val().name;
+		if (getIn<TransformSize>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<TransformSize>("B")->val().name;
 	default:
 		return;
 	}
 
 	ExportElement<std::string> ele;
-	ele.dependencys = {inName};
+	ele.dependencys = {aName,bName};
 	ele.identifier = outName;
 #if _DEBUG
 	ele.sourceNodeName = typeid(*this).name();
@@ -648,7 +678,7 @@ void BinaryMathNode::Export(RuiExportPrototype& proto)
 			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
 			std::string bx;
 			std::string by;
-			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(Float2Variable))
+			if (getIn<Float2Variable>("B")->getConnectedDataType()==typeid(Float2Variable))
 			{
 				auto b = getInVal<Float2Variable>("B");
 				bx = std::format("{}.x",b.GetFormattedName(proto));
@@ -678,7 +708,7 @@ void BinaryMathNode::Export(RuiExportPrototype& proto)
 			std::string bx;
 			std::string by;
 			std::string bz;
-			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(Float3Variable))
+			if (getIn<Float3Variable>("B")->getConnectedDataType()==typeid(Float3Variable))
 			{
 				auto b = getInVal<Float3Variable>("B");
 				bx = std::format("{}.x",b.GetFormattedName(proto));
@@ -711,7 +741,7 @@ void BinaryMathNode::Export(RuiExportPrototype& proto)
 			std::string bGreen;
 			std::string bBlue;
 			std::string bAlpha;
-			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(ColorVariable))
+			if (getIn<ColorVariable>("B")->getConnectedDataType()==typeid(ColorVariable))
 			{
 				auto b = getInVal<ColorVariable>("B");
 				bRed = std::format("{}.red",b.GetFormattedName(proto));
@@ -744,7 +774,7 @@ void BinaryMathNode::Export(RuiExportPrototype& proto)
 			auto a = getInVal<TransformSize>("A");
 			auto res = getOut<TransformSize>("Res Size")->val();
 			std::string bName;
-			if (inPin("B")->isConnected()&&inPin("B")->getLink().lock()->right()->getDataType()==typeid(TransformSize))
+			if (getIn<TransformSize>("B")->getConnectedDataType()==typeid(TransformSize))
 			{
 				auto b = getInVal<TransformSize>("B");
 				bName = b.GetFormattedName(proto);
@@ -1259,7 +1289,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
 	return info;
 }
 
-MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style)
+MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :BinaryMathNode(name, category, rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -1271,48 +1301,22 @@ MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManag
 
 MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(rend, style) {}
 
-void MinNode::draw()
+float MinNode::Operation(float a, float b)
 {
-	
+	return std::min(a, b);
 }
 
-void MinNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+std::string MinNode::OperationString(std::string a, std::string b)
 {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+	return std::format("std::min({}, {})",a,b);
 }
 
-void MinNode::Export(RuiExportPrototype& proto)
+std::string MinNode::OperationStringM128(std::string a, std::string b)
 {
-	const auto& out = getOut<FloatVariable>("Res")->val();
-	const FloatVariable& a = getInNumeric("A");
-	const FloatVariable& b = getInNumeric("B");
-	ExportElement<std::string> ele;
-#if _DEBUG
-	ele.sourceNodeName = typeid(*this).name();
-#endif
-	ele.dependencys = { a.name,b.name };
-	ele.identifier = out.name;
-	ele.callback = [out, a, b](RuiExportPrototype& proto) {
-		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		else
-			proto.codeLines.push_back(std::format("float {} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		};
-	proto.codeElements.push_back(ele);
+	return std::format("_mm_min_ps({}, {})",a,b);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> MinNode::GetPinInfo()
-{
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	return info;
-}
-
-MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style)
+MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :BinaryMathNode(name, category, rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -1324,43 +1328,19 @@ MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManag
 
 MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(rend, style) {}
 
-void MaxNode::draw()
-{}
-
-void MaxNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+float MaxNode::Operation(float a, float b)
 {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+	return std::max(a, b);
 }
 
-void MaxNode::Export(RuiExportPrototype& proto)
+std::string MaxNode::OperationString(std::string a, std::string b)
 {
-	const auto& out = getOut<FloatVariable>("Res")->val();
-	const FloatVariable& a = getInNumeric("A");
-	const FloatVariable& b = getInNumeric("B");
-	ExportElement<std::string> ele;
-#if _DEBUG
-	ele.sourceNodeName = typeid(*this).name();
-#endif
-	ele.dependencys = { a.name,b.name };
-	ele.identifier = out.name;
-	ele.callback = [out, a, b](RuiExportPrototype& proto) {
-		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		else
-			proto.codeLines.push_back(std::format("float {} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		};
-	proto.codeElements.push_back(ele);
+	return std::format("std::max({}, {})",a,b);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> MaxNode::GetPinInfo()
+std::string MaxNode::OperationStringM128(std::string a, std::string b)
 {
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	return info;
+	return std::format("_mm_max_ps({}, {})",a,b);
 }
 
 void AddMathNodes(const std::unique_ptr<NodeEditor>& editor) {

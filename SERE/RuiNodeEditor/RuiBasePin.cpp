@@ -4,12 +4,45 @@
 #include "CustomImGuiWidgets.h"
 #include "Imgui/imgui_stdlib.h"
 
+void DrawConnectedOutValue(const char* name, ImFlow::Pin* out)
+{
+
+
+    const std::type_info& t = out->getDataType();
+    if (t == typeid(FloatVariable)) {
+        const auto& v = static_cast<ImFlow::OutPin<FloatVariable>*>(out)->val();
+        ImGui::Text("%s %f", name, v.value);
+    } else if (t == typeid(IntVariable)) {
+        const auto& v = static_cast<ImFlow::OutPin<IntVariable>*>(out)->val();
+        ImGui::Text("%s %d", name, v.value);
+    } else if (t == typeid(BoolVariable)) {
+        const auto& v = static_cast<ImFlow::OutPin<BoolVariable>*>(out)->val();
+        ImGui::Text("%s %s", name, v.value ? "true" : "false");
+    } else if (t == typeid(Float2Variable)) {
+        const auto& v = static_cast<ImFlow::OutPin<Float2Variable>*>(out)->val();
+        ImGui::Text("%s <%f,%f>", name, v.value.x, v.value.y);
+    } else if (t == typeid(Float3Variable)) {
+        const auto& v = static_cast<ImFlow::OutPin<Float3Variable>*>(out)->val();
+        ImGui::Text("%s <%f,%f,%f>", name, v.value.x, v.value.y, v.value.z);
+    } else if (t == typeid(ColorVariable)) {
+        const auto& v = static_cast<ImFlow::OutPin<ColorVariable>*>(out)->val();
+        float disp[4];
+        memcpy(disp, &v.value, sizeof(float) * 4);
+        ImGui::ColorEdit4(name, disp, ImGuiColorEditFlags_NoPicker|ImGuiColorEditFlags_NoOptions|ImGuiColorEditFlags_NoInputs);
+    } else if (t == typeid(StringVariable)) {
+        const auto& v = static_cast<ImFlow::OutPin<StringVariable>*>(out)->val();
+        ImGui::Text("%s %s", name, v.value.c_str());
+    } else { // TransformSize, AssetVariable, TransformResult, ConditionalValue
+        ImGui::Text("%s", name);
+    }
+}
+
 template<>
 void ImFlow::InPin<FloatVariable>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text("%s %f",m_proto->name.c_str(),val().value);
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -41,7 +74,7 @@ void ImFlow::InPin<Float2Variable>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text("%s <%f,%f>",m_proto->name.c_str(),val().value.x, val().value.y);
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -86,7 +119,7 @@ void ImFlow::InPin<Float3Variable>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text("%s <%f,%f,%f>",m_proto->name.c_str(),val().value.x, val().value.y,val().value.z);
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -136,9 +169,7 @@ void ImFlow::InPin<ColorVariable>::drawNodeContent()
 {
     if (isConnected())
     {
-        float disp[4];
-        memcpy(disp,&val().value,sizeof(float)*4);
-        ImGui::ColorEdit4(m_proto->name.c_str(),disp,ImGuiColorEditFlags_NoPicker|ImGuiColorEditFlags_NoOptions|ImGuiColorEditFlags_NoInputs);
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -184,7 +215,7 @@ void ImFlow::InPin<TransformSize>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text(m_proto->name.c_str());
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -247,7 +278,7 @@ void ImFlow::InPin<AssetVariable>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text("%s",m_proto->name.c_str());
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -293,7 +324,7 @@ void ImFlow::InPin<StringVariable>::drawNodeContent()
 {
     if (isConnected())
     {
-        ImGui::Text("%s %s",m_proto->name.c_str(),val().value.c_str());
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -328,7 +359,7 @@ template <>
 void ImFlow::InPin<MathVariable>::drawNodeContent()
 {
     if (isConnected()){
-        ImGui::Text("%s",m_proto->name.c_str());
+        DrawConnectedOutValue(m_proto->name.c_str(),getLink().lock()->left());
     }
     else
     {
@@ -362,3 +393,5 @@ void ImFlow::InPin<MathVariable>::StoreEmptyValue(rapidjson::GenericValue<rapidj
         rapidjson::Value().SetFloat(val.value),
         allocator);
 }
+
+
