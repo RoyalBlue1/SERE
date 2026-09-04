@@ -1,15 +1,15 @@
 #include "GlobalNodes.h"
 
 
-TimeNode::TimeNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+TimeNode::TimeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Time")->behaviour([this, outName]() {
-		return FloatVariable(render.globals.currentTime, outName);
+		return FloatVariable(render->globals.currentTime, outName);
 		});
 
 }
 
-TimeNode::TimeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TimeNode(rend, style) {
+TimeNode::TimeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TimeNode(rend, style) {
 
 
 }
@@ -17,7 +17,7 @@ TimeNode::TimeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson:
 void TimeNode::draw() {
 
 
-	ImGui::Text("Time %f", render.globals.currentTime);
+	ImGui::Text("Time %f", render->globals.currentTime);
 
 
 }
@@ -50,16 +50,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TimeNode::GetPinInfo() {
 	return info;
 }
 
-ADSFracNode::ADSFracNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ADSFracNode::ADSFracNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 
 	getOut<FloatVariable>("AdsFrac")->behaviour([this, outName]() {
-		return FloatVariable(render.globals.adsFracValue, outName);
+		return FloatVariable(render->globals.adsFracValue, outName);
 		});
 
 }
 
-ADSFracNode::ADSFracNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ADSFracNode(rend, style) {
+ADSFracNode::ADSFracNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ADSFracNode(rend, style) {
 
 
 }
@@ -68,7 +68,7 @@ void ADSFracNode::draw() {
 
 
 	ImGui::PushItemWidth(100);
-	ImGui::SliderFloat("ADS Fraction", &render.globals.adsFracValue, 0, 1);
+	ImGui::SliderFloat("ADS Fraction", &render->globals.adsFracValue, 0, 1);
 	ImGui::PopItemWidth();
 
 
@@ -103,22 +103,22 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ADSFracNode::GetPinInfo() {
 }
 
 
-LocalPlayerPosNode::LocalPlayerPosNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+LocalPlayerPosNode::LocalPlayerPosNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 
 	minVal = 0;
 	maxVal = 1;
-	render.globals.localPlayerPos[0] = 0;
-	render.globals.localPlayerPos[1] = 0;
-	render.globals.localPlayerPos[2] = 0;
+	render->globals.localPlayerPos[0] = 0;
+	render->globals.localPlayerPos[1] = 0;
+	render->globals.localPlayerPos[2] = 0;
 
 	getOut<Float3Variable>("LocalPlayerPos")->behaviour([this, outName]() {
-		return Float3Variable(render.globals.localPlayerPos[0], render.globals.localPlayerPos[1], render.globals.localPlayerPos[2], outName);
+		return Float3Variable(render->globals.localPlayerPos[0], render->globals.localPlayerPos[1], render->globals.localPlayerPos[2], outName);
 		});
 
 }
 
-LocalPlayerPosNode::LocalPlayerPosNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LocalPlayerPosNode(rend, style) {
+LocalPlayerPosNode::LocalPlayerPosNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :LocalPlayerPosNode(rend, style) {
 
 
 }
@@ -132,7 +132,7 @@ void LocalPlayerPosNode::draw() {
 	ImGui::InputFloat("Max", &maxVal);
 	ImGui::PopItemWidth();
 	ImGui::PushItemWidth(240);
-	ImGui::SliderFloat3("Value", render.globals.localPlayerPos, minVal, maxVal);
+	ImGui::SliderFloat3("Value", render->globals.localPlayerPos, minVal, maxVal);
 	ImGui::PopItemWidth();
 
 
@@ -169,21 +169,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> LocalPlayerPosNode::GetPinInfo() 
 
 
 
-ScreenWidthNode::ScreenWidthNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ScreenWidthNode::ScreenWidthNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 
 	minVal = 0;
 	maxVal = 1;
-	render.globals.screenWidth = 0;
+	render->globals.screenWidth = 0;
 
 
 	getOut<FloatVariable>("ScreenWidth")->behaviour([this, outName]() {
-		return FloatVariable(render.globals.screenWidth, outName);
+		return FloatVariable(render->globals.screenWidth, outName);
 		});
 
 }
 
-ScreenWidthNode::ScreenWidthNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ScreenWidthNode(rend, style) {
+ScreenWidthNode::ScreenWidthNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ScreenWidthNode(rend, style) {
 
 
 }
@@ -197,7 +197,7 @@ void ScreenWidthNode::draw() {
 	ImGui::InputFloat("Max", &maxVal);
 	ImGui::PopItemWidth();
 	ImGui::PushItemWidth(100);
-	ImGui::SliderFloat("Screen Width", &render.globals.screenWidth, minVal, maxVal);
+	ImGui::SliderFloat("Screen Width", &render->globals.screenWidth, minVal, maxVal);
 	ImGui::PopItemWidth();
 
 
@@ -234,21 +234,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ScreenWidthNode::GetPinInfo() {
 
 ///
 
-ScreenHeightNode::ScreenHeightNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ScreenHeightNode::ScreenHeightNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 
 	minVal = 0;
 	maxVal = 1;
-	render.globals.screenHeight = 0;
+	render->globals.screenHeight = 0;
 
 
 	getOut<FloatVariable>("ScreenHeight")->behaviour([this, outName]() {
-		return FloatVariable(render.globals.screenHeight, outName);
+		return FloatVariable(render->globals.screenHeight, outName);
 		});
 
 }
 
-ScreenHeightNode::ScreenHeightNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ScreenHeightNode(rend, style) {
+ScreenHeightNode::ScreenHeightNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ScreenHeightNode(rend, style) {
 
 
 }
@@ -262,7 +262,7 @@ void ScreenHeightNode::draw() {
 	ImGui::InputFloat("Max", &maxVal);
 	ImGui::PopItemWidth();
 	ImGui::PushItemWidth(100);
-	ImGui::SliderFloat("Screen Height", &render.globals.screenHeight, minVal, maxVal);
+	ImGui::SliderFloat("Screen Height", &render->globals.screenHeight, minVal, maxVal);
 	ImGui::PopItemWidth();
 
 
@@ -300,21 +300,21 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ScreenHeightNode::GetPinInfo() {
 
 
 BoolGlobalNode::BoolGlobalNode(const std::string& nodeName, int Globals::* localField, const std::string& exportField,
-	RenderInstance& rend, ImFlow::StyleManager& style)
+	const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(nodeName, "Globals", GetPinInfo(), rend, style),
 	nodeName(nodeName), exportField(exportField), localField(localField)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<BoolVariable>("Value")->behaviour([this, outName]() {
-		return BoolVariable(render.globals.*this->localField != 0, outName);
+		return BoolVariable(render->globals.*this->localField != 0, outName);
 		});
 }
 
 void BoolGlobalNode::draw()
 {
-	bool value = render.globals.*localField != 0;
+	bool value = render->globals.*localField != 0;
 	if (ImGui::Checkbox("Value", &value))
-		render.globals.*localField = value;
+		render->globals.*localField = value;
 }
 
 void BoolGlobalNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
@@ -348,69 +348,69 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BoolGlobalNode::GetPinInfo()
 	return info;
 }
 
-IsKillReplayNode::IsKillReplayNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsKillReplayNode::IsKillReplayNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isKillReplay, "isKillReplay", rend, style)
 {}
 
-IsKillReplayNode::IsKillReplayNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsKillReplayNode::IsKillReplayNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsKillReplayNode(rend, style)
 {}
 
-IsUsingControllerNode::IsUsingControllerNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsUsingControllerNode::IsUsingControllerNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isUsingController, "isUsingController", rend, style)
 {}
 
-IsUsingControllerNode::IsUsingControllerNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsUsingControllerNode::IsUsingControllerNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsUsingControllerNode(rend, style)
 {}
 
-IsAliveNode::IsAliveNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsAliveNode::IsAliveNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isAlive, "isAlive", rend, style)
 {}
 
-IsAliveNode::IsAliveNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsAliveNode::IsAliveNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsAliveNode(rend, style)
 {}
 
-IsSpectatingNode::IsSpectatingNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsSpectatingNode::IsSpectatingNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isSpectating, "isSpectating", rend, style)
 {}
 
-IsSpectatingNode::IsSpectatingNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsSpectatingNode::IsSpectatingNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsSpectatingNode(rend, style)
 {}
 
-IsMenuOpenNode::IsMenuOpenNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsMenuOpenNode::IsMenuOpenNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isMenuOpen, "isMenuOpen", rend, style)
 {}
 
-IsMenuOpenNode::IsMenuOpenNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsMenuOpenNode::IsMenuOpenNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsMenuOpenNode(rend, style)
 {}
 
-IsPhaseShiftedNode::IsPhaseShiftedNode(RenderInstance& rend, ImFlow::StyleManager& style)
+IsPhaseShiftedNode::IsPhaseShiftedNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: BoolGlobalNode(name, &Globals::isPhaseShifted, "isPhaseShifted", rend, style)
 {}
 
-IsPhaseShiftedNode::IsPhaseShiftedNode(RenderInstance& rend, ImFlow::StyleManager& style,
+IsPhaseShiftedNode::IsPhaseShiftedNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : IsPhaseShiftedNode(rend, style)
 {}
 
 ColorGlobalNode::ColorGlobalNode(const std::string& nodeName, float (Globals::* localField)[3],
-	const std::string& exportField, RenderInstance& rend, ImFlow::StyleManager& style)
+	const std::string& exportField, const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: RuiBaseNode(nodeName, "Globals", GetPinInfo(), rend, style),
 	nodeName(nodeName), exportField(exportField), localField(localField)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<ColorVariable>("Value")->behaviour([this, outName]() {
-		const float* color = render.globals.*this->localField;
+		const float* color = render->globals.*this->localField;
 		return ColorVariable(color[0], color[1], color[2], 1.0f, outName);
 		});
 }
 
 void ColorGlobalNode::draw()
 {
-	const float* color = render.globals.*localField;
+	const float* color = render->globals.*localField;
 	ImGui::ColorButton("##ColorPreview", ImVec4(color[0], color[1], color[2], 1.0f),
 		ImGuiColorEditFlags_NoDragDrop, ImVec2(48.0f, 48.0f));
 	ImGui::SameLine();
@@ -451,43 +451,43 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ColorGlobalNode::GetPinInfo()
 	return info;
 }
 
-FriendlyTeamColorNode::FriendlyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style)
+FriendlyTeamColorNode::FriendlyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: ColorGlobalNode(name, &Globals::friendlyTeamColor, "friendlyTeamColor", rend, style)
 {}
 
-FriendlyTeamColorNode::FriendlyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style,
+FriendlyTeamColorNode::FriendlyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : FriendlyTeamColorNode(rend, style)
 {}
 
-EnemyTeamColorNode::EnemyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style)
+EnemyTeamColorNode::EnemyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: ColorGlobalNode(name, &Globals::enemyTeamColor, "enemyTeamColor", rend, style)
 {}
 
-EnemyTeamColorNode::EnemyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style,
+EnemyTeamColorNode::EnemyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : EnemyTeamColorNode(rend, style)
 {}
 
-PartyTeamColorNode::PartyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style)
+PartyTeamColorNode::PartyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style)
 	: ColorGlobalNode(name, &Globals::partyTeamColor, "partyTeamColor", rend, style)
 {}
 
-PartyTeamColorNode::PartyTeamColorNode(RenderInstance& rend, ImFlow::StyleManager& style,
+PartyTeamColorNode::PartyTeamColorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style,
 	rapidjson::GenericObject<false, rapidjson::Value> obj) : PartyTeamColorNode(rend, style)
 {}
 
-void AddGlobalNodes(NodeEditor& editor) {
-	editor.AddNodeType<TimeNode>();
-	editor.AddNodeType<ScreenWidthNode>();
-	editor.AddNodeType<ScreenHeightNode>();
-	editor.AddNodeType<ADSFracNode>();
-	editor.AddNodeType<LocalPlayerPosNode>();
-	editor.AddNodeType<IsKillReplayNode>();
-	editor.AddNodeType<IsUsingControllerNode>();
-	editor.AddNodeType<IsAliveNode>();
-	editor.AddNodeType<IsSpectatingNode>();
-	editor.AddNodeType<IsMenuOpenNode>();
-	editor.AddNodeType<IsPhaseShiftedNode>();
-	editor.AddNodeType<FriendlyTeamColorNode>();
-	editor.AddNodeType<EnemyTeamColorNode>();
-	editor.AddNodeType<PartyTeamColorNode>();
+void AddGlobalNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<TimeNode>();
+	editor->AddNodeType<ScreenWidthNode>();
+	editor->AddNodeType<ScreenHeightNode>();
+	editor->AddNodeType<ADSFracNode>();
+	editor->AddNodeType<LocalPlayerPosNode>();
+	editor->AddNodeType<IsKillReplayNode>();
+	editor->AddNodeType<IsUsingControllerNode>();
+	editor->AddNodeType<IsAliveNode>();
+	editor->AddNodeType<IsSpectatingNode>();
+	editor->AddNodeType<IsMenuOpenNode>();
+	editor->AddNodeType<IsPhaseShiftedNode>();
+	editor->AddNodeType<FriendlyTeamColorNode>();
+	editor->AddNodeType<EnemyTeamColorNode>();
+	editor->AddNodeType<PartyTeamColorNode>();
 }

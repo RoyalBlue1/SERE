@@ -1,17 +1,17 @@
 #pragma once
 #include <memory>
-#include <set>
-#include "Util.h"
-
-#include "Imgui/ImNodeFlow.h"
-
-
-class RuiBaseNode;
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "ThirdParty/rapidjson/document.h"
+
+#include "Imgui/ImNodeFlow.h"
 #include "RuiRendering/RenderManager.h"
-#include "RuiNodeEditor/Mapping.h"
+
+class RuiBaseNode;
+
+
+
+
 #include "RuiNodeEditor/RuiExportPrototype.h"
 
 
@@ -28,13 +28,42 @@ public:
 	virtual void Export(RuiExportPrototype&) = 0;
 	void recreateInputPinEmptyValues(rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void storeInputPinEmptyValues(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator);
+	template <typename T> void storePin(const char* name,std::unordered_map<std::string,std::any>& defaultVals)
+	{
+		std::string typeName = typeid(T).name();
+		std::any value = getInVal<T>(name);
+		defaultVals[typeName] = value;
+	}
+	template <typename T> std::shared_ptr<ImFlow::InPin<T>> recreatePin(const char* name,std::function<bool(const std::type_info&, const std::type_info&)> selectionFunc,std::unordered_map<std::string,std::any>& defaultVals)
+	{
+		std::string typeName = typeid(T).name();
+		if (!defaultVals.contains(typeName))
+			defaultVals[typeName] = T();
+		auto info = std::make_shared<ImFlow::InPinProto<T>>(name, selectionFunc, std::any_cast<T>(defaultVals[typeName]));
+
+		ImFlow::PinUID h = std::hash<std::string>{}(name);
+		for (auto it = m_ins.begin(); it != m_ins.end(); it++)
+		{
+			if (it->get()->getUid() == h)
+			{
+				auto pin = std::make_shared<ImFlow::InPin<T>>(h,info,std::any_cast<T>(defaultVals[typeName]),styles.GetPinStyle(typeName),this,&m_inf);
+				*it = pin;
+				return pin;
+			}
+		}
+
+
+
+		return addIN<T>(info,std::any_cast<T>(defaultVals[typeName]),styles.GetPinStyle(typeName));
+
+	}
 protected:
-	RenderInstance& render;
+	std::shared_ptr<RenderInstance> render;
 	ImFlow::StyleManager& styles;
-	RuiBaseNode(std::string name,
-		std::string category,
+	RuiBaseNode(const std::string& name,
+		const std::string& category,
 		std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,
-		RenderInstance& rend,
+		const std::shared_ptr<RenderInstance>& rend,
 		ImFlow::StyleManager& style
 	) :render(rend), styles(style) {
 		setTitle(name);
@@ -49,8 +78,8 @@ protected:
 };
 
 struct NodeType {
-	std::shared_ptr<RuiBaseNode>(*AddNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& style);
-	std::shared_ptr<RuiBaseNode>(*RecreateNode)(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	std::shared_ptr<RuiBaseNode>(*AddNode)(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& style);
+	std::shared_ptr<RuiBaseNode>(*RecreateNode)(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	std::vector<std::shared_ptr<ImFlow::PinProto>>(*GetPinInfo)();
 };
 
@@ -58,7 +87,7 @@ struct NodeType {
 typedef std::map<std::string, NodeType> NodeCategory;
 
 
-template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& styles) {
+template<class T> std::shared_ptr<RuiBaseNode> AddNode(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& styles) {
 	return mINF.placeNode<T>(proto, styles);
 }
 
@@ -66,7 +95,7 @@ template<class T> std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo() {
 	return T::GetPinInfo();
 }
 
-template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, RenderInstance& proto, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+template <class T>std::shared_ptr<RuiBaseNode> RecreateNode(ImFlow::ImNodeFlow& mINF, const std::shared_ptr<RenderInstance>& proto, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("Id"))return nullptr;
 	if (!(obj.HasMember("PosX") && obj["PosX"].IsNumber()))return nullptr;
 	if (!(obj.HasMember("PosY") && obj["PosY"].IsNumber()))return nullptr;

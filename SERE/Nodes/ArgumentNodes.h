@@ -4,7 +4,7 @@
 
 
 
-void AddArgumentNodes(NodeEditor& editor);
+void AddArgumentNodes(const std::unique_ptr<NodeEditor>& editor);
 
 class IntArgNode : public RuiBaseNode
 {
@@ -12,8 +12,8 @@ public:
 	static inline std::string name = "Integer Arg";
 	static inline std::string category = "Argument";
 
-	explicit IntArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit IntArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit IntArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit IntArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -29,8 +29,8 @@ public:
 	static inline std::string name = "Boolean Arg";
 	static inline std::string category = "Argument";
 
-	explicit BoolArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit BoolArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit BoolArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit BoolArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -46,8 +46,8 @@ public:
 	static inline std::string name = "Float Arg";
 	static inline std::string category = "Argument";
 
-	explicit FloatArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit FloatArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit FloatArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit FloatArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -63,8 +63,8 @@ public:
 	static inline std::string name = "Gametime Arg";
 	static inline std::string category = "Argument";
 
-	explicit GametimeArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit GametimeArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit GametimeArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit GametimeArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -80,8 +80,8 @@ public:
 	static inline std::string name = "Vector2 Arg";
 	static inline std::string category = "Argument";
 
-	explicit Float2ArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit Float2ArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit Float2ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit Float2ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -97,8 +97,8 @@ public:
 	static inline std::string name = "Vector3 Arg";
 	static inline std::string category = "Argument";
 
-	explicit Float3ArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit Float3ArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit Float3ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit Float3ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -114,8 +114,8 @@ public:
 	static inline std::string name = "Color Arg";
 	static inline std::string category = "Argument";
 
-	explicit ColorArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit ColorArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit ColorArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit ColorArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -131,8 +131,8 @@ public:
 	static inline std::string name = "String Arg";
 	static inline std::string category = "Argument";
 
-	explicit StringArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit StringArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit StringArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit StringArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -148,8 +148,8 @@ public:
 	static inline std::string name = "Asset Arg";
 	static inline std::string category = "Argument";
 
-	explicit AssetArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit AssetArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit AssetArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit AssetArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -165,8 +165,8 @@ public:
 	static inline std::string name = "Ui Handle Arg";
 	static inline std::string category = "Argument";
 
-	explicit UiHandleArgNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit UiHandleArgNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit UiHandleArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit UiHandleArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;

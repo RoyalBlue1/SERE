@@ -52,7 +52,7 @@ ImFlow::Pin* FindPinByName(const std::vector<std::shared_ptr<ImFlow::Pin>>& pins
 }
 }
 
-NodeEditor::NodeEditor(RenderInstance& rend):render(rend) {
+NodeEditor::NodeEditor(std::shared_ptr<RenderInstance>& rend):render(rend) {
 	m_clipboard.SetObject();
 	mINF.rightClickPopUpContent([this](ImFlow::BaseNode* node) {
 		RightClickPopup(node);

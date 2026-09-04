@@ -974,23 +974,24 @@ namespace ImFlow
 
         template<typename T>
         std::shared_ptr<InPin<T>> getIn(const char* uid);
-
+    protected:
+        ImNodeFlow* m_inf = nullptr;
+        std::vector<std::shared_ptr<Pin>> m_ins;
+        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicIns;
+        std::vector<std::shared_ptr<Pin>> m_outs;
+        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicOuts;
     private:
         NodeUID m_uid = 0;
         std::string m_title;
         ImVec2 m_pos, m_posTarget;
         ImVec2 m_size;
-        ImNodeFlow* m_inf = nullptr;
         ImDrawListSplitter m_splitter;
         std::shared_ptr<NodeStyle> m_style;
         bool m_selected = false, m_selectedNext = false;
         bool m_dragged = false;
         bool m_destroyed = false;
 
-        std::vector<std::shared_ptr<Pin>> m_ins;
-        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicIns;
-        std::vector<std::shared_ptr<Pin>> m_outs;
-        std::vector<std::pair<int, std::shared_ptr<Pin>>> m_dynamicOuts;
+
     };
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -1040,6 +1041,8 @@ namespace ImFlow
     private:
         std::function<bool(const std::type_info&, const std::type_info&)> typeFilter;
         T defaultValue;
+        T minValue;
+        T maxValue;
     };
 
 
@@ -1320,6 +1323,14 @@ namespace ImFlow
          */
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
 
+        /** @brief <BR>Get pins ActualDataType so the connected Type if one is connected ... */
+        [[nodiscard]] const std::type_info& getConnectedDataType()
+        {
+            if (!isConnected())
+                return getDataType();
+            return getLink().lock()->left()->getDataType();
+        };
+
         /**
          * @brief <BR>Get pin's link attachment point (socket)
          * @return Grid coordinates to the attachment point between the link and the pin's socket
@@ -1377,6 +1388,7 @@ namespace ImFlow
         {
             ImGui::Text("%s", m_proto->name.c_str());
         }
+        
 
         /**
          * @brief <BR>Create link between pins
@@ -1427,6 +1439,7 @@ namespace ImFlow
          * @return String containing unique information identifying the data type
          */
         [[nodiscard]] const std::type_info& getDataType() const override { return typeid(T); };
+
     private:
         std::vector<std::weak_ptr<Link>> m_links;
         std::function<T()> m_behaviour;

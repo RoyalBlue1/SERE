@@ -12,8 +12,8 @@ private:
 
 
 public:
-	explicit GreaterNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit GreaterNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit GreaterNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit GreaterNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -30,8 +30,8 @@ private:
 
 
 public:
-	explicit LessNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit LessNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit LessNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit LessNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -48,8 +48,8 @@ private:
 
 
 public:
-	explicit ConditionalFloatNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit ConditionalFloatNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ConditionalFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit ConditionalFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -66,8 +66,8 @@ private:
 
 
 public:
-	explicit ConditionalValueNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit ConditionalValueNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ConditionalValueNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit ConditionalValueNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	bool CanCreateLink(ImFlow::Pin* pin, ImFlow::Pin* other) override;
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
@@ -85,8 +85,8 @@ private:
 
 
 public:
-	explicit EqualFloatNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit EqualFloatNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit EqualFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit EqualFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -103,8 +103,8 @@ private:
 
 
 public:
-	explicit NotGateNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit NotGateNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit NotGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit NotGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -121,8 +121,8 @@ private:
 
 
 public:
-	explicit AndGateNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit AndGateNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit AndGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit AndGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -139,8 +139,8 @@ private:
 
 
 public:
-	explicit OrGateNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit OrGateNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit OrGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit OrGateNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -157,8 +157,8 @@ private:
 
 
 public:
-	explicit EqualStringNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit EqualStringNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit EqualStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit EqualStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -175,8 +175,8 @@ private:
 
 
 public:
-	explicit ConditionalStringNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit ConditionalStringNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ConditionalStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit ConditionalStringNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -184,4 +184,4 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
-void AddConditionalNodes(NodeEditor& editor);
+void AddConditionalNodes(const std::unique_ptr<NodeEditor>& editor);

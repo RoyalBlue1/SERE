@@ -7,9 +7,9 @@
 namespace {
 
 template<typename T>
-T GetArgumentValue(RenderInstance& render, const std::string& argName, const T& fallback) {
-	if (render.arguments.contains(argName) && render.arguments[argName].type() == typeid(T))
-		return std::any_cast<T>(render.arguments[argName]);
+T GetArgumentValue(const std::shared_ptr<RenderInstance>& render, const std::string& argName, const T& fallback) {
+	if (render->arguments.contains(argName) && render->arguments[argName].type() == typeid(T))
+		return std::any_cast<T>(render->arguments[argName]);
 	return fallback;
 }
 
@@ -38,47 +38,47 @@ void AddColorDefault(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson:
 	obj.AddMember("DefaultValue", defaultValue, allocator);
 }
 
-void RestoreIntDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreIntDefault(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsInt())
-		render.arguments[argName] = obj["DefaultValue"].GetInt();
+		render->arguments[argName] = obj["DefaultValue"].GetInt();
 }
 
-void RestoreBoolDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreBoolDefault(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("DefaultValue"))
 		return;
 	if (obj["DefaultValue"].IsBool())
-		render.arguments[argName] = static_cast<int>(obj["DefaultValue"].GetBool());
+		render->arguments[argName] = static_cast<int>(obj["DefaultValue"].GetBool());
 	else if (obj["DefaultValue"].IsInt())
-		render.arguments[argName] = obj["DefaultValue"].GetInt();
+		render->arguments[argName] = obj["DefaultValue"].GetInt();
 }
 
-void RestoreFloatDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreFloatDefault(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsNumber())
-		render.arguments[argName] = obj["DefaultValue"].GetFloat();
+		render->arguments[argName] = obj["DefaultValue"].GetFloat();
 }
 
-void RestoreStringDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreStringDefault(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (obj.HasMember("DefaultValue") && obj["DefaultValue"].IsString())
-		render.arguments[argName] = std::string(obj["DefaultValue"].GetString());
+		render->arguments[argName] = std::string(obj["DefaultValue"].GetString());
 }
 
-void RestoreVector2Default(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreVector2Default(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
 		return;
 	const rapidjson::Value& val = obj["DefaultValue"];
 	if (val.HasMember("X") && val["X"].IsNumber() && val.HasMember("Y") && val["Y"].IsNumber())
-		render.arguments[argName] = Vector2(val["X"].GetFloat(), val["Y"].GetFloat());
+		render->arguments[argName] = Vector2(val["X"].GetFloat(), val["Y"].GetFloat());
 }
 
-void RestoreVector3Default(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreVector3Default(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
 		return;
 	const rapidjson::Value& val = obj["DefaultValue"];
 	if (val.HasMember("X") && val["X"].IsNumber() && val.HasMember("Y") && val["Y"].IsNumber() && val.HasMember("Z") && val["Z"].IsNumber())
-		render.arguments[argName] = Vector3(val["X"].GetFloat(), val["Y"].GetFloat(), val["Z"].GetFloat());
+		render->arguments[argName] = Vector3(val["X"].GetFloat(), val["Y"].GetFloat(), val["Z"].GetFloat());
 }
 
-void RestoreColorDefault(RenderInstance& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
+void RestoreColorDefault(const std::shared_ptr<RenderInstance>& render, const std::string& argName, rapidjson::GenericObject<false, rapidjson::Value> obj) {
 	if (!obj.HasMember("DefaultValue") || !obj["DefaultValue"].IsObject())
 		return;
 	const rapidjson::Value& val = obj["DefaultValue"];
@@ -86,7 +86,7 @@ void RestoreColorDefault(RenderInstance& render, const std::string& argName, rap
 		val.HasMember("Green") && val["Green"].IsNumber() &&
 		val.HasMember("Blue") && val["Blue"].IsNumber() &&
 		val.HasMember("Alpha") && val["Alpha"].IsNumber()) {
-		render.arguments[argName] = Color(
+		render->arguments[argName] = Color(
 			val["Red"].GetFloat(),
 			val["Green"].GetFloat(),
 			val["Blue"].GetFloat(),
@@ -96,18 +96,18 @@ void RestoreColorDefault(RenderInstance& render, const std::string& argName, rap
 }
 
 
-IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+IntArgNode::IntArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<IntVariable>("Value")->behaviour([this]() {
 		int val = 0;
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(int)))
-			val = std::any_cast<int>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(int)))
+			val = std::any_cast<int>(render->arguments[argName]);
 		return IntVariable(val,argName);
 
 	});
 }
 
-IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):IntArgNode(rend,style) {
+IntArgNode::IntArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):IntArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -119,14 +119,14 @@ IntArgNode::IntArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjs
 void IntArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	int val;
 	if(any.type()==typeid(int))
 		val = std::any_cast<int>(any);
 	else
 		val = 0;
 	ImGui::InputInt("Default Value",&val);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -148,17 +148,17 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> IntArgNode::GetPinInfo() {
 	return info;
 }
 
-BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+BoolArgNode::BoolArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<BoolVariable>("Value")->behaviour([this]() {
 		int val = 0;
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(int)))
-			val = std::any_cast<int>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(int)))
+			val = std::any_cast<int>(render->arguments[argName]);
 		return BoolVariable(val,argName);
 	});
 }
 
-BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):BoolArgNode(rend,style) {
+BoolArgNode::BoolArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):BoolArgNode(rend,style) {
 	
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -170,7 +170,7 @@ BoolArgNode::BoolArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapid
 void BoolArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	int val;
 	if(any.type()==typeid(int))
 		val = std::any_cast<int>(any);
@@ -179,7 +179,7 @@ void BoolArgNode::draw() {
 	bool bval = val;
 	ImGui::Checkbox("Default Value",&bval);
 	val = bval;
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -201,17 +201,17 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> BoolArgNode::GetPinInfo() {
 	return info;
 }
 
-FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+FloatArgNode::FloatArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("Value")->behaviour([this]() {
 		float val = 0.f;
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(float)))
-			val = std::any_cast<float>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(float)))
+			val = std::any_cast<float>(render->arguments[argName]);
 		return FloatVariable(val,argName);
 	});
 }
 
-FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):FloatArgNode(rend,style) {
+FloatArgNode::FloatArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):FloatArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -222,14 +222,14 @@ FloatArgNode::FloatArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rap
 void FloatArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	float val;
 	if(any.type()==typeid(float))
 		val = std::any_cast<float>(any);
 	else
 		val = 0.f;
 	ImGui::InputFloat("Default Value",&val);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -251,17 +251,17 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> FloatArgNode::GetPinInfo() {
 	return info;
 }
 
-GametimeArgNode::GametimeArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+GametimeArgNode::GametimeArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<FloatVariable>("Value")->behaviour([this]() {
 		float val = 0.f;
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(float)))
-			val = std::any_cast<float>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(float)))
+			val = std::any_cast<float>(render->arguments[argName]);
 		return FloatVariable(val,argName);
 	});
 }
 
-GametimeArgNode::GametimeArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):GametimeArgNode(rend,style) {
+GametimeArgNode::GametimeArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):GametimeArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -272,14 +272,14 @@ GametimeArgNode::GametimeArgNode(RenderInstance& rend,ImFlow::StyleManager& styl
 void GametimeArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	float val;
 	if(any.type()==typeid(float))
 		val = std::any_cast<float>(any);
 	else
 		val = 0.f;
 	ImGui::InputFloat("Default Value",&val);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -301,12 +301,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> GametimeArgNode::GetPinInfo() {
 	return info;
 }
 
-Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float2ArgNode::Float2ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float2Variable>("Value")->behaviour([this]() {
 		Vector2 val(0.f,0.f);
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Vector2)))
-			val = std::any_cast<Vector2>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(Vector2)))
+			val = std::any_cast<Vector2>(render->arguments[argName]);
 		return Float2Variable(
 			val,
 			argName);
@@ -314,7 +314,7 @@ Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float2ArgNode(rend,style) {
+Float2ArgNode::Float2ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float2ArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -325,12 +325,12 @@ Float2ArgNode::Float2ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void Float2ArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	Vector2 val = Vector2(0.f,0.f);
 	if(any.type()==typeid(Vector2))
 		val = std::any_cast<Vector2>(any);
 	ImGui::InputFloat2("Default Value",&val.x);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -352,12 +352,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float2ArgNode::GetPinInfo() {
 	return info;
 }
 
-Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+Float3ArgNode::Float3ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<Float3Variable>("Value")->behaviour([this]() {
 		Vector3 val(0.f,0.f,0.f);
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Vector3)))
-			val = std::any_cast<Vector3>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(Vector3)))
+			val = std::any_cast<Vector3>(render->arguments[argName]);
 		return Float3Variable(
 			val,
 			argName);
@@ -365,7 +365,7 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float3ArgNode(rend,style) {
+Float3ArgNode::Float3ArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):Float3ArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -376,12 +376,12 @@ Float3ArgNode::Float3ArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void Float3ArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	Vector3 val = Vector3(0.f,0.f,0.f);
 	if(any.type()==typeid(Vector3))
 		val = std::any_cast<Vector3>(any);
 	ImGui::InputFloat3("Default Value",&val.x);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -403,19 +403,19 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> Float3ArgNode::GetPinInfo() {
 	return info;
 }
 
-ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+ColorArgNode::ColorArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<ColorVariable>("Value")->behaviour([this]() {
 		Color val(1.f,1.f,1.f,1.f);
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Color)))
-			val = std::any_cast<Color>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(Color)))
+			val = std::any_cast<Color>(render->arguments[argName]);
 		return ColorVariable(
 			val,
 			argName);
 	});
 }
 
-ColorArgNode::ColorArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ColorArgNode(rend,style) {
+ColorArgNode::ColorArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ColorArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -427,12 +427,12 @@ void ColorArgNode::draw() {
 	ImGui::PushItemWidth(180);
 	ImGui::InputText("Name",&argName);
 
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	Color val = Color(1.f,1.f,1.f,1.f);
 	if(any.type()==typeid(Color))
 		val = std::any_cast<Color>(any);
 	ImGui::ColorEdit4("Default Value",&val.red);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -445,8 +445,8 @@ void ColorArgNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, ra
 }
 
 void ColorArgNode::Export(RuiExportPrototype& proto) {
-	if(!(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(Color))))
-		render.arguments[argName] = Color(1.f,1.f,1.f,1.f);
+	if(!(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(Color))))
+		render->arguments[argName] = Color(1.f,1.f,1.f,1.f);
 	proto.arguments.emplace(argName,VariableType::COLOR_ALPHA);
 }
 
@@ -456,18 +456,18 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ColorArgNode::GetPinInfo() {
 	return info;
 }
 
-StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+StringArgNode::StringArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<StringVariable>("Value")->behaviour([this]() {
 		std::string val = "";
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(std::string)))
-			val = std::any_cast<std::string>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(std::string)))
+			val = std::any_cast<std::string>(render->arguments[argName]);
 		return StringVariable(val,argName);
 
 	});
 }
 
-StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):StringArgNode(rend,style) {
+StringArgNode::StringArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):StringArgNode(rend,style) {
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -477,12 +477,12 @@ StringArgNode::StringArgNode(RenderInstance& rend,ImFlow::StyleManager& style, r
 void StringArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
-	std::any& any = render.arguments[argName];
+	std::any& any = render->arguments[argName];
 	std::string val = "";
 	if(any.type()==typeid(std::string))
 		val = std::any_cast<std::string>(any);
 	ImGui::InputText("Default Value",&val);
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -504,12 +504,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> StringArgNode::GetPinInfo() {
 	return info;
 }
 
-AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+AssetArgNode::AssetArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<AssetVariable>("Value")->behaviour([this]() {
 		std::string val = "white";
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(std::string)))
-			val = std::any_cast<std::string>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(std::string)))
+			val = std::any_cast<std::string>(render->arguments[argName]);
 		return AssetVariable(val,Variable::UniqueName());
 	});
 }
@@ -531,7 +531,7 @@ void AssetArgNode::Export(RuiExportPrototype& proto) {
 	proto.codeElements.push_back(ele);
 }
 
-AssetArgNode::AssetArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetArgNode(rend,style){
+AssetArgNode::AssetArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AssetArgNode(rend,style){
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -543,15 +543,15 @@ void AssetArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
 	std::string val = "white";
-	if(render.arguments.contains(argName)&&(render.arguments[argName].type() == typeid(std::string)))
-		val = std::any_cast<std::string>(render.arguments[argName]);
+	if(render->arguments.contains(argName)&&(render->arguments[argName].type() == typeid(std::string)))
+		val = std::any_cast<std::string>(render->arguments[argName]);
 	uint32_t hash = loadAsset(val.c_str());
 	if (AtlasImageButton("AssetButton", hash)) {
 		ImGui::OpenPopup("Default Value");
 	}
 	AssetSelectionPopup("Default Value",&hash);
 	val = imageAssetMap[hash].name;
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -570,12 +570,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetArgNode::GetPinInfo() {
 }
 
 
-UiHandleArgNode::UiHandleArgNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+UiHandleArgNode::UiHandleArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	getOut<AssetVariable>("Value")->behaviour([this]() {
 		std::string val = "white";
-		if(render.arguments.contains(argName) && (render.arguments[argName].type()==typeid(std::string)))
-			val = std::any_cast<std::string>(render.arguments[argName]);
+		if(render->arguments.contains(argName) && (render->arguments[argName].type()==typeid(std::string)))
+			val = std::any_cast<std::string>(render->arguments[argName]);
 		return AssetVariable(val,Variable::UniqueName());
 	});
 }
@@ -597,7 +597,7 @@ void UiHandleArgNode::Export(RuiExportPrototype& proto) {
 	proto.codeElements.push_back(ele);
 }
 
-UiHandleArgNode::UiHandleArgNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):UiHandleArgNode(rend,style){
+UiHandleArgNode::UiHandleArgNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):UiHandleArgNode(rend,style){
 
 	if(obj.HasMember("ArgName")&&obj["ArgName"].IsString())
 		argName = obj["ArgName"].GetString();
@@ -609,15 +609,15 @@ void UiHandleArgNode::draw() {
 	ImGui::PushItemWidth(90);
 	ImGui::InputText("Name",&argName);
 	std::string val = "white";
-	if(render.arguments.contains(argName)&&(render.arguments[argName].type() == typeid(std::string)))
-		val = std::any_cast<std::string>(render.arguments[argName]);
+	if(render->arguments.contains(argName)&&(render->arguments[argName].type() == typeid(std::string)))
+		val = std::any_cast<std::string>(render->arguments[argName]);
 	uint32_t hash = loadAsset(val.c_str());
 	if (AtlasImageButton("AssetButton", imageAssetMap[hash])) {
 		ImGui::OpenPopup("Asset Selection");
 	}
 	AssetSelectionPopup("Default Value",&hash);
 	val = imageAssetMap[hash].name;
-	render.arguments[argName] = val;
+	render->arguments[argName] = val;
 	ImGui::PopItemWidth();
 }
 
@@ -636,16 +636,16 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> UiHandleArgNode::GetPinInfo() {
 }
 
 
-void AddArgumentNodes(NodeEditor& editor) {
-	editor.AddNodeType<IntArgNode>();
-	editor.AddNodeType<BoolArgNode>();
-	editor.AddNodeType<FloatArgNode>();
-	editor.AddNodeType<GametimeArgNode>();
-	editor.AddNodeType<Float2ArgNode>();
-	editor.AddNodeType<Float3ArgNode>();
-	editor.AddNodeType<ColorArgNode>();
-	editor.AddNodeType<StringArgNode>();
-	editor.AddNodeType<AssetArgNode>();
-	editor.AddNodeType<UiHandleArgNode>();
+void AddArgumentNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<IntArgNode>();
+	editor->AddNodeType<BoolArgNode>();
+	editor->AddNodeType<FloatArgNode>();
+	editor->AddNodeType<GametimeArgNode>();
+	editor->AddNodeType<Float2ArgNode>();
+	editor->AddNodeType<Float3ArgNode>();
+	editor->AddNodeType<ColorArgNode>();
+	editor->AddNodeType<StringArgNode>();
+	editor->AddNodeType<AssetArgNode>();
+	editor->AddNodeType<UiHandleArgNode>();
 
 }

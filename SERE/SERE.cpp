@@ -26,7 +26,7 @@
 #include "SERE.h"
 
 
-void RegisterSereNodeTypes(NodeEditor& nodeEdit)
+void RegisterSereNodeTypes(std::unique_ptr<NodeEditor>& nodeEdit)
 {
     AddArgumentNodes(nodeEdit);
     AddConstantVarNodes(nodeEdit);
@@ -302,16 +302,16 @@ static int RunGraphExportCommand(const CommandLineOptions& options)
 
     g_renderFramework = std::make_unique<HeadlessRenderFramework>();
 
-    RenderInstance render{ static_cast<float>(width), static_cast<float>(height) };
-    render.StartFrame(0.f);
+    auto render = std::make_shared<RenderInstance>( static_cast<float>(width), static_cast<float>(height) );
+    render->StartFrame(0.f);
 
-    NodeEditor nodeEdit{ render };
+    auto nodeEdit = std::make_unique<NodeEditor>(render );
     RegisterSereNodeTypes(nodeEdit);
-    if (!nodeEdit.DeserializeFromPath(options.graphInputPath)) {
+    if (!nodeEdit->DeserializeFromPath(options.graphInputPath)) {
         std::cerr << "Could not deserialize graph input: " << options.graphInputPath.string() << "\n";
         return 1;
     }
-    nodeEdit.ExportToPath(outputPath);
+    nodeEdit->ExportToPath(outputPath);
 
     if (!fs::exists(outputPath, error)) {
         std::cerr << "Export failed: " << outputPath.string() << " was not written.\n";
@@ -382,11 +382,11 @@ int main(int argc, char** argv)
     bool assetsLoaded = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    RenderInstance render{(float)ruiSize.width,(float)ruiSize.height};
-    NodeEditor nodeEdit{render};
+    auto render = std::make_shared<RenderInstance>((float)ruiSize.width,(float)ruiSize.height);
+    auto nodeEdit = std::make_unique<NodeEditor>(render);
     RegisterSereNodeTypes(nodeEdit);
 
-    
+
 
     while (g_renderFramework->ShouldMainLoopRun())
     {
@@ -397,26 +397,26 @@ int main(int argc, char** argv)
         }
 
         // Start the Dear ImGui frame
-        
+
         ImGui::NewFrame();
 
-     
+
         ShowExampleAppDockSpace(&use_docking_space);
-        
+
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::BeginDisabled(!assetsLoaded);
                 if (ImGui::MenuItem("New")) {
-                   nodeEdit.Clear();
+                   nodeEdit->Clear();
                 }
                 if (ImGui::MenuItem("Save Graph")) {
-                    nodeEdit.Serialize();
+                    nodeEdit->Serialize();
                 }
                 if (ImGui::MenuItem("Load Graph")) {
-                    nodeEdit.Deserialize();
+                    nodeEdit->Deserialize();
                 }
                 if (ImGui::MenuItem("Export")) {
-                    nodeEdit.Export();
+                    nodeEdit->Export();
 					          is_exporting = true;
                 }
                 ImGui::EndDisabled();
@@ -424,28 +424,28 @@ int main(int argc, char** argv)
             }
             if (ImGui::BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Copy")) {
-                    nodeEdit.CopyNodes();
+                    nodeEdit->CopyNodes();
                 }
                 if (ImGui::MenuItem("Paste")) {
-                    nodeEdit.PasteNodes();
+                    nodeEdit->PasteNodes();
                 }
                 ImGui::EndMenu();
             }
             if(ImGui::MenuItem("Settings")) {
                 settings.Open();
             }
-            
+
             ImGui::EndMainMenuBar();
         }
-        if (assetsLoaded && nodeEdit.currentFilePath.has_value()) {
-            auto path = *nodeEdit.currentFilePath;
-            nodeEdit.currentFilePath.reset();
+        if (assetsLoaded && nodeEdit->currentFilePath.has_value()) {
+            auto path = *nodeEdit->currentFilePath;
+            nodeEdit->currentFilePath.reset();
             if (is_exporting) {
-				nodeEdit.ExportToPath(path);
+				nodeEdit->ExportToPath(path);
 				is_exporting = false;
             }
             else {
-                nodeEdit.DeserializeFromPath(path);
+                nodeEdit->DeserializeFromPath(path);
             }
         }
         settings.ShowSettingsWindow();
@@ -454,33 +454,33 @@ int main(int argc, char** argv)
             if (!assetsLoaded)
                 settings.Open();
             auto size = settings.GetRuiSize();
-            render.SetSize(size.width,size.height);
+            render->SetSize(size.width,size.height);
             g_renderFramework->RuiReCreatePipeline(size.width,size.height);
         }
-        
 
-        render.StartFrame(ImGui::GetCurrentContext()->Time);
+
+        render->StartFrame(ImGui::GetCurrentContext()->Time);
         if (assetsLoaded) {
-            nodeEdit.Draw();
+            nodeEdit->Draw();
         }
         else {
             ImGui::Begin("Node Editor");
             ImGui::TextUnformatted("Select a valid Titanfall 2 path in Settings to get started.");
             ImGui::End();
         }
-        render.EndFrame();
-        render.DrawImage();
+        render->EndFrame();
+        render->DrawImage();
 
        const bool isEditingWidget = ImGui::GetIO().WantTextInput || ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused();
        if (assetsLoaded && !isEditingWidget) {
            if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_C, ImGuiInputFlags_RouteGlobal)) {
-               nodeEdit.CopyNodes();
+               nodeEdit->CopyNodes();
            }
            if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_V, ImGuiInputFlags_RouteGlobal)) {
-               nodeEdit.PasteNodes();
+               nodeEdit->PasteNodes();
            }
        }
-        
+
        //ImPlot::ShowDemoWindow();
        // Rendering
        ImGui::Render();
@@ -492,7 +492,8 @@ int main(int argc, char** argv)
 
        g_renderFramework->ImGuiEndFrame();
     }
-
+    nodeEdit.reset();
+    render.reset();
     g_renderFramework->ImGuiDeInit();
 
     // Cleanup

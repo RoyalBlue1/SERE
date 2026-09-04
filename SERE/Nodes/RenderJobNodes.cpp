@@ -7,12 +7,16 @@
 
 
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),maskFlag(false),layer(0) {
+AssetRenderNode::AssetRenderNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+RuiBaseNode(name,category,GetPinInfo(),rend,style),maskFlag(false),layer(0)
+{
 
-	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Transform")->setEmptyVal(render->transformResults[2]);
 }
 
-AssetRenderNode::AssetRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetRenderNode(rend, style) {
+AssetRenderNode::AssetRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj):
+AssetRenderNode(rend, style)
+{
 	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
 		layer = obj["Layer"].GetInt();
 	}
@@ -42,7 +46,7 @@ void AssetRenderNode::draw() {
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = maskFlag ? 0x1001 : 0x1000;
 
-	render.jobs.emplace_back(layer, [input](RenderInstance& render) {
+	render->jobs.emplace_back(layer, [input](const std::shared_ptr<RenderInstance>& render) {
 		Render_Asset(render,input);
 	} );
 	
@@ -197,12 +201,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetRenderNode::GetPinInfo() {
 	return info;
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
+AssetCircleRenderNode::AssetCircleRenderNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
 
-	getIn<TransformResult>("Transform")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Transform")->setEmptyVal(render->transformResults[2]);
 }
 
-AssetCircleRenderNode::AssetCircleRenderNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {
+AssetCircleRenderNode::AssetCircleRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :AssetCircleRenderNode(rend, style) {
 	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
 		layer = obj["Layer"].GetInt();
 	}
@@ -235,7 +239,7 @@ void AssetCircleRenderNode::draw() {
 	input.transform = getInVal<TransformResult>("Transform");
 	input.flags = 0x2000;
 
-	render.jobs.emplace_back(layer, [input](RenderInstance& render) {
+	render->jobs.emplace_back(layer, [input](const std::shared_ptr<RenderInstance>& render) {
 		Render_AssetSmall(render,input);
 	});
 	
@@ -357,7 +361,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> AssetCircleRenderNode::GetPinInfo
 
 
 
-TextStyleNode::TextStyleNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextStyleNode::TextStyleNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 
 	currentFont = &fonts[0].fonts.begin()->second;
 
@@ -382,7 +386,7 @@ TextStyleNode::TextStyleNode(RenderInstance& rend,ImFlow::StyleManager& style):R
 	});
 }
 
-TextStyleNode::TextStyleNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
+TextStyleNode::TextStyleNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextStyleNode(rend, style) {
 	if (obj.HasMember("FontName") && obj["FontName"].IsString()) {
 		std::string fontName = obj["FontName"].GetString();
 		for (auto& fontAtlas : fonts) {
@@ -444,7 +448,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextStyleNode::GetPinInfo() {
 	return info;
 }
 
-TextSizeNode::TextSizeNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+TextSizeNode::TextSizeNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string sizeName = Variable::UniqueName();
 	getOut<TextInputData>("Text Data")->behaviour([this,sizeName]() {
 		
@@ -479,7 +483,7 @@ TextSizeNode::TextSizeNode(RenderInstance& rend,ImFlow::StyleManager& style):Rui
 
 }
 
-TextSizeNode::TextSizeNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
+TextSizeNode::TextSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TextSizeNode(rend, style) {}
 
 void TextSizeNode::draw() {
 
@@ -511,12 +515,12 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextSizeNode::GetPinInfo() {
 }
 
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
+TextRenderNode::TextRenderNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style),layer(0) {
 
-	getIn<TransformResult>("Parent")->setEmptyVal(render.transformResults[2]);
+	getIn<TransformResult>("Parent")->setEmptyVal(render->transformResults[2]);
 }
 
-TextRenderNode::TextRenderNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){
+TextRenderNode::TextRenderNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):TextRenderNode(rend,style){
 	if (obj.HasMember("Layer") && obj["Layer"].IsInt()) {
 		layer = obj["Layer"].GetInt();
 	}
@@ -528,7 +532,7 @@ void TextRenderNode::draw() {
 	ImGui::PushItemWidth(70.f);
 	ImGui::InputInt("Layer",&layer);
 	ImGui::PopItemWidth();
-	render.jobs.emplace_back(layer, [data, parent](RenderInstance& render) {
+	render->jobs.emplace_back(layer, [data, parent](const std::shared_ptr<RenderInstance>& render) {
 		Text_Render(render,data,parent);
 	});
 }
@@ -666,11 +670,11 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> TextRenderNode::GetPinInfo() {
 
 
 
-void AddRenderNodes(NodeEditor& editor) {
-	editor.AddNodeType<AssetRenderNode>();
-	editor.AddNodeType<AssetCircleRenderNode>();
-	editor.AddNodeType<TextStyleNode>();
-	editor.AddNodeType<TextSizeNode>();
-	editor.AddNodeType<TextRenderNode>();
+void AddRenderNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<AssetRenderNode>();
+	editor->AddNodeType<AssetCircleRenderNode>();
+	editor->AddNodeType<TextStyleNode>();
+	editor->AddNodeType<TextSizeNode>();
+	editor->AddNodeType<TextRenderNode>();
 
 }

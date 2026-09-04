@@ -8,8 +8,8 @@ public:
 	static inline std::string name = "Set No Render";
 	static inline std::string category = "Functions";
 
-	explicit SetNoRenderNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit SetNoRenderNode(RenderInstance& prot, ImFlow::StyleManager& styles,
+	explicit SetNoRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit SetNoRenderNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles,
 		rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 	void draw() override;
@@ -26,8 +26,8 @@ class RandomFloatNode : public RuiBaseNode
 public:
 	static inline std::string name = "Random Float";
 	static inline std::string category = "Functions";
-	explicit RandomFloatNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit RandomFloatNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit RandomFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit RandomFloatNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -45,8 +45,8 @@ class ProjectionNode : public RuiBaseNode
 public:
 	static inline std::string name = "Project";
 	static inline std::string category = "Functions";
-	explicit ProjectionNode(RenderInstance& prot, ImFlow::StyleManager& style);
-	explicit ProjectionNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ProjectionNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style);
+	explicit ProjectionNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -59,8 +59,8 @@ class ToUpperNode : public RuiBaseNode
 public:
 	static inline std::string name = "To Upper";
 	static inline std::string category = "Functions";
-	explicit ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit ToUpperNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit ToUpperNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit ToUpperNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
@@ -75,8 +75,8 @@ public:
 	static inline std::string name = "Localize";
 	static inline std::string category = "Functions";
 
-	explicit LocalizeNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit LocalizeNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit LocalizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit LocalizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -92,8 +92,8 @@ public:
 	static inline std::string name = "PrintF";
 	static inline std::string category = "Functions";
 
-	explicit PrintFNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit PrintFNode(RenderInstance& prot, ImFlow::StyleManager& styles,
+	explicit PrintFNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit PrintFNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles,
 		rapidjson::GenericObject<false, rapidjson::Value> obj);
 
 	void draw() override;
@@ -115,4 +115,4 @@ private:
 };
 
 
-void AddFunctionNodes(NodeEditor& editor);
+void AddFunctionNodes(const std::unique_ptr<NodeEditor>& editor);

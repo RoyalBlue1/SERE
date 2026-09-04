@@ -9,8 +9,8 @@ public:
 	static inline std::string name = "Split Vector2";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit SplitFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit SplitFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -25,8 +25,8 @@ public:
 	static inline std::string name = "Merge Vector2";
 	static inline std::string category = "Split Merge";
 
-	explicit MergeFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit MergeFloat2Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MergeFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit MergeFloat2Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -40,8 +40,8 @@ public:
 	static inline std::string name = "Split Vector3";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit SplitFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit SplitFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -56,8 +56,8 @@ public:
 	static inline std::string name = "Merge Vector3";
 	static inline std::string category = "Split Merge";
 
-	explicit MergeFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit MergeFloat3Node(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit MergeFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit MergeFloat3Node(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -71,8 +71,8 @@ public:
 	static inline std::string name = "Split Color RGB";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit SplitColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit SplitColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit SplitColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -86,8 +86,8 @@ class RGBToColorNode : public RuiBaseNode
 	static inline std::string name = "Merge Color RGB";
 	static inline std::string category = "Split Merge";
 
-	explicit RGBToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit RGBToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit RGBToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit RGBToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -101,8 +101,8 @@ class HSVToColorNode : public RuiBaseNode
 	static inline std::string name = "Merge Color HSV";
 	static inline std::string category = "Split Merge";
 
-	explicit HSVToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles);
-	explicit HSVToColorNode(RenderInstance& prot,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
+	explicit HSVToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles);
+	explicit HSVToColorNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles, rapidjson::GenericObject<false,rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj,rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -116,8 +116,8 @@ public:
 	static inline std::string name = "Split Size";
 	static inline std::string category = "Split Merge";
 
-	explicit SplitTransformSizeNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit SplitTransformSizeNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit SplitTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit SplitTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -131,8 +131,8 @@ public:
 	static inline std::string name = "Merge Size";
 	static inline std::string category = "Split Merge";
 
-	explicit MergeTransformSizeNode(RenderInstance& prot, ImFlow::StyleManager& styles);
-	explicit MergeTransformSizeNode(RenderInstance& prot, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
+	explicit MergeTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles);
+	explicit MergeTransformSizeNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& styles, rapidjson::GenericObject<false, rapidjson::Value> obj);
 	void draw() override;
 	void Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) override;
 	void Export(RuiExportPrototype& proto) override;
@@ -140,4 +140,4 @@ public:
 	static std::vector<std::shared_ptr<ImFlow::PinProto>> GetPinInfo();
 };
 
-void AddSplitMergeNodes(NodeEditor& editor);
+void AddSplitMergeNodes(const std::unique_ptr<NodeEditor>& editor);

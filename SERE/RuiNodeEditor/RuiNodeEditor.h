@@ -22,12 +22,12 @@ namespace fs = std::filesystem;
 class NodeEditor{
 private:
 	ImFlow::ImNodeFlow mINF;
-	RenderInstance& render;
+	std::shared_ptr<RenderInstance> render;
 
 	std::map<std::string,NodeCategory> nodeTypes;
 	rapidjson::Document m_clipboard;
 public:
-	NodeEditor(RenderInstance& rend);
+	NodeEditor(std::shared_ptr<RenderInstance>& rend);
 	void SetStyles(ImFlow::StyleManager& styles);
 	void RightClickPopup(ImFlow::BaseNode* node);
 	void LinkDroppedPopup(ImFlow::Pin* pin);

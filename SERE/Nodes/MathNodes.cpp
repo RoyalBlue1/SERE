@@ -1,720 +1,984 @@
 #include "Nodes/MathNodes.h"
 
-namespace {
-enum class MathBinaryOp {
-	Add,
-	Subtract,
-	Multiply,
-	Divide,
-	Modulo,
-	Exponent
-};
 
-enum class MathUnaryOp {
-	Absolute,
-	Sine,
-	Tangent,
-	Cosine,
-	SquareRoot,
-	Round,
-	Floor,
-	Ceil,
-	Truncate
-};
-
-const char* OpSymbol(MathBinaryOp op) {
-	switch (op) {
-	case MathBinaryOp::Add: return "+";
-	case MathBinaryOp::Subtract: return "-";
-	case MathBinaryOp::Multiply: return "*";
-	case MathBinaryOp::Divide: return "/";
-	case MathBinaryOp::Modulo: return "%";
-	case MathBinaryOp::Exponent: return "^";
-	}
-	return "?";
+MathNodeConnectionType TypeInfoToConnectionType(const std::type_info& typeInfo)
+{
+	if (typeInfo == typeid(FloatVariable))
+		return MathNodeConnectionType::Float;
+	if (typeInfo == typeid(Float2Variable))
+		return MathNodeConnectionType::Float2;
+	if (typeInfo == typeid(Float3Variable))
+		return MathNodeConnectionType::Float3;
+	if (typeInfo == typeid(ColorVariable))
+		return MathNodeConnectionType::Color;
+	if (typeInfo == typeid(TransformSize))
+		return MathNodeConnectionType::Size;
+	return MathNodeConnectionType::Invalid;
 }
 
-int ComponentCount(MathVariableType type) {
-	switch (type) {
-	case MathVariableType::FLOAT: return 1;
-	case MathVariableType::FLOAT2: return 2;
-	case MathVariableType::FLOAT3: return 3;
-	case MathVariableType::SIZE: return 4;
-	}
-	return 1;
+BaseMathNode::BaseMathNode(const std::string& name,const std::string& category,std::vector<std::shared_ptr<ImFlow::PinProto>> pinInfo,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+RuiBaseNode(name,category,std::move(pinInfo),rend,styles),
+nodeName(name),
+nodeCategory(category)
+{}
+
+void BaseMathNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+{
+	obj.AddMember("Name",nodeName,allocator);
+	obj.AddMember("Category",nodeCategory,allocator);
+	RuiBaseNode::Serialize(obj,allocator);
 }
 
-float ComponentAt(const MathVariable& value, int index) {
-	if (std::holds_alternative<FloatVariable>(value.value))
-		return std::get<FloatVariable>(value.value).value;
-	if (std::holds_alternative<Float2Variable>(value.value)) {
-		const Vector2& val = std::get<Float2Variable>(value.value).value;
-		return index == 0 ? val.x : val.y;
-	}
-	if (std::holds_alternative<Float3Variable>(value.value)) {
-		const Vector3& val = std::get<Float3Variable>(value.value).value;
-		if (index == 0)
-			return val.x;
-		if (index == 1)
-			return val.y;
-		return val.z;
-	}
-	const TransformSize& val = std::get<TransformSize>(value.value);
-	float size[4];
-	_mm_storeu_ps(size, val.size);
-	return size[index];
-}
-
-MathVariableType ResultType(const MathVariable& a, const MathVariable& b, bool& valid) {
-	MathVariableType aType = a.Type();
-	MathVariableType bType = b.Type();
-	valid = true;
-	if (aType == bType)
-		return aType;
-	if (aType == MathVariableType::FLOAT)
-		return bType;
-	if (bType == MathVariableType::FLOAT)
-		return aType;
-	valid = false;
-	return MathVariableType::FLOAT;
-}
-
-float ApplyComponent(MathBinaryOp op, float a, float b) {
-	switch (op) {
-	case MathBinaryOp::Add: return a + b;
-	case MathBinaryOp::Subtract: return a - b;
-	case MathBinaryOp::Multiply: return a * b;
-	case MathBinaryOp::Divide: return b == 0.f ? 0.f : a / b;
-	case MathBinaryOp::Modulo: return b == 0.f ? 0.f : std::fmodf(a, b);
-	case MathBinaryOp::Exponent: return std::pow(a, b);
-	}
-	return 0.f;
-}
-
-MathVariable EvalBinary(MathBinaryOp op, const MathVariable& a, const MathVariable& b, const std::string& outName, bool* valid = nullptr, bool* divideByZero = nullptr) {
-	bool isValid = false;
-	MathVariableType type = ResultType(a, b, isValid);
-	if (valid)
-		*valid = isValid;
-	if (!isValid)
-		return MathVariable(FloatVariable(0.f));
-
-	int count = ComponentCount(type);
-	std::string name = (a.IsConstant() && b.IsConstant()) ? "" : outName;
-	bool hasZeroDivisor = false;
-	float result[4] = {};
-	for (int i = 0; i < count; i++) {
-		float right = ComponentAt(b, ComponentCount(b.Type()) == 1 ? 0 : i);
-		hasZeroDivisor |= (op == MathBinaryOp::Divide || op == MathBinaryOp::Modulo) && right == 0.f;
-		result[i] = ApplyComponent(op, ComponentAt(a, ComponentCount(a.Type()) == 1 ? 0 : i), right);
-	}
-	if (divideByZero)
-		*divideByZero = hasZeroDivisor;
-
-	switch (type) {
-	case MathVariableType::FLOAT:
-		return MathVariable(FloatVariable(result[0], name));
-	case MathVariableType::FLOAT2:
-		return MathVariable(Float2Variable(result[0], result[1], name));
-	case MathVariableType::FLOAT3:
-		return MathVariable(Float3Variable(result[0], result[1], result[2], name));
-	case MathVariableType::SIZE:
-		return MathVariable(TransformSize(_mm_set_ps(result[3], result[2], result[1], result[0]), name));
-	}
-	return MathVariable(FloatVariable(0.f));
-}
-
-FloatVariable AsFloatOutput(const MathVariable& value) {
-	if (std::holds_alternative<FloatVariable>(value.value))
-		return std::get<FloatVariable>(value.value);
-	return FloatVariable(0.f);
-}
-
-Float2Variable AsFloat2Output(const MathVariable& value) {
-	if (std::holds_alternative<Float2Variable>(value.value))
-		return std::get<Float2Variable>(value.value);
-	if (std::holds_alternative<FloatVariable>(value.value)) {
-		const FloatVariable& scalar = std::get<FloatVariable>(value.value);
-		return Float2Variable(scalar.value, scalar.value, scalar.name);
-	}
-	return Float2Variable(0.f, 0.f);
-}
-
-Float3Variable AsFloat3Output(const MathVariable& value) {
-	if (std::holds_alternative<Float3Variable>(value.value))
-		return std::get<Float3Variable>(value.value);
-	if (std::holds_alternative<FloatVariable>(value.value)) {
-		const FloatVariable& scalar = std::get<FloatVariable>(value.value);
-		return Float3Variable(scalar.value, scalar.value, scalar.value, scalar.name);
-	}
-	return Float3Variable(0.f, 0.f, 0.f);
-}
-
-TransformSize AsSizeOutput(const MathVariable& value) {
-	if (std::holds_alternative<TransformSize>(value.value))
-		return std::get<TransformSize>(value.value);
-	if (std::holds_alternative<FloatVariable>(value.value)) {
-		const FloatVariable& scalar = std::get<FloatVariable>(value.value);
-		return TransformSize(_mm_set1_ps(scalar.value), scalar.name);
-	}
-	return TransformSize(_mm_setzero_ps());
-}
-
-void DrawMathValue(const char* label, const MathVariable& value) {
-	switch (value.Type()) {
-	case MathVariableType::FLOAT:
-		ImGui::Text("%s %f", label, std::get<FloatVariable>(value.value).value);
-		break;
-	case MathVariableType::FLOAT2:
+void BaseMathNode::UpdateInPin(const char* name,MathNodeConnectionType& lastConnectionType,std::unordered_map<std::string,std::any>& emptyVals)
+{
+	MathNodeConnectionType connectionType = GetConnectionRestrictions();
+	if (lastConnectionType == connectionType)
+		return;
+	if ((lastConnectionType == MathNodeConnectionType::None&&connectionType == MathNodeConnectionType::Float) ||
+		(lastConnectionType == MathNodeConnectionType::Float&& connectionType == MathNodeConnectionType::None))
 	{
-		const Vector2& val = std::get<Float2Variable>(value.value).value;
-		ImGui::Text("%s %f, %f", label, val.x, val.y);
-		break;
+		lastConnectionType = connectionType;
+		return;
 	}
-	case MathVariableType::FLOAT3:
+
+
+	ImFlow::Pin* connectedPin = nullptr;
+	if (inPin(name)->isConnected())
+		connectedPin = inPin(name)->getLink().lock()->left();
+	inPin(name)->deleteLink();
+	switch (lastConnectionType)
 	{
-		const Vector3& val = std::get<Float3Variable>(value.value).value;
-		ImGui::Text("%s %f, %f, %f", label, val.x, val.y, val.z);
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Float:
+		storePin<FloatVariable>(name,emptyVals);
+		break;
+	case MathNodeConnectionType::Float2:
+		storePin<Float2Variable>(name,emptyVals);
+		break;
+	case MathNodeConnectionType::Float3:
+		storePin<Float3Variable>(name,emptyVals);
+		break;
+	case MathNodeConnectionType::Color:
+		storePin<ColorVariable>(name,emptyVals);
+		break;
+	case MathNodeConnectionType::Size:
+		storePin<TransformSize>(name,emptyVals);
 		break;
 	}
-	case MathVariableType::SIZE:
+
+	switch (connectionType)
 	{
-		float size[4];
-		_mm_storeu_ps(size, std::get<TransformSize>(value.value).size);
-		ImGui::Text("%s %f, %f, %f, %f", label, size[0], size[1], size[2], size[3]);
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Float:
+		recreatePin<FloatVariable>(name,isPinMath,emptyVals);
+		break;
+	case MathNodeConnectionType::Float2:
+		recreatePin<Float2Variable>(name,isPinMath,emptyVals);
+		break;
+	case MathNodeConnectionType::Float3:
+		recreatePin<Float3Variable>(name,isPinMath,emptyVals);
+		break;
+	case MathNodeConnectionType::Color:
+		recreatePin<ColorVariable>(name,isPinMath,emptyVals);
+		break;
+	case MathNodeConnectionType::Size:
+		recreatePin<TransformSize>(name,isPinMath,emptyVals);
 		break;
 	}
+	if (connectedPin)
+		inPin(name)->createLink(connectedPin);
+
+	lastConnectionType = connectionType;
+}
+
+MathNodeConnectionType BaseMathNode::OutConnectionType()
+{
+	MathNodeConnectionType outConnection = MathNodeConnectionType::None;
+	if (outPin("Res")->isConnected())
+	{
+		outConnection = MathNodeConnectionType::Float;
+	}
+	if (outPin("Vector2 Res")->isConnected())
+	{
+		if (outConnection != MathNodeConnectionType::None)
+			return MathNodeConnectionType::Invalid;
+		outConnection = MathNodeConnectionType::Float2;
+	}
+	if (outPin("Vector3 Res")->isConnected())
+	{
+		if (outConnection != MathNodeConnectionType::None)
+			return MathNodeConnectionType::Invalid;
+		outConnection =  MathNodeConnectionType::Float3;
+	}
+	if (outPin("Color Res")->isConnected())
+	{
+		if (outConnection != MathNodeConnectionType::None)
+			return MathNodeConnectionType::Invalid;
+		outConnection = MathNodeConnectionType::Color;
+	}
+	return outConnection;
+}
+
+void BaseMathNode::UpdateOutPinVisibility()
+{
+	outPin("Res")->visible(false);
+	outPin("Vector2 Res")->visible(false);
+	outPin("Vector3 Res")->visible(false);
+	outPin("Color Res")->visible(false);
+	outPin("Size Res")->visible(false);
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Invalid:
+		outPin("Res")->visible(true);
+		outPin("Vector2 Res")->visible(true);
+		outPin("Vector3 Res")->visible(true);
+		outPin("Color Res")->visible(true);
+		outPin("Size Res")->visible(true);
+		break;
+	case MathNodeConnectionType::Float:
+		outPin("Res")->visible(true);
+		break;
+	case MathNodeConnectionType::Float2:
+		outPin("Vector2 Res")->visible(true);
+		break;
+	case MathNodeConnectionType::Float3:
+		outPin("Vector3 Res")->visible(true);
+		break;
+	case MathNodeConnectionType::Color:
+		outPin("Color Res")->visible(true);
+		break;
+	case MathNodeConnectionType::Size:
+		outPin("Size Res")->visible(true);
+		break;
 	}
 }
 
-bool CanUseMathOutput(MathVariableType resultType, MathVariableType outputType) {
-	return resultType == outputType;
+UnaryMathNode::UnaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+	BaseMathNode(name,category,GetPinInfo(),rend,styles),
+	lastConnectionType(MathNodeConnectionType::None)
+{
+	std::string outFloatName = Variable::UniqueName();
+	std::string outFloat2Name = Variable::UniqueName();
+	std::string outFloat3Name = Variable::UniqueName();
+	std::string outColorName = Variable::UniqueName();
+	std::string outSizeName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float)
+			return FloatVariable(1);
+
+		FloatVariable in = getInVal<FloatVariable>("In");
+		return FloatVariable(Operation(in.value),outFloatName);
+
+	});
+	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float2)
+			return Float2Variable(1,1);
+
+		Float2Variable in = getInVal<Float2Variable>("In");
+		return Float2Variable(Operation(in.value.x),Operation(in.value.y),outFloat2Name);
+	});
+	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float3)
+			return Float3Variable(1,1,1);
+
+		Float3Variable in = getInVal<Float3Variable>("In");
+		return Float3Variable(Operation(in.value.x),Operation(in.value.y),Operation(in.value.z),outFloat3Name);
+	});
+	getOut<ColorVariable>("Color Res")->behaviour([this, outColorName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Color)
+			return ColorVariable(1,1,1,1);
+
+		ColorVariable in = getInVal<ColorVariable>("In");
+		return ColorVariable(Operation(in.value.red),Operation(in.value.green),Operation(in.value.blue),Operation(in.value.alpha),outColorName);
+	});
+	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float3)
+			return TransformSize(_mm_set1_ps(1));
+
+		TransformSize in = getInVal<TransformSize>("In");
+		float inVal[4];
+		_mm_store_ps(inVal,in.size);
+		__m128 outVal = _mm_set_ps(
+			Operation(inVal[3]),
+			Operation(inVal[2]),
+			Operation(inVal[1]),
+			Operation(inVal[0])
+		);
+		return TransformSize(outVal,outSizeName);
+	});
 }
 
-void UpdateDynamicMathOutputVisibility(ImFlow::BaseNode* node, MathVariableType resultType, bool valid) {
-	ImFlow::Pin* scalar = node->outPin("Res");
-	ImFlow::Pin* vector2 = node->outPin("Vector2 Res");
-	ImFlow::Pin* vector3 = node->outPin("Vector3 Res");
-	ImFlow::Pin* size = node->outPin("Size Res");
-	bool allowScalar = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT);
-	bool allowVector2 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT2);
-	bool allowVector3 = valid && CanUseMathOutput(resultType, MathVariableType::FLOAT3);
-	bool allowSize = valid && CanUseMathOutput(resultType, MathVariableType::SIZE);
-	bool hasSelectedOutput = (allowScalar && scalar->isConnected()) ||
-		(allowVector2 && vector2->isConnected()) ||
-		(allowVector3 && vector3->isConnected()) ||
-		(allowSize && size->isConnected());
 
-	scalar->visible(allowScalar && (!hasSelectedOutput || scalar->isConnected()));
-	vector2->visible(allowVector2 && (!hasSelectedOutput || vector2->isConnected()));
-	vector3->visible(allowVector3 && (!hasSelectedOutput || vector3->isConnected()));
-	size->visible(allowSize && (!hasSelectedOutput || size->isConnected()));
+
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathNode::GetPinInfo()
+{
+	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("In", isPinMath, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Color Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size Res"));
+	return info;
 }
 
-std::string ComponentExpression(const MathVariable& value, int index, RuiExportPrototype& proto) {
-	if (value.Type() == MathVariableType::FLOAT)
-		return value.GetFormattedName(proto);
-	if (value.IsConstant())
-		return std::format("{}", ComponentAt(value, index));
+MathNodeConnectionType UnaryMathNode::GetConnectionRestrictions()
+{
 
-	if (value.Type() == MathVariableType::SIZE)
-		return std::format("{}.m128_f32[{}]", value.GetFormattedName(proto), index);
-
-	const char* component = index == 0 ? "x" : (index == 1 ? "y" : "z");
-	return std::format("{}.{}", value.GetFormattedName(proto), component);
+	MathNodeConnectionType inType = MathNodeConnectionType::None;
+	if (inPin("In")->isConnected())
+		inType = TypeInfoToConnectionType(inPin("In")->getLink().lock()->left()->getDataType());
+	MathNodeConnectionType outType = OutConnectionType();
+	if (outType == MathNodeConnectionType::None)
+		return inType;
+	if (inType == MathNodeConnectionType::None)
+		return outType;
+	if (inType == outType)
+		return inType;
+	return MathNodeConnectionType::Invalid;
 }
 
-const char* ExportTypeName(MathVariableType type) {
-	switch (type) {
-	case MathVariableType::FLOAT: return "float";
-	case MathVariableType::FLOAT2: return "Vector2";
-	case MathVariableType::FLOAT3: return "Vector3";
-	case MathVariableType::SIZE: return "__m128";
+
+
+
+bool UnaryMathNode::CanCreateLink(ImFlow::Pin* own, ImFlow::Pin* other)
+{
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+		return true;
+	case MathNodeConnectionType::Float:
+		if (other->getDataType() == typeid(FloatVariable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Float2:
+		if (other->getDataType() == typeid(Float2Variable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Float3:
+		if (other->getDataType() == typeid(Float3Variable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Color:
+		if (other->getDataType() == typeid(ColorVariable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Size:
+		if (other->getDataType() == typeid(TransformSize))
+			return true;
+		return false;
+	case MathNodeConnectionType::Invalid:
+		return false;
 	}
-	return "float";
+	return false;
 }
 
-std::string BuildComponentExpression(MathBinaryOp op, const std::string& a, const std::string& b) {
-	switch (op) {
-	case MathBinaryOp::Modulo:
-		return std::format("std::fmodf({}, {})", a, b);
-	case MathBinaryOp::Exponent:
-		return std::format("std::pow({}, {})", a, b);
+
+
+void UnaryMathNode::Export(RuiExportPrototype& proto)
+{
+	std::string outName;
+	std::string inName;
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Invalid:
+		return;
+	case MathNodeConnectionType::Float:
+		outName = getOut<FloatVariable>("Res")->val().name;
+		inName = getIn<FloatVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float2:
+		outName = getOut<Float2Variable>("Res")->val().name;
+		inName = getIn<Float2Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Float3:
+		outName = getOut<Float3Variable>("Res")->val().name;
+		inName = getIn<Float3Variable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Color:
+		outName = getOut<ColorVariable>("Res")->val().name;
+		inName = getIn<ColorVariable>("In")->val().name;
+		break;
+	case MathNodeConnectionType::Size:
+		outName = getOut<TransformSize>("Res")->val().name;
+		inName = getIn<TransformSize>("In")->val().name;
 	default:
-		return std::format("{} {} {}", a, OpSymbol(op), b);
-	}
-}
-
-std::string BuildBinaryExpression(MathBinaryOp op, MathVariableType outType, const MathVariable& a, const MathVariable& b, RuiExportPrototype& proto) {
-	int count = ComponentCount(outType);
-	if (count == 1)
-		return BuildComponentExpression(op, ComponentExpression(a, 0, proto), ComponentExpression(b, 0, proto));
-
-	std::string components[4];
-	for (int i = 0; i < count; i++) {
-		int aIndex = ComponentCount(a.Type()) == 1 ? 0 : i;
-		int bIndex = ComponentCount(b.Type()) == 1 ? 0 : i;
-		components[i] = BuildComponentExpression(op, ComponentExpression(a, aIndex, proto), ComponentExpression(b, bIndex, proto));
-	}
-	if (outType == MathVariableType::FLOAT2)
-		return std::format("Vector2({}, {})", components[0], components[1]);
-	if (outType == MathVariableType::FLOAT3)
-		return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
-	return std::format("_mm_set_ps({}, {}, {}, {})", components[3], components[2], components[1], components[0]);
-}
-
-std::string DivideByZeroGuard(const MathVariable& b, RuiExportPrototype& proto) {
-	int count = ComponentCount(b.Type());
-	if (count == 1)
-		return std::format("{} == 0", ComponentExpression(b, 0, proto));
-
-	std::string guard;
-	for (int i = 0; i < count; i++) {
-		if (i)
-			guard += " || ";
-		guard += std::format("{} == 0", ComponentExpression(b, i, proto));
-	}
-	return guard;
-}
-
-template<typename T>
-void PushBinaryExport(RuiExportPrototype& proto, const T& out, MathVariableType outType, const MathVariable& a, const MathVariable& b, MathBinaryOp op) {
-	if (out.IsConstant())
 		return;
+	}
 
 	ExportElement<std::string> ele;
-	ele.dependencys = { a.Name(), b.Name() };
-	ele.identifier = out.name;
-	ele.callback = [out, outType, a, b, op](RuiExportPrototype& proto) {
-		const char* typeName = ExportTypeName(outType);
-		std::string assignPrefix = proto.varsInDataStruct.contains(out.name) ? "" : std::format("{} ", typeName);
-		if (op == MathBinaryOp::Divide || op == MathBinaryOp::Modulo) {
+	ele.dependencys = {inName};
+	ele.identifier = outName;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::Float:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<FloatVariable>("In");
+			auto res = getOut<FloatVariable>("Res")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"float";
+			proto.codeLines.push_back(std::format("{} {} = {};",typeName,res.GetFormattedName(proto),OperationString(in.GetFormattedName(proto))));
+
+		};
+		break;
+	case MathNodeConnectionType::Float2:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<Float2Variable>("In");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
 			proto.codeLines.push_back(std::format(
-				"if({}){{\n\tfuncs->SetErrorWithReason(inst,\"{} by zero\");\n\treturn;\n}}\n{}{} = {};",
-				DivideByZeroGuard(b, proto),
-				op == MathBinaryOp::Divide ? "Divide" : "Modulo",
-				assignPrefix,
-				out.GetFormattedName(proto),
-				BuildBinaryExpression(op, outType, a, b, proto)));
-		}
-		else {
-			proto.codeLines.push_back(std::format("{}{} = {};", assignPrefix, out.GetFormattedName(proto), BuildBinaryExpression(op, outType, a, b, proto)));
-		}
-	};
+				"{} {} = Vector2({},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.y",in.GetFormattedName(proto)))
+			));
+		};
+		break;
+	case MathNodeConnectionType::Float3:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<Float3Variable>("In");
+			auto res = getOut<Float3Variable>("Res Vector3")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector3";
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector3({},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.y",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.z",in.GetFormattedName(proto)))
+			));
+		};
+	case MathNodeConnectionType::Color:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<ColorVariable>("In");
+			auto res = getOut<ColorVariable>("Res Color")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Color";
+			proto.codeLines.push_back(std::format(
+				"{} {} = Color({},{},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.red",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.green",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.blue",in.GetFormattedName(proto))),
+				OperationString(std::format("{}.alpha",in.GetFormattedName(proto)))
+			));
+		};
+		break;
+	case MathNodeConnectionType::Size:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto in = getInVal<TransformSize>("In");
+			auto res = getOut<TransformSize>("Res Size")->val();
+			proto.codeLines.push_back(std::format(
+				"_m128 {} = {}",
+				res.GetFormattedName(proto),
+				OperationStringM128(in.GetFormattedName(proto))
+			));
+		};
+		break;
+	default:
+		return;
+	}
 	proto.codeElements.push_back(ele);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> BinaryMathPinInfo(float defaultB) {
+void UnaryMathNode::draw()
+{
+	UpdateInPin("In",lastConnectionType,inPinEmptyVal);
+	UpdateOutPinVisibility();
+
+}
+
+BinaryMathNode::BinaryMathNode(const std::string& name,const std::string& category,const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& styles):
+	BaseMathNode(name,category,GetPinInfo(),rend,styles),
+	aLastConnectionType(MathNodeConnectionType::None),
+	bLastConnectionType(MathNodeConnectionType::None)
+{
+	std::string outFloatName = Variable::UniqueName();
+	std::string outFloat2Name = Variable::UniqueName();
+	std::string outFloat3Name = Variable::UniqueName();
+	std::string outColorName = Variable::UniqueName();
+	std::string outSizeName = Variable::UniqueName();
+	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float)
+			return FloatVariable(1);
+
+		FloatVariable a = getInVal<FloatVariable>("A");
+		FloatVariable b = getInVal<FloatVariable>("B");
+		return FloatVariable(Operation(a.value,b.value),outFloatName);
+
+	});
+	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float2)
+			return Float2Variable(1,1);
+
+		Float2Variable a = getInVal<Float2Variable>("A");
+		if (getIn<Float2Variable>("B")->getConnectedDataType() == typeid(Float2Variable))
+		{
+			Float2Variable b = getInVal<Float2Variable>("B");
+			return Float2Variable(Operation(a.value.x,b.value.x),Operation(a.value.y,b.value.y),outFloat2Name);
+		}
+		FloatVariable b = getInVal<FloatVariable>("B");
+		return Float2Variable(Operation(a.value.x,b.value),Operation(a.value.y,b.value),outFloat2Name);
+	});
+	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float3)
+			return Float3Variable(1,1,1);
+
+		Float3Variable a = getInVal<Float3Variable>("A");
+		if (getIn<Float3Variable>("B")->getConnectedDataType() == typeid(Float3Variable))
+		{
+			Float3Variable b = getInVal<Float3Variable>("B");
+			return Float3Variable(Operation(a.value.x,b.value.x),Operation(a.value.y,b.value.y),Operation(a.value.z,b.value.z),outFloat3Name);
+		}
+		FloatVariable b = getInVal<FloatVariable>("B");
+		return Float3Variable(Operation(a.value.x,b.value),Operation(a.value.y,b.value),Operation(a.value.z,b.value));
+	});
+	getOut<ColorVariable>("Color Res")->behaviour([this, outColorName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Color)
+			return ColorVariable(1,1,1,1);
+
+		ColorVariable a = getInVal<ColorVariable>("A");
+		if (getIn<ColorVariable>("B")->getConnectedDataType() == typeid(ColorVariable))
+		{
+			ColorVariable b = getInVal<ColorVariable>("B");
+		return ColorVariable(
+			Operation(a.value.red,b.value.red),
+			Operation(a.value.green,b.value.green),
+			Operation(a.value.blue,b.value.blue),
+			Operation(a.value.alpha,b.value.alpha),
+			outColorName);
+		}
+		FloatVariable b = getInVal<FloatVariable>("B");
+		return ColorVariable(
+			Operation(a.value.red,b.value),
+			Operation(a.value.green,b.value),
+			Operation(a.value.blue,b.value),
+			Operation(a.value.alpha,b.value),
+			outColorName);
+	});
+	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() {
+		if (GetConnectionRestrictions() != MathNodeConnectionType::Float3)
+			return TransformSize(_mm_set1_ps(1));
+
+		TransformSize a = getInVal<TransformSize>("A");
+		if (getIn<TransformSize>("B")->getConnectedDataType() == typeid(TransformSize))
+		{
+			TransformSize b = getInVal<TransformSize>("B");
+			float aInVal[4];
+			float bInVal[4];
+			_mm_store_ps(aInVal,a.size);
+			_mm_store_ps(bInVal,b.size);
+			__m128 outVal = _mm_set_ps(
+				Operation(aInVal[3],bInVal[3]),
+				Operation(aInVal[2],bInVal[2]),
+				Operation(aInVal[1],bInVal[1]),
+				Operation(aInVal[0],bInVal[0])
+
+			);
+			return TransformSize(outVal,outSizeName);
+		}
+		FloatVariable b = getInVal<FloatVariable>("B");
+		float aInVal[4];
+
+		_mm_store_ps(aInVal,a.size);
+		__m128 outVal = _mm_set_ps(
+			Operation(aInVal[3],b.value),
+			Operation(aInVal[2],b.value),
+			Operation(aInVal[1],b.value),
+			Operation(aInVal[0],b.value)
+
+		);
+		return TransformSize(outVal,outSizeName);
+	});
+}
+
+std::vector<std::shared_ptr<ImFlow::PinProto>> BinaryMathNode::GetPinInfo()
+{
 	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("A", isPinMath, MathVariable(FloatVariable(0.f))));
-	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("B", isPinMath, MathVariable(FloatVariable(defaultB))));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinMath, FloatVariable(0.f)));
+	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinMath, FloatVariable(0.f)));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
+	info.push_back(std::make_shared<ImFlow::OutPinProto<ColorVariable>>("Color Res"));
 	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size Res"));
 	return info;
 }
 
-float ApplyUnary(MathUnaryOp op, float value) {
-	switch (op) {
-	case MathUnaryOp::Absolute: return abs(value);
-	case MathUnaryOp::Sine: return sin(value);
-	case MathUnaryOp::Tangent: return tan(value);
-	case MathUnaryOp::Cosine: return cos(value);
-	case MathUnaryOp::SquareRoot: return sqrt(value);
-	case MathUnaryOp::Round: return round(value);
-	case MathUnaryOp::Floor: return floor(value);
-	case MathUnaryOp::Ceil: return ceil(value);
-	case MathUnaryOp::Truncate: return trunc(value);
+MathNodeConnectionType BinaryMathNode::GetConnectionRestrictions()
+{
+
+	MathNodeConnectionType aInType = MathNodeConnectionType::None;
+	if (inPin("A")->isConnected())
+		aInType = TypeInfoToConnectionType(inPin("A")->getLink().lock()->left()->getDataType());
+	MathNodeConnectionType bInType = MathNodeConnectionType::None;
+	if (inPin("B")->isConnected())
+		bInType = TypeInfoToConnectionType(inPin("B")->getLink().lock()->left()->getDataType());
+
+	MathNodeConnectionType outType = OutConnectionType();
+
+	if (bInType == MathNodeConnectionType::None || bInType == MathNodeConnectionType::Float)
+		bInType = aInType;
+	if (aInType == MathNodeConnectionType::None || aInType == MathNodeConnectionType::Float)
+		aInType = bInType;
+	if (aInType != bInType)
+		return MathNodeConnectionType::Invalid;
+
+	if (outType == MathNodeConnectionType::None)
+		return aInType;
+	if (aInType == MathNodeConnectionType::None)
+		return outType;
+	if (aInType == outType)
+		return aInType;
+	return MathNodeConnectionType::Invalid;
+}
+
+
+
+
+bool BinaryMathNode::CanCreateLink(ImFlow::Pin* own, ImFlow::Pin* other)
+{
+	if (own->getName() == "B"&&other->getDataType() == typeid(FloatVariable))
+		return true;
+
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+		return true;
+	case MathNodeConnectionType::Float:
+		if (other->getDataType() == typeid(FloatVariable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Float2:
+		if (other->getDataType() == typeid(Float2Variable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Float3:
+		if (other->getDataType() == typeid(Float3Variable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Color:
+		if (other->getDataType() == typeid(ColorVariable))
+			return true;
+		return false;
+	case MathNodeConnectionType::Size:
+		if (other->getDataType() == typeid(TransformSize))
+			return true;
+		return false;
+	case MathNodeConnectionType::Invalid:
+		return false;
 	}
-	return value;
+	return false;
 }
 
-const char* UnaryFunctionName(MathUnaryOp op) {
-	switch (op) {
-	case MathUnaryOp::Absolute: return "abs";
-	case MathUnaryOp::Sine: return "sin";
-	case MathUnaryOp::Tangent: return "tan";
-	case MathUnaryOp::Cosine: return "cos";
-	case MathUnaryOp::SquareRoot: return "sqrt";
-	case MathUnaryOp::Round: return "round";
-	case MathUnaryOp::Floor: return "floor";
-	case MathUnaryOp::Ceil: return "ceil";
-	case MathUnaryOp::Truncate: return "trunc";
-	}
-	return "";
-}
 
-MathVariable EvalUnary(MathUnaryOp op, const MathVariable& in, const std::string& outName) {
-	std::string name = in.IsConstant() ? "" : outName;
-	switch (in.Type()) {
-	case MathVariableType::FLOAT:
-		return MathVariable(FloatVariable(ApplyUnary(op, ComponentAt(in, 0)), name));
-	case MathVariableType::FLOAT2:
-		return MathVariable(Float2Variable(ApplyUnary(op, ComponentAt(in, 0)), ApplyUnary(op, ComponentAt(in, 1)), name));
-	case MathVariableType::FLOAT3:
-		return MathVariable(Float3Variable(ApplyUnary(op, ComponentAt(in, 0)), ApplyUnary(op, ComponentAt(in, 1)), ApplyUnary(op, ComponentAt(in, 2)), name));
-	case MathVariableType::SIZE:
-		return MathVariable(TransformSize(_mm_set_ps(ApplyUnary(op, ComponentAt(in, 3)), ApplyUnary(op, ComponentAt(in, 2)), ApplyUnary(op, ComponentAt(in, 1)), ApplyUnary(op, ComponentAt(in, 0))), name));
-	}
-	return MathVariable(FloatVariable(0.f));
-}
 
-std::string BuildUnaryExpression(MathUnaryOp op, MathVariableType outType, const MathVariable& in, RuiExportPrototype& proto) {
-	int count = ComponentCount(outType);
-	std::string components[4];
-	for (int i = 0; i < count; i++)
-		components[i] = std::format("{}({})", UnaryFunctionName(op), ComponentExpression(in, i, proto));
-
-	if (outType == MathVariableType::FLOAT)
-		return components[0];
-	if (outType == MathVariableType::FLOAT2)
-		return std::format("Vector2({}, {})", components[0], components[1]);
-	if (outType == MathVariableType::FLOAT3)
-		return std::format("Vector3({}, {}, {})", components[0], components[1], components[2]);
-	return std::format("_mm_set_ps({}, {}, {}, {})", components[3], components[2], components[1], components[0]);
-}
-
-template<typename T>
-void PushUnaryExport(RuiExportPrototype& proto, const T& out, MathVariableType outType, const MathVariable& in, MathUnaryOp op) {
-	if (out.IsConstant())
+void BinaryMathNode::Export(RuiExportPrototype& proto)
+{
+	std::string outName;
+	std::string aName;
+	std::string bName;
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::None:
+	case MathNodeConnectionType::Invalid:
 		return;
+	case MathNodeConnectionType::Float:
+		outName = getOut<FloatVariable>("Res")->val().name;
+		aName = getIn<FloatVariable>("A")->val().name;
+		bName = getIn<FloatVariable>("B")->val().name;
+		break;
+	case MathNodeConnectionType::Float2:
+		outName = getOut<Float2Variable>("Vector2 Res")->val().name;
+		if (getIn<Float2Variable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<Float2Variable>("A")->val().name;
+		if (getIn<Float2Variable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<Float2Variable>("B")->val().name;
+		break;
+	case MathNodeConnectionType::Float3:
+		outName = getOut<Float3Variable>("Vector3 Res")->val().name;
+		if (getIn<Float3Variable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<Float3Variable>("A")->val().name;
+		if (getIn<Float3Variable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<Float3Variable>("B")->val().name;
+		break;
+	case MathNodeConnectionType::Color:
+		outName = getOut<ColorVariable>("Color Res")->val().name;
+		if (getIn<ColorVariable>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<ColorVariable>("A")->val().name;
+		if (getIn<ColorVariable>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<ColorVariable>("B")->val().name;
+		break;
+	case MathNodeConnectionType::Size:
+		outName = getOut<TransformSize>("Size Res")->val().name;
+		if (getIn<TransformSize>("A")->getDataType() == typeid(FloatVariable))
+			aName = getIn<FloatVariable>("A")->val().name;
+		else
+			aName = getIn<TransformSize>("A")->val().name;
+		if (getIn<TransformSize>("B")->getDataType() == typeid(FloatVariable))
+			bName = getIn<FloatVariable>("B")->val().name;
+		else
+			bName = getIn<TransformSize>("B")->val().name;
+	default:
+		return;
+	}
 
 	ExportElement<std::string> ele;
-	ele.dependencys = { in.Name() };
-	ele.identifier = out.name;
-	ele.callback = [out, outType, in, op](RuiExportPrototype& proto) {
-		const char* typeName = ExportTypeName(outType);
-		std::string assignPrefix = proto.varsInDataStruct.contains(out.name) ? "" : std::format("{} ", typeName);
-		proto.codeLines.push_back(std::format("{}{} = {};", assignPrefix, out.GetFormattedName(proto), BuildUnaryExpression(op, outType, in, proto)));
-	};
+	ele.dependencys = {aName,bName};
+	ele.identifier = outName;
+#if _DEBUG
+	ele.sourceNodeName = typeid(*this).name();
+#endif
+	switch (GetConnectionRestrictions())
+	{
+	case MathNodeConnectionType::Float:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<FloatVariable>("A");
+			auto b = getInVal<FloatVariable>("B");
+			auto res = getOut<FloatVariable>("Res")->val();
+
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"float";
+			proto.codeLines.push_back(std::format("{} {} = {};",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(a.GetFormattedName(proto),b.GetFormattedName(proto))
+			));
+
+		};
+		break;
+	case MathNodeConnectionType::Float2:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<Float2Variable>("A");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
+			std::string bx;
+			std::string by;
+			if (getIn<Float2Variable>("B")->getConnectedDataType()==typeid(Float2Variable))
+			{
+				auto b = getInVal<Float2Variable>("B");
+				bx = std::format("{}.x",b.GetFormattedName(proto));
+				by = std::format("{}.y",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bx = b.GetFormattedName(proto);
+				by = bx;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector2({},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",a.GetFormattedName(proto)),bx),
+				OperationString(std::format("{}.y",a.GetFormattedName(proto)),by)
+			));
+		};
+		break;
+	case MathNodeConnectionType::Float3:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<Float3Variable>("A");
+			auto res = getOut<Float3Variable>("Res Vector3")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector3";
+			std::string bx;
+			std::string by;
+			std::string bz;
+			if (getIn<Float3Variable>("B")->getConnectedDataType()==typeid(Float3Variable))
+			{
+				auto b = getInVal<Float3Variable>("B");
+				bx = std::format("{}.x",b.GetFormattedName(proto));
+				by = std::format("{}.y",b.GetFormattedName(proto));
+				bz = std::format("{}.z",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bx = b.GetFormattedName(proto);
+				by = bx;
+				bz = bx;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Vector3({},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.x",a.GetFormattedName(proto)),bx),
+				OperationString(std::format("{}.y",a.GetFormattedName(proto)),by),
+				OperationString(std::format("{}.z",a.GetFormattedName(proto)),bz)
+			));
+		};
+	case MathNodeConnectionType::Color:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<ColorVariable>("A");
+			auto res = getOut<Float2Variable>("Res Vector2")->val();
+			std::string typeName = proto.varsInDataStruct.contains(res.name)?"":"Vector2";
+			std::string bRed;
+			std::string bGreen;
+			std::string bBlue;
+			std::string bAlpha;
+			if (getIn<ColorVariable>("B")->getConnectedDataType()==typeid(ColorVariable))
+			{
+				auto b = getInVal<ColorVariable>("B");
+				bRed = std::format("{}.red",b.GetFormattedName(proto));
+				bGreen = std::format("{}.green",b.GetFormattedName(proto));
+				bBlue = std::format("{}.blue",b.GetFormattedName(proto));
+				bAlpha = std::format("{}.alpha",b.GetFormattedName(proto));
+
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bRed = b.GetFormattedName(proto);
+				bGreen = bRed;
+				bBlue = bRed;
+				bAlpha = bRed;
+			}
+			proto.codeLines.push_back(std::format(
+				"{} {} = Color({},{},{},{});",
+				typeName,
+				res.GetFormattedName(proto),
+				OperationString(std::format("{}.red",a.GetFormattedName(proto)),bRed),
+				OperationString(std::format("{}.green",a.GetFormattedName(proto)),bGreen),
+				OperationString(std::format("{}.blue",a.GetFormattedName(proto)),bBlue),
+				OperationString(std::format("{}.alpha",a.GetFormattedName(proto)),bAlpha)
+			));
+		};
+		break;
+	case MathNodeConnectionType::Size:
+		ele.callback = [this](RuiExportPrototype& proto)
+		{
+			auto a = getInVal<TransformSize>("A");
+			auto res = getOut<TransformSize>("Res Size")->val();
+			std::string bName;
+			if (getIn<TransformSize>("B")->getConnectedDataType()==typeid(TransformSize))
+			{
+				auto b = getInVal<TransformSize>("B");
+				bName = b.GetFormattedName(proto);
+			}else
+			{
+				auto b = getInVal<FloatVariable>("B");
+				bName = std::format("_mm_set1_ps({})",b.GetFormattedName(proto));
+			}
+			proto.codeLines.push_back(std::format(
+				"_m128 {} = {}",
+				res.GetFormattedName(proto),
+				OperationStringM128(a.GetFormattedName(proto),bName)
+			));
+		};
+		break;
+	default:
+		return;
+	}
 	proto.codeElements.push_back(ele);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> UnaryMathPinInfo() {
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<MathVariable>>("A", isPinMath, MathVariable(FloatVariable(0.f))));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float2Variable>>("Vector2 Res"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<Float3Variable>>("Vector3 Res"));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<TransformSize>>("Size Res"));
-	return info;
-}
-}
+void BinaryMathNode::draw()
+{
+	UpdateInPin("A",aLastConnectionType,aPinEmptyVal);
+	UpdateInPin("B",bLastConnectionType,bPinEmptyVal);
+	UpdateOutPinVisibility();
 
-#define CONFIGURE_BINARY_NODE(NodeTypeName, OpName) \
-	std::string outFloatName = Variable::UniqueName(); \
-	std::string outFloat2Name = Variable::UniqueName(); \
-	std::string outFloat3Name = Variable::UniqueName(); \
-	std::string outSizeName = Variable::UniqueName(); \
-	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() { \
-		bool valid = false; \
-		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloatName, &valid); \
-		if (valid) \
-			return AsFloatOutput(res); \
-		return FloatVariable(0.f); \
-	}); \
-	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() { \
-		bool valid = false; \
-		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloat2Name, &valid); \
-		if (valid) \
-			return AsFloat2Output(res); \
-		return Float2Variable(0.f, 0.f); \
-	}); \
-	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() { \
-		bool valid = false; \
-		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outFloat3Name, &valid); \
-		if (valid) \
-			return AsFloat3Output(res); \
-		return Float3Variable(0.f, 0.f, 0.f); \
-	}); \
-	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() { \
-		bool valid = false; \
-		MathVariable res = EvalBinary(OpName, getInMath("A"), getInMath("B"), outSizeName, &valid); \
-		if (valid) \
-			return AsSizeOutput(res); \
-		return TransformSize(_mm_setzero_ps()); \
-	});
-
-#define DRAW_BINARY_NODE(OpName) \
-	MathVariable a = getInMath("A"); \
-	MathVariable b = getInMath("B"); \
-	bool valid = false; \
-	bool divideByZero = false; \
-	MathVariable res = EvalBinary(OpName, a, b, "", &valid, &divideByZero); \
-	UpdateDynamicMathOutputVisibility(this, res.Type(), valid); \
-	if (!valid) { \
-		setStyle(styles.GetErrorStyle()); \
-		ImGui::Text("Mismatched vector sizes"); \
-	} \
-	else if (divideByZero) { \
-		setStyle(styles.GetErrorStyle()); \
-		ImGui::Text("Zero divisor"); \
-	} \
-	else { \
-		setStyle(styles.GetNodeStyle(category)); \
-	}
-
-#define EXPORT_BINARY_NODE(OpName) \
-	MathVariable a = getInMath("A"); \
-	MathVariable b = getInMath("B"); \
-	bool valid = false; \
-	EvalBinary(OpName, a, b, "", &valid); \
-	if (!valid) \
-		return; \
-	MathVariable res = EvalBinary(OpName, a, b, ""); \
-	auto outFloat = getOut<FloatVariable>("Res"); \
-	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
-	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
-	auto outSize = getOut<TransformSize>("Size Res"); \
-	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
-		PushBinaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, b, OpName); \
-	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
-		PushBinaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, b, OpName); \
-	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
-		PushBinaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, b, OpName); \
-	if (outSize->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::SIZE)) \
-		PushBinaryExport(proto, outSize->val(), MathVariableType::SIZE, a, b, OpName);
-
-#define CONFIGURE_UNARY_NODE(OpName) \
-	std::string outFloatName = Variable::UniqueName(); \
-	std::string outFloat2Name = Variable::UniqueName(); \
-	std::string outFloat3Name = Variable::UniqueName(); \
-	std::string outSizeName = Variable::UniqueName(); \
-	getOut<FloatVariable>("Res")->behaviour([this, outFloatName]() { \
-		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloatName); \
-		return AsFloatOutput(res); \
-	}); \
-	getOut<Float2Variable>("Vector2 Res")->behaviour([this, outFloat2Name]() { \
-		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloat2Name); \
-		return AsFloat2Output(res); \
-	}); \
-	getOut<Float3Variable>("Vector3 Res")->behaviour([this, outFloat3Name]() { \
-		MathVariable res = EvalUnary(OpName, getInMath("A"), outFloat3Name); \
-		return AsFloat3Output(res); \
-	}); \
-	getOut<TransformSize>("Size Res")->behaviour([this, outSizeName]() { \
-		MathVariable res = EvalUnary(OpName, getInMath("A"), outSizeName); \
-		return AsSizeOutput(res); \
-	});
-
-#define DRAW_UNARY_NODE(OpName) \
-	MathVariable a = getInMath("A"); \
-	MathVariable res = EvalUnary(OpName, a, ""); \
-	UpdateDynamicMathOutputVisibility(this, res.Type(), true); \
-	setStyle(styles.GetNodeStyle(category)); \
-
-#define EXPORT_UNARY_NODE(OpName) \
-	MathVariable a = getInMath("A"); \
-	MathVariable res = EvalUnary(OpName, a, ""); \
-	auto outFloat = getOut<FloatVariable>("Res"); \
-	auto outFloat2 = getOut<Float2Variable>("Vector2 Res"); \
-	auto outFloat3 = getOut<Float3Variable>("Vector3 Res"); \
-	auto outSize = getOut<TransformSize>("Size Res"); \
-	if (outFloat->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT)) \
-		PushUnaryExport(proto, outFloat->val(), MathVariableType::FLOAT, a, OpName); \
-	if (outFloat2->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT2)) \
-		PushUnaryExport(proto, outFloat2->val(), MathVariableType::FLOAT2, a, OpName); \
-	if (outFloat3->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::FLOAT3)) \
-		PushUnaryExport(proto, outFloat3->val(), MathVariableType::FLOAT3, a, OpName); \
-	if (outSize->isConnected() && CanUseMathOutput(res.Type(), MathVariableType::SIZE)) \
-		PushUnaryExport(proto, outSize->val(), MathVariableType::SIZE, a, OpName);
-
-MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_BINARY_NODE(MultiplyNode, MathBinaryOp::Multiply);
-}
-
-MultiplyNode::MultiplyNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
-
-void MultiplyNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Multiply);
-}
-
-void MultiplyNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
-}
-
-void MultiplyNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Multiply);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> MultiplyNode::GetPinInfo() {
-	return BinaryMathPinInfo(2.f);
-}
-
-AdditionNode::AdditionNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_BINARY_NODE(AdditionNode, MathBinaryOp::Add);
-}
-
-AdditionNode::AdditionNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
-
-void AdditionNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Add);
-}
-
-void AdditionNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
-}
-
-void AdditionNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Add);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> AdditionNode::GetPinInfo() {
-	return BinaryMathPinInfo(0.f);
-}
-
-SubtractNode::SubtractNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_BINARY_NODE(SubtractNode, MathBinaryOp::Subtract);
-}
-
-SubtractNode::SubtractNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
-
-void SubtractNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Subtract);
-}
-
-void SubtractNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
-}
-
-void SubtractNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Subtract);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> SubtractNode::GetPinInfo() {
-	return BinaryMathPinInfo(0.f);
-}
-
-DivideNode::DivideNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_BINARY_NODE(DivideNode, MathBinaryOp::Divide);
-}
-
-DivideNode::DivideNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
-
-void DivideNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Divide);
-}
-
-void DivideNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
-}
-
-void DivideNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Divide);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> DivideNode::GetPinInfo() {
-	return BinaryMathPinInfo(2.f);
-}
-
-ModuloNode::ModuloNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_BINARY_NODE(ModuloNode, MathBinaryOp::Modulo);
-}
-
-ModuloNode::ModuloNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
-
-void ModuloNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Modulo);
-}
-
-void ModuloNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
-}
-
-void ModuloNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Modulo);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> ModuloNode::GetPinInfo() {
-	return BinaryMathPinInfo(1.f);
 }
 
 
-AbsoluteNode::AbsoluteNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Absolute);
+MultiplyNode::MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style) :
+BinaryMathNode(name, category,rend,style)
+{}
+
+MultiplyNode::MultiplyNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MultiplyNode(rend,style){}
+
+float MultiplyNode::Operation(float a,float b)
+{
+	return a*b;
 }
 
-AbsoluteNode::AbsoluteNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
-
-void AbsoluteNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Absolute);
+std::string MultiplyNode::OperationString(std::string a,std::string b)
+{
+	return std::format("{} * {}",a,b);
 }
 
-void AbsoluteNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
+std::string MultiplyNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_mul_ps({},{})",a,b);
 }
 
-void AbsoluteNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Absolute);
+AdditionNode::AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+BinaryMathNode(name, category,rend,style)
+{}
+
+AdditionNode::AdditionNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AdditionNode(rend,style){}
+
+float AdditionNode::Operation(float a,float b)
+{
+	return a+b;
+}
+
+std::string AdditionNode::OperationString(std::string a,std::string b)
+{
+	return std::format("{} + {}",a,b);
+}
+
+std::string AdditionNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_add_ps({},{})",a,b);
 }
 
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> AbsoluteNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+
+SubtractNode::SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+BinaryMathNode(name, category,rend,style)
+{}
+SubtractNode::SubtractNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SubtractNode(rend,style){}
+
+float SubtractNode::Operation(float a,float b)
+{
+	return a-b;
 }
 
-SineNode::SineNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Sine);
+std::string SubtractNode::OperationString(std::string a,std::string b)
+{
+	return std::format("{} - {}",a,b);
+}
+std::string SubtractNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_sub_ps({},{})",a,b);
 }
 
-SineNode::SineNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
 
-void SineNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Sine);
+DivideNode::DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+BinaryMathNode(name, category,rend,style)
+{}
+
+
+DivideNode::DivideNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):DivideNode(rend,style){}
+
+float DivideNode::Operation(float a,float b)
+{
+	return a/b;
 }
 
-void SineNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
+std::string DivideNode::OperationString(std::string a,std::string b)
+{
+	return std::format("{} / {}",a,b);
 }
 
-void SineNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Sine);
+std::string DivideNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_div_ps({},{})",a,b);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> SineNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+
+ModuloNode::ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+BinaryMathNode(name, category,rend,style)
+{}
+
+
+ModuloNode::ModuloNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ModuloNode(rend,style){}
+
+float ModuloNode::Operation(float a,float b)
+{
+	return std::fmodf(a,b);
 }
 
-ExponentNode::ExponentNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
-	CONFIGURE_BINARY_NODE(ExponentNode, MathBinaryOp::Exponent);
+std::string ModuloNode::OperationString(std::string a,std::string b)
+{
+	return std::format("std::fmodf({}, {})",a,b);
 }
 
-ExponentNode::ExponentNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
-
-void ExponentNode::draw() {
-	DRAW_BINARY_NODE(MathBinaryOp::Exponent);
+std::string ModuloNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_sub_ps({}, _mm_mul_ps(_mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_div_ps({}, {}))), {}))",a,a,b,b);
 }
 
-void ExponentNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name",name,allocator);
-	obj.AddMember("Category",category,allocator);
-	RuiBaseNode::Serialize(obj,allocator);
+
+AbsoluteNode::AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+UnaryMathNode(name, category,rend,style)
+{}
+
+AbsoluteNode::AbsoluteNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):AbsoluteNode(rend,style){}
+
+float AbsoluteNode::Operation(float a)
+{
+	return std::abs(a);
 }
 
-void ExponentNode::Export(RuiExportPrototype& proto) {
-	EXPORT_BINARY_NODE(MathBinaryOp::Exponent);
+std::string AbsoluteNode::OperationString(std::string a)
+{
+	return std::format("std::abs({})",a);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> ExponentNode::GetPinInfo() {
-	return BinaryMathPinInfo(0.f);
+std::string AbsoluteNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_and_ps({}, _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF))",a);
 }
 
-MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
+SineNode::SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+UnaryMathNode(name, category,rend,style)
+{}
+
+SineNode::SineNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):SineNode(rend,style){}
+
+float SineNode::Operation(float a)
+{
+	return std::sinf(a);
+}
+
+std::string SineNode::OperationString(std::string a)
+{
+	return std::format("std::sinf({})",a);
+}
+
+std::string SineNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_sin_ps({})",a);
+}
+
+ExponentNode::ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):
+BinaryMathNode(name, category,rend,style)
+{}
+
+ExponentNode::ExponentNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):ExponentNode(rend,style){}
+
+float ExponentNode::Operation(float a,float b)
+{
+	return std::pow(a,b);
+}
+
+std::string ExponentNode::OperationString(std::string a,std::string b)
+{
+	return std::format("std::pow({},{})",a,b);
+}
+
+std::string ExponentNode::OperationStringM128(std::string a,std::string b)
+{
+	return std::format("_mm_pow_ps({}, {})",a,b);
+}
+
+MappingNode::MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style):RuiBaseNode(name,category,GetPinInfo(),rend,style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this,outName]() {
 		const FloatVariable& a = getInNumeric("A");
@@ -723,7 +987,7 @@ MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style):RuiBa
 
 }
 
-MappingNode::MappingNode(RenderInstance& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){
+MappingNode::MappingNode(const std::shared_ptr<RenderInstance>& rend,ImFlow::StyleManager& style, rapidjson::GenericObject<false,rapidjson::Value> obj):MappingNode(rend,style){
 	if(obj.HasMember("CubicSpline")&&obj["CubicSpline"].IsBool())
 		map.cubicSpline = obj["CubicSpline"].GetBool();
 	if(obj.HasMember("ControlPoints")&&obj["ControlPoints"].IsArray()) {
@@ -803,175 +1067,155 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> MappingNode::GetPinInfo() {
 	return info;
 }
 
-TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Tangent);
+TangentNode::TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+TangentNode::TangentNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
+
+float TangentNode::Operation(float a)
+{
+	return std::tanf(a);
 }
 
-TangentNode::TangentNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TangentNode(rend, style) {}
-
-void TangentNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Tangent);
+std::string TangentNode::OperationString(std::string a)
+{
+	return std::format("std::tanf({})",a);
 }
 
-void TangentNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+std::string TangentNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_tan_ps({})",a);
 }
 
-void TangentNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Tangent);
+CosineNode::CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+CosineNode::CosineNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CosineNode(rend, style) {}
+
+float CosineNode::Operation(float a)
+{
+	return std::cosf(a);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> TangentNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+std::string CosineNode::OperationString(std::string a)
+{
+	return std::format("std::cosf({})",a);
 }
 
-CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Cosine);
+std::string CosineNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_cos_ps({})",a);
 }
 
-CosineNode::CosineNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CosineNode(rend, style) {}
+SquareRootNode::SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
 
-void CosineNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Cosine);
+SquareRootNode::SquareRootNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SquareRootNode(rend, style) {}
+
+float SquareRootNode::Operation(float a)
+{
+	return std::sqrtf(a);
 }
 
-void CosineNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+std::string SquareRootNode::OperationString(std::string a)
+{
+	return std::format("std::sqrtf({})",a);
 }
 
-void CosineNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Cosine);
+std::string SquareRootNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_sqrt_ps({})",a);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> CosineNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+RoundNode::RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+RoundNode::RoundNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :RoundNode(rend, style) {}
+
+float RoundNode::Operation(float a)
+{
+	return std::roundf(a);
 }
 
-SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::SquareRoot);
+std::string RoundNode::OperationString(std::string a)
+{
+	return std::format("std::roundf({})",a);
 }
 
-SquareRootNode::SquareRootNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :SquareRootNode(rend, style) {}
-
-void SquareRootNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::SquareRoot);
+std::string RoundNode::OperationStringM128(std::string a)
+{
+	return std::format("mm_cvtepi32_ps(_mm_cvttps_epi32(_mm_add_ps({}, _mm_or_ps(_mm_set1_ps(0.5f), _mm_and_ps({}, _mm_set1_ps(-0.0f))))))",a,a);
 }
 
-void SquareRootNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+FloorNode::FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+FloorNode::FloorNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :FloorNode(rend, style) {}
+
+float FloorNode::Operation(float a)
+{
+	return std::floorf(a);
 }
 
-void SquareRootNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::SquareRoot);
+std::string FloorNode::OperationString(std::string a)
+{
+	return std::format("std::floorf({})",a);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> SquareRootNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+std::string FloorNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)",a);
 }
 
-RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Round);
+CeilNode::CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+CeilNode::CeilNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CeilNode(rend, style) {}
+
+float CeilNode::Operation(float a)
+{
+	return std::ceilf(a);
 }
 
-RoundNode::RoundNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :RoundNode(rend, style) {}
-
-void RoundNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Round);
+std::string CeilNode::OperationString(std::string a)
+{
+	return std::format("std::ceilf({})",a);
 }
 
-void RoundNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+std::string CeilNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)",a);
 }
 
-void RoundNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Round);
+TruncNode::TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :
+UnaryMathNode(name, category,rend,style)
+{}
+
+TruncNode::TruncNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TruncNode(rend, style) {}
+
+float TruncNode::Operation(float a)
+{
+	return std::truncf(a);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> RoundNode::GetPinInfo() {
-	return UnaryMathPinInfo();
+std::string TruncNode::OperationString(std::string a)
+{
+	return std::format("std::truncf({})",a);
 }
 
-FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Floor);
+std::string TruncNode::OperationStringM128(std::string a)
+{
+	return std::format("_mm_round_ps({}, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC)",a);
 }
 
-FloorNode::FloorNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :FloorNode(rend, style) {}
 
-void FloorNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Floor);
-}
-
-void FloorNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
-}
-
-void FloorNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Floor);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> FloorNode::GetPinInfo() {
-	return UnaryMathPinInfo();
-}
-
-CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Ceil);
-}
-
-CeilNode::CeilNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :CeilNode(rend, style) {}
-
-void CeilNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Ceil);
-}
-
-void CeilNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
-}
-
-void CeilNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Ceil);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> CeilNode::GetPinInfo() {
-	return UnaryMathPinInfo();
-}
-
-TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
-	CONFIGURE_UNARY_NODE(MathUnaryOp::Truncate);
-}
-
-TruncNode::TruncNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :TruncNode(rend, style) {}
-
-void TruncNode::draw() {
-	DRAW_UNARY_NODE(MathUnaryOp::Truncate);
-}
-
-void TruncNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator) {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
-}
-
-void TruncNode::Export(RuiExportPrototype& proto) {
-	EXPORT_UNARY_NODE(MathUnaryOp::Truncate);
-}
-
-std::vector<std::shared_ptr<ImFlow::PinProto>> TruncNode::GetPinInfo() {
-	return UnaryMathPinInfo();
-}
-
-ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
+ClampNode::ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), rend, style) {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
 
@@ -987,7 +1231,7 @@ ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style) :RuiBase
 
 }
 
-ClampNode::ClampNode(RenderInstance& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ClampNode(rend, style) {}
+ClampNode::ClampNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :ClampNode(rend, style) {}
 
 void ClampNode::draw() {
 	const FloatVariable& min = getInNumeric("Min");
@@ -1045,7 +1289,7 @@ std::vector<std::shared_ptr<ImFlow::PinProto>> ClampNode::GetPinInfo() {
 	return info;
 }
 
-MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :BinaryMathNode(name, category, rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -1055,50 +1299,24 @@ MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode
 	});
 }
 
-MinNode::MinNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(prot, style) {}
+MinNode::MinNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MinNode(rend, style) {}
 
-void MinNode::draw()
+float MinNode::Operation(float a, float b)
 {
-	
+	return std::min(a, b);
 }
 
-void MinNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+std::string MinNode::OperationString(std::string a, std::string b)
 {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+	return std::format("std::min({}, {})",a,b);
 }
 
-void MinNode::Export(RuiExportPrototype& proto)
+std::string MinNode::OperationStringM128(std::string a, std::string b)
 {
-	const auto& out = getOut<FloatVariable>("Res")->val();
-	const FloatVariable& a = getInNumeric("A");
-	const FloatVariable& b = getInNumeric("B");
-	ExportElement<std::string> ele;
-#if _DEBUG
-	ele.sourceNodeName = typeid(*this).name();
-#endif
-	ele.dependencys = { a.name,b.name };
-	ele.identifier = out.name;
-	ele.callback = [out, a, b](RuiExportPrototype& proto) {
-		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		else
-			proto.codeLines.push_back(std::format("float {} = std::min( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		};
-	proto.codeElements.push_back(ele);
+	return std::format("_mm_min_ps({}, {})",a,b);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> MinNode::GetPinInfo()
-{
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	return info;
-}
-
-MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode(name, category, GetPinInfo(), prot, style)
+MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style) :BinaryMathNode(name, category, rend, style)
 {
 	std::string outName = Variable::UniqueName();
 	getOut<FloatVariable>("Res")->behaviour([this, outName]() {
@@ -1108,66 +1326,42 @@ MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style) :RuiBaseNode
 	});
 }
 
-MaxNode::MaxNode(RenderInstance& prot, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(prot, style) {}
+MaxNode::MaxNode(const std::shared_ptr<RenderInstance>& rend, ImFlow::StyleManager& style, rapidjson::GenericObject<false, rapidjson::Value> obj) :MaxNode(rend, style) {}
 
-void MaxNode::draw()
-{}
-
-void MaxNode::Serialize(rapidjson::GenericValue<rapidjson::UTF8<>>& obj, rapidjson::Document::AllocatorType& allocator)
+float MaxNode::Operation(float a, float b)
 {
-	obj.AddMember("Name", name, allocator);
-	obj.AddMember("Category", category, allocator);
-	RuiBaseNode::Serialize(obj, allocator);
+	return std::max(a, b);
 }
 
-void MaxNode::Export(RuiExportPrototype& proto)
+std::string MaxNode::OperationString(std::string a, std::string b)
 {
-	const auto& out = getOut<FloatVariable>("Res")->val();
-	const FloatVariable& a = getInNumeric("A");
-	const FloatVariable& b = getInNumeric("B");
-	ExportElement<std::string> ele;
-#if _DEBUG
-	ele.sourceNodeName = typeid(*this).name();
-#endif
-	ele.dependencys = { a.name,b.name };
-	ele.identifier = out.name;
-	ele.callback = [out, a, b](RuiExportPrototype& proto) {
-		if (proto.varsInDataStruct.contains(out.name))
-			proto.codeLines.push_back(std::format("{} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		else
-			proto.codeLines.push_back(std::format("float {} = std::max( (float){}, (float){});", out.GetFormattedName(proto), a.GetFormattedName(proto), b.GetFormattedName(proto)));
-		};
-	proto.codeElements.push_back(ele);
+	return std::format("std::max({}, {})",a,b);
 }
 
-std::vector<std::shared_ptr<ImFlow::PinProto>> MaxNode::GetPinInfo()
+std::string MaxNode::OperationStringM128(std::string a, std::string b)
 {
-	std::vector<std::shared_ptr<ImFlow::PinProto>> info;
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("A", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::InPinProto<FloatVariable>>("B", isPinNumeric, FloatVariable(0.f)));
-	info.push_back(std::make_shared<ImFlow::OutPinProto<FloatVariable>>("Res"));
-	return info;
+	return std::format("_mm_max_ps({}, {})",a,b);
 }
 
-void AddMathNodes(NodeEditor& editor) {
-	editor.AddNodeType<AdditionNode>();
-	editor.AddNodeType<MultiplyNode>();
-	editor.AddNodeType<SubtractNode>();
-	editor.AddNodeType<DivideNode>();
-	editor.AddNodeType<ModuloNode>();
-	editor.AddNodeType<AbsoluteNode>();
-	editor.AddNodeType<SineNode>();
-	editor.AddNodeType<ExponentNode>();
-	editor.AddNodeType<MappingNode>();
-	editor.AddNodeType<TangentNode>();
-	editor.AddNodeType<CosineNode>();
-	editor.AddNodeType<SquareRootNode>();
-	editor.AddNodeType<RoundNode>();
-	editor.AddNodeType<FloorNode>();
-	editor.AddNodeType<CeilNode>();
-	editor.AddNodeType<TruncNode>();
-	editor.AddNodeType<ClampNode>();
-	editor.AddNodeType<MinNode>();
-	editor.AddNodeType<MaxNode>();
+void AddMathNodes(const std::unique_ptr<NodeEditor>& editor) {
+	editor->AddNodeType<AdditionNode>();
+	editor->AddNodeType<MultiplyNode>();
+	editor->AddNodeType<SubtractNode>();
+	editor->AddNodeType<DivideNode>();
+	editor->AddNodeType<ModuloNode>();
+	editor->AddNodeType<AbsoluteNode>();
+	editor->AddNodeType<SineNode>();
+	editor->AddNodeType<ExponentNode>();
+	editor->AddNodeType<MappingNode>();
+	editor->AddNodeType<TangentNode>();
+	editor->AddNodeType<CosineNode>();
+	editor->AddNodeType<SquareRootNode>();
+	editor->AddNodeType<RoundNode>();
+	editor->AddNodeType<FloorNode>();
+	editor->AddNodeType<CeilNode>();
+	editor->AddNodeType<TruncNode>();
+	editor->AddNodeType<ClampNode>();
+	editor->AddNodeType<MinNode>();
+	editor->AddNodeType<MaxNode>();
 }
 
